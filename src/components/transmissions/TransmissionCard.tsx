@@ -69,7 +69,7 @@ export function TransmissionCard({
           </span>
           <time dateTime={entry.date}>{entry.date}</time>
           <span className="text-muted/40" aria-hidden>
-            //
+            {"//"}
           </span>
           <span className="text-neon-cyan/70">{minutes} min read</span>
           <span className="text-muted/50">{entry.id}</span>

@@ -30,7 +30,7 @@ export function TerminalNote({
       aria-label={label}
     >
       <p className="mb-2 text-[9px] uppercase tracking-[0.3em] text-muted/70">
-        // {label}
+        {`// ${label}`}
       </p>
       <ul className="space-y-1.5 text-xs leading-relaxed sm:text-[13px]">
         {lines.map((line) => (
