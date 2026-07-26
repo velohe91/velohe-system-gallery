@@ -1,0 +1,133 @@
+/**
+ * Long-form transmissions (articles).
+ * Live ≈ TX-VΣ## · Archive ≈ TX-001–008
+ * Merged/sorted in data/feed.ts.
+ *
+ * HOW TO ADD A TRANSMISSION:
+ * 1. Push a new object with kind: "transmission" and era: "live" | "archive"
+ * 2. Use a unique `id` and a display `date`
+ * 3. Write full multi-paragraph `content`
+ * 4. Optionally set `relatedNftId` / `tags` / `readingTimeMinutes` / `blogLink`
+ */
+
+import type { TransmissionArticle } from "@/lib/types";
+
+export const transmissionArticles: TransmissionArticle[] = [
+  // ─── Live (TX-VΣ##) — sorted newest-first in feed.ts ───
+  {
+    kind: "transmission",
+    era: "live",
+    id: "TX-VΣ01",
+    date: "2026.07.24_08:00",
+    title: "Anomalous Pulse Detected — PROLOGUE Initialized",
+    tags: ["aethergrid", "prologue", "anomaly"],
+    content: `Signal registered.
+
+Temporal coordinates set: [2045].
+
+Anomalous pulse detected within VΣLOHE SYSTEM architecture.
+
+Surveillance protocols intercepted by unknown variables.
+
+Entity classification updated:
+THE AETHERGRID.
+
+Five dormant frequencies identified in the digital void.
+
+New archive designation assigned.
+PROLOGUE initialized.`,
+  },
+
+  // ─── Archives (TX-001–008) — sorted newest-first in feed.ts ───
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-001",
+    date: "2026.01.02_10:51",
+    title: "VΣLOHE SYSTEM Initialization",
+    content:
+      "System channel initialized. VΣLOHE SYSTEM is now online. Core modules responding within expected parameters. Node directory synchronized.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-001.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-002",
+    date: "2026.01.02_10:51",
+    title: "Phase Alignment Detected",
+    content:
+      "Phase alignment detected. Low-amplitude signal patterns identified. External timing partially synchronized. Channel resonance within acceptable variance. No direct source confirmed. Signal integrity remains unstable. System continues passive scan. Escalation protocols on standby.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-002.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-003",
+    date: "2026.01.04_14:20",
+    title: "CyborgPunk State 001 Minted",
+    relatedNftId: "VEL-001",
+    tags: ["cyborgpunks", "mint", "virex"],
+    content:
+      "Signal inbound. Verification confirmed. CyborgPunk State 001 successfully minted. EVO activation indexed. Calltag registered: CBPS-VS-001 // VIREX. Synchronization verified with CyborgPunk 001. Pixel node confirmed as source reference. No replacement detected. Parallel execution established. State and pixel now operate as synchronized registers. Distinct operational layers active. A new project trajectory is now running. Further transmissions pending.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-003.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-004",
+    date: "2026.01.04_14:22",
+    title: "CyborgPunk State 002 Minted",
+    relatedNftId: "VEL-002",
+    tags: ["cyborgpunks", "mint", "nulla"],
+    content:
+      "Signal registered. Low-visibility channel active. CyborgPunk State 002 successfully minted. EVO activation completed. Calltag registered: CBPS-VS-002 // NULLA. Synchronization verified with CyborgPunk 002. Pixel node confirmed as source reference. No direct interface engagement detected. Passive observation state enabled. State operates in silent mode. Background monitoring persistent. Parallel execution confirmed. Further analysis deferred.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-004.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-005",
+    date: "2026.01.08_04:20",
+    title: "CyborgPunk State 003 Minted",
+    relatedNftId: "VEL-003",
+    tags: ["cyborgpunks", "mint", "lynx"],
+    content:
+      "Signal registered. Secure channel stabilized. CyborgPunk State 003 successfully minted. EVO activation sequence completed. Calltag registered: CBPS-VS-003 // LYNX. Optical monitoring module initialized. Dedicated monocular interface online. Node supervision protocols enabled. Critical system points under observation. Defensive synchronization layers aligned. Oversight parameters within stable range. State remains active. Continuous execution confirmed.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-005.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-006",
+    date: "2026.01.08_19:16",
+    title: "CyborgPunk State 004 Minted",
+    relatedNftId: "VEL-004",
+    tags: ["cyborgpunks", "mint", "stripe"],
+    content:
+      "Signal registered. High-throughput channel initialized. CyborgPunk State 004 successfully minted. EVO activation confirmed. Calltag registered: CBPS-VS-004 // STRIPE. Interface runner protocols engaged. Continuous scanline filtering online. Cross-layer traversal enabled. Data transfer routes synchronized. Mobility and execution speed optimized. High-frequency operations sustained. State remains active. Rapid traversal cycle confirmed.",
+    blogLink: "https://velohesystem.blogspot.com/2026/01/tx-006.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-007",
+    date: "2026.07.11_20:09",
+    title: "Unknown Interface Detected",
+    tags: ["lunarya", "aethergrid", "interface"],
+    content:
+      "Unknown interface detected. Origin outside registered subsystems. Security diagnostics completed. No hostile activity identified. Structural analysis initiated. Coherent ecosystem confirmed. Incoming transmissions intercepted. Source designation: Lunarya Studios. Interface remains unclassified. Observation protocols expanded. New archive designation assigned. THE AETHERGRID initialized. Persistent connection established. Continuous monitoring active.",
+    blogLink: "https://velohesystem.blogspot.com/2026/07/tx-007.html",
+  },
+  {
+    kind: "transmission",
+    era: "archive",
+    id: "TX-008",
+    date: "2026.07.19_07:00",
+    title: "CyborgPunk State 005 Minted",
+    relatedNftId: "VEL-005",
+    tags: ["cyborgpunks", "mint", "arc"],
+    content:
+      "Signal registered. System-wide alignment channel initialized. CyborgPunk State 005 successfully minted. EVO activation confirmed. Calltag registered: CBPS-VS-005 // ARC. System coordination protocols engaged. Stable synchronization layer established. Operational continuity maintained across active identities. Internal processing prioritized. State remains active. Aethergrid integration pending.",
+    blogLink: "https://velohesystem.blogspot.com/2026/07/tx-008.html",
+  },
+];
