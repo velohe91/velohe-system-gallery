@@ -16,7 +16,7 @@ export default function GalleryPage() {
         <SectionHeading
           eyebrow="Archive // Catalog"
           title="Gallery"
-          subtitle="Select a fragment to expand lore and metadata. Hover for holographic response."
+          subtitle="Newest fragments first. Select a piece to expand lore and metadata."
         />
         <NftGrid items={nfts} />
       </div>

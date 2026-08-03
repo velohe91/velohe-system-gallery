@@ -2,16 +2,28 @@
  * NFT catalog for the VΣLOHE archive (15 exhibition pieces).
  *
  * HOW TO UPDATE ASSETS:
- * 1. Place stills in  /public/nfts/images/  (e.g. VEL-001.png)
- * 2. Place videos in  /public/nfts/videos/  (e.g. VEL-001.mp4)
- * 3. Edit fields below — Gallery reads this array automatically
+ * 1. Place stills in  /public/nfts/images/  (e.g. VEL-016.png)
+ * 2. Place videos in  /public/nfts/videos/  (e.g. VEL-016.mp4)
+ * 3. Append a new object at the END of `nftCatalog` below
+ * 4. Gallery sorts by id number (newest first) automatically —
+ *    VEL-016 will appear before VEL-015 without reordering this file
  *
  * rarity values (code): common | rare | epic | legendary | mythic
  */
 
 import type { NftItem } from "@/lib/types";
 
-export const nfts: NftItem[] = [
+/** Extract numeric suffix from ids like "VEL-015" → 15 */
+export function nftIdNumber(id: string): number {
+  const match = id.match(/(\d+)\s*$/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
+/**
+ * Source catalog — keep chronological / append-new-at-end order.
+ * Do not reverse this array manually; display order is derived below.
+ */
+const nftCatalog: NftItem[] = [
   {
     id: "VEL-001",
     title: "CBPS-VS-001 // VIREX",
@@ -280,7 +292,15 @@ A rare convergence where balance meets evolution.
   },
 ];
 
+/**
+ * Public catalog for the Gallery — newest first (VEL-015 … VEL-001).
+ * New entries appended to `nftCatalog` surface at the top automatically.
+ */
+export const nfts: NftItem[] = [...nftCatalog].sort(
+  (a, b) => nftIdNumber(b.id) - nftIdNumber(a.id),
+);
+
 /** Lookup helper for transmissions and deep links */
 export function getNftById(id: string): NftItem | undefined {
-  return nfts.find((n) => n.id === id);
+  return nftCatalog.find((n) => n.id === id);
 }
