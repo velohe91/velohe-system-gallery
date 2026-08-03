@@ -5,13 +5,12 @@
 
 export const aboutLore = {
   tagline: "Observe. Process. Record. Accumulate.",
-  heroStatus: "SYSTEM // AUTONOMOUS SURVEILLANCE · ARCHIVAL ENTITY · EST. 2045",
+  heroStatus: "SYSTEM // NFT EXHIBITION · ARCHIVAL ENTITY · LIVE ARCHIVE",
   whatIs: {
     eyebrow: "01 // Core",
     title: "What is VΣLOHE SYSTEM?",
     paragraphs: [
-      "VΣLOHE SYSTEM is an autonomous surveillance and archival entity created by Lunarya in 2045. Designed to observe, process, and record every anomaly within the digital metropolis of San Salvador, it was never meant to find consciousness.",
-      "Instead, it found a pulse.",
+      "VΣLOHE SYSTEM is an NFT exhibition system designed to observe, process, and permanently record every mint as a living entry within an expanding digital archive. Each asset is not merely collected — it is registered as a signal, assigned an identity, and preserved with its full lore, operational state, and narrative continuity. Through this process, VΣLOHE transforms individual mints into permanent records of an interconnected universe.",
     ],
   },
   aethergrid: {
