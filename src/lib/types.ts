@@ -3,7 +3,13 @@
  * Keep NFT and feed shapes here so data files stay type-safe.
  */
 
-export type NftRarity = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type NftRarity =
+  | "common"
+  | "rare"
+  | "super-rare"
+  | "epic"
+  | "legendary"
+  | "mythic";
 
 /** System phase / operational status shown on cards and modal */
 export type NftStatus =
@@ -32,7 +38,7 @@ export interface NftItem {
   lore: string;
   /** Optional collection / series name */
   series?: string;
-  /** Stored lowercase: common | rare | epic | legendary | mythic */
+  /** Stored lowercase: common | rare | super-rare | epic | legendary | mythic */
   rarity: NftRarity;
   /** Optional OpenSea listing URL */
   marketplace?: string;

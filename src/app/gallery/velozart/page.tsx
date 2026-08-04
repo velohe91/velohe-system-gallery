@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
+import { NftGrid } from "@/components/gallery/NftGrid";
 import { GalleryBackLink } from "@/components/gallery/GalleryBackLink";
-import { VelozArtPlaceholder } from "@/components/gallery/VelozArtPlaceholder";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { velozartNfts } from "@/data/velozart-nfts";
 
 export const metadata: Metadata = {
   title: "NFT VeLozArt Gallery",
-  description: "VeLozArt AI artworks wing — catalog pending.",
+  description:
+    "VeLozArt AI artworks — Tree of Life, Biopunk Faces, Ballet Dancer, Watercolor Arts.",
 };
 
 /**
- * VeLozArt wing — placeholder until assets are added.
+ * VeLozArt wing — same grid + modal system as the main archive.
  */
 export default function VelozArtGalleryPage() {
   return (
@@ -20,9 +22,9 @@ export default function VelozArtGalleryPage() {
         <SectionHeading
           eyebrow="Sector // VeLozArt"
           title="NFT VeLozArt Gallery"
-          subtitle="A separate collection of AI artworks under the VeLozArt label."
+          subtitle="A separate collection of AI artworks under the VeLozArt label. Select a piece to expand lore and marketplace links."
         />
-        <VelozArtPlaceholder />
+        <NftGrid items={velozartNfts} />
       </div>
     </PageTransition>
   );

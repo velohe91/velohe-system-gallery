@@ -41,6 +41,6 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     seriesHint: "VeLozArt · AI collection",
     cta: "Enter VeLozArt",
     accent: "violet",
-    status: "standby",
+    status: "online",
   },
 ];
