@@ -12,9 +12,25 @@ type Props = {
   onClose: () => void;
 };
 
+type MediaMode = "still" | "motion";
+
+/** Classify optional motion asset: GIF uses <img>, MP4/WebM use <video>. */
+function getMotionKind(src?: string): "gif" | "video" | null {
+  if (!src) return null;
+  if (/\.gif(\?|#|$)/i.test(src)) return "gif";
+  if (/\.(mp4|webm|ogg)(\?|#|$)/i.test(src)) return "video";
+  // Unknown extension — try as video for archive compatibility
+  return "video";
+}
+
 /**
  * Accessible lore modal: Esc / backdrop / close button, focus return, scroll lock.
  * Portaled to document.body so it escapes main/nav stacking contexts.
+ *
+ * Media:
+ * - `image` (.jpg/.png) = still frame (grid + modal “Still”)
+ * - `video` (.gif) = animated loop via <img>
+ * - `video` (.mp4/…) = HTML5 video with image as poster
  */
 export function NftModal({ nft, onClose }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -22,6 +38,7 @@ export function NftModal({ nft, onClose }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
+  const [mediaMode, setMediaMode] = useState<MediaMode>("motion");
 
   useEffect(() => {
     setMounted(true);
@@ -29,6 +46,9 @@ export function NftModal({ nft, onClose }: Props) {
 
   useEffect(() => {
     if (!nft) return;
+
+    // Prefer animated media when a motion asset exists
+    setMediaMode(nft.video ? "motion" : "still");
 
     const prev = document.activeElement as HTMLElement | null;
     // Always open scrolled to the top (title / media first).
@@ -59,6 +79,8 @@ export function NftModal({ nft, onClose }: Props) {
   const rarityClass = nft
     ? RARITY_COLORS[nft.rarity] ?? RARITY_COLORS.common
     : "";
+  const motionKind = nft ? getMotionKind(nft.video) : null;
+  const showMotion = Boolean(nft?.video) && mediaMode === "motion";
 
   return createPortal(
     <AnimatePresence>
@@ -92,9 +114,18 @@ export function NftModal({ nft, onClose }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid min-h-0 gap-0 md:grid-cols-2">
-              {/* Media: prefer video when available */}
+              {/* Media: still (image) + optional motion (gif / mp4) */}
               <div className="relative aspect-square shrink-0 bg-void cyber-grid md:min-h-[320px]">
-                {nft.video ? (
+                {showMotion && motionKind === "gif" && nft.video ? (
+                  // GIF must use <img> — <video> cannot play animated GIFs
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={nft.video}
+                    src={nft.video}
+                    alt={`${nft.title} — animation`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : showMotion && motionKind === "video" && nft.video ? (
                   <video
                     key={nft.video}
                     src={nft.video}
@@ -104,17 +135,52 @@ export function NftModal({ nft, onClose }: Props) {
                     loop
                     playsInline
                     className="absolute inset-0 h-full w-full object-cover"
-                    aria-label={nft.title}
+                    aria-label={`${nft.title} — video`}
                   />
                 ) : (
                   <Image
+                    key={nft.image}
                     src={nft.image}
-                    alt={nft.title}
+                    alt={`${nft.title} — still`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                     priority
                   />
+                )}
+
+                {/* Still / Motion toggle when both assets exist */}
+                {nft.video && (
+                  <div
+                    className="absolute bottom-3 left-3 z-10 flex gap-1 rounded border border-neon-cyan/30 bg-void/80 p-0.5 font-mono text-[9px] uppercase tracking-wider backdrop-blur-sm"
+                    role="group"
+                    aria-label="Media mode"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setMediaMode("still")}
+                      className={`rounded px-2 py-1 transition-colors ${
+                        mediaMode === "still"
+                          ? "bg-neon-cyan/20 text-neon-cyan"
+                          : "text-muted hover:text-foreground"
+                      }`}
+                      aria-pressed={mediaMode === "still"}
+                    >
+                      Still
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMediaMode("motion")}
+                      className={`rounded px-2 py-1 transition-colors ${
+                        mediaMode === "motion"
+                          ? "bg-neon-cyan/20 text-neon-cyan"
+                          : "text-muted hover:text-foreground"
+                      }`}
+                      aria-pressed={mediaMode === "motion"}
+                    >
+                      Motion
+                    </button>
+                  </div>
                 )}
               </div>
 
