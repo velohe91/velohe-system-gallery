@@ -143,6 +143,7 @@ export function NftModal({ nft, onClose }: Props) {
                     src={nft.image}
                     alt={`${nft.title} — still`}
                     fill
+                    unoptimized
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                     priority

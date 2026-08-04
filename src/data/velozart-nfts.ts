@@ -1,21 +1,22 @@
 /**
  * NFT VeLozArt Gallery catalog.
  *
- * HOW TO ADD A PIECE:
- * 1. Place stills in  /public/nfts/velozart/images/  (e.g. VeLozArt-005.jpg)
- * 2. Place motion in  /public/nfts/velozart/videos/  (e.g. VeLozArt-005.gif)
- * 3. Append an object to `velozartCatalog` below
- * 4. Gallery sorts by id number (newest first) automatically
+ * Media layout (exact public paths):
+ *   image → /nfts/velozart/images/VeLozArt-00X.jpg
+ *   video → /nfts/velozart/videos/VeLozArt-00X.gif
  *
- * rarity values (code): common | rare | super-rare | epic | legendary | mythic
+ * HOW TO ADD A PIECE:
+ * 1. Drop still JPG into  public/nfts/velozart/images/
+ * 2. Drop motion GIF into public/nfts/velozart/videos/
+ * 3. Append an object to `velozartCatalog` below
+ *
+ * rarity: common | rare | super-rare | epic | legendary | mythic
  */
 
 import type { NftItem } from "@/lib/types";
 import { nftIdNumber } from "@/data/nfts";
 
-/**
- * Source catalog — append new pieces at the end.
- */
+/** Source catalog — append new pieces at the end (display sorts newest first). */
 const velozartCatalog: NftItem[] = [
   {
     id: "VeLozArt-001",
@@ -75,9 +76,7 @@ const velozartCatalog: NftItem[] = [
   },
 ];
 
-/**
- * Public VeLozArt catalog — newest first (highest id number first).
- */
+/** Public catalog — newest first (VeLozArt-004 → 001). */
 export const velozartNfts: NftItem[] = [...velozartCatalog].sort(
   (a, b) => nftIdNumber(b.id) - nftIdNumber(a.id),
 );

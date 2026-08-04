@@ -26,10 +26,12 @@ export function NftCard({ nft, index, onOpen }: Props) {
       whileHover={{ y: -4 }}
     >
       <div className="relative aspect-square overflow-hidden bg-void cyber-grid">
+        {/* unoptimized: serve /public paths as-is (avoids optimizer 404/timeouts on large NFT media) */}
         <Image
           src={nft.image}
           alt={nft.title}
           fill
+          unoptimized
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
