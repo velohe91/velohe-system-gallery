@@ -66,18 +66,31 @@ Protocol registration complete. Live channel index updated. Awaiting subsequent 
     timestamp: "2026.07.22_19:32",
     level: "SIGNAL",
     title: "LOG-VΣ01 — Digital Asset Transfer Confirmed",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VΣLOHE SYSTEM Archive",
+    image: "/logs/AGD-01.jpg",
+    marketplace:
+      "https://objkt.com/tokens/KT1A62q84v9prXa1P477BhBxsZrjAvEbaagy/0",
+    buyerProfile:
+      "https://objkt.com/users/tz1heVncrdmyGE4qeQBejR1iXkkqCqAocSW5/created",
+    relatedNftId: "VEL-011",
     message: `A successful transaction has been registered and verified across the external exchange protocol, interfacing directly with the OBJKT platform.
 
 Transfer parsing completed successfully.
 
-Asset designation: AGD-01 // Cyan Core.
+Asset designation: AGD-01 // Cyan Core
+
+Gallery: VΣLOHE SYSTEM Archive
+Collection: Aethergrid Spirits
 
 VΣLOHE SYSTEM initiated an automatic synchronization sequence, updating the ownership registries and confirming the departure of the asset from the local archive to the new designated node.
 
 Cryptographic signatures and transaction hashes have been securely validated. The asset transfer is now classified as permanent and immutable within the network.
 
-Subsystem indexes have been adjusted accordingly. Awaiting further directives for subsequent asset deployment.`,
-    relatedNftId: "VEL-011",
+Subsystem indexes have been adjusted accordingly. Awaiting further directives for subsequent asset deployment.
+
+Use the Marketplace and Buyer profile links below for external verification.`,
   },
 
   // ─── Archives (LOG-001–009) — sorted newest-first in feed.ts ───

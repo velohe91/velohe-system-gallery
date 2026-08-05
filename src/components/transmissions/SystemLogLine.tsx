@@ -94,14 +94,14 @@ export function SystemLogLine({
         )}
 
         {entry.image && (
-          <div className="relative mt-3 aspect-[4/3] w-full max-w-sm overflow-hidden rounded border border-neon-cyan/20 bg-void">
+          <div className="relative mt-3 aspect-square w-full max-w-[220px] overflow-hidden rounded border border-neon-cyan/20 bg-void sm:max-w-[240px]">
             <Image
               src={entry.image}
               alt={entry.title ?? entry.id}
               fill
               unoptimized
-              sizes="(max-width: 640px) 100vw, 24rem"
-              className="object-cover"
+              sizes="240px"
+              className="object-cover object-center"
             />
           </div>
         )}
@@ -113,13 +113,14 @@ export function SystemLogLine({
           {entry.message}
         </p>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+        {/* External + related actions — always clearly clickable */}
+        <div className="mt-3 flex flex-col gap-2 border-t border-neon-cyan/10 pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
           {entry.marketplace && (
             <a
               href={entry.marketplace}
               target="_blank"
               rel="noopener noreferrer"
-              className={linkClass}
+              className={`${linkClass} rounded border border-neon-cyan/30 bg-neon-cyan/5 px-2.5 py-1.5 hover:border-neon-cyan/60 hover:bg-neon-cyan/10`}
             >
               Marketplace →
             </a>
@@ -129,7 +130,7 @@ export function SystemLogLine({
               href={entry.buyerProfile}
               target="_blank"
               rel="noopener noreferrer"
-              className={linkClass}
+              className={`${linkClass} rounded border border-neon-blue/30 bg-neon-blue/5 px-2.5 py-1.5 hover:border-neon-cyan/50 hover:bg-neon-blue/10`}
             >
               Buyer profile →
             </a>
