@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import type { SystemLogEntry } from "@/lib/types";
 import { getNftById } from "@/data/nfts";
@@ -20,6 +21,9 @@ const LEVEL_GLOW: Record<string, string> = {
   LORE: "bg-violet-400",
   ERROR: "bg-rose-400",
 };
+
+const linkClass =
+  "inline-block font-mono text-[10px] uppercase tracking-widest text-neon-blue/90 transition-colors hover:text-neon-cyan focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neon-cyan/60";
 
 function relatedNftLabel(nftId: string): string {
   const nft = getNftById(nftId);
@@ -65,12 +69,41 @@ export function SystemLogLine({
             {entry.level}
           </span>
           <span className="text-muted/50">{entry.id}</span>
+          {entry.status && (
+            <span className="rounded border border-emerald-400/40 px-1.5 py-0.5 text-[9px] uppercase text-emerald-300">
+              {entry.status}
+            </span>
+          )}
+          {entry.classification && (
+            <span className="rounded border border-sky-400/30 px-1.5 py-0.5 text-[9px] uppercase text-sky-300/90">
+              {entry.classification}
+            </span>
+          )}
         </div>
 
         {entry.title && (
           <h3 className="mt-1.5 text-[11px] font-medium tracking-wide text-foreground/90 sm:text-xs">
             {entry.title}
           </h3>
+        )}
+
+        {entry.gallery && (
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-violet-300/80">
+            Gallery: {entry.gallery}
+          </p>
+        )}
+
+        {entry.image && (
+          <div className="relative mt-3 aspect-[4/3] w-full max-w-sm overflow-hidden rounded border border-neon-cyan/20 bg-void">
+            <Image
+              src={entry.image}
+              alt={entry.title ?? entry.id}
+              fill
+              unoptimized
+              sizes="(max-width: 640px) 100vw, 24rem"
+              className="object-cover"
+            />
+          </div>
         )}
 
         <p className="mt-1.5 whitespace-pre-line text-xs leading-relaxed text-neon-cyan/90 sm:text-[13px]">
@@ -81,11 +114,31 @@ export function SystemLogLine({
         </p>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {entry.marketplace && (
+            <a
+              href={entry.marketplace}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              Marketplace →
+            </a>
+          )}
+          {entry.buyerProfile && (
+            <a
+              href={entry.buyerProfile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClass}
+            >
+              Buyer profile →
+            </a>
+          )}
           {entry.relatedNftId && (
             <button
               type="button"
               onClick={() => onOpenRelatedNft?.(entry.relatedNftId!)}
-              className="inline-block font-mono text-[10px] uppercase tracking-widest text-neon-blue/80 transition-colors hover:text-neon-cyan focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neon-cyan/60"
+              className={linkClass}
             >
               → Related: {relatedNftLabel(entry.relatedNftId)}
             </button>

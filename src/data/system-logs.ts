@@ -17,6 +17,36 @@ export const systemLogs: SystemLogEntry[] = [
   {
     kind: "system-log",
     era: "live",
+    id: "LOG-VΣ03",
+    timestamp: "2026.08.04",
+    level: "SIGNAL",
+    title: "LOG-VΣ03 // BPTEZ-05 — Asset Transfer Confirmed: Aurelia",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VeLozArt Gallery",
+    image: "/logs/BPTEZ-05.jpg",
+    marketplace:
+      "https://objkt.com/tokens/KT1Sp7AXSqsCoA16s2rxL6yrTa7WFqjw64w3/5",
+    buyerProfile:
+      "https://objkt.com/users/tz1eTSPHKKHdHUSz2bZFU7LjXViEo9jF7tqy/created",
+    message: `A successful transfer has been registered and verified across the external exchange protocol, interfacing directly with the OBJKT platform.
+
+Gallery: VeLozArt Gallery
+Collection: Biopunk Faces
+Asset designation: BPTEZ-05 // Aurelia
+
+Aurelia — of Latin origin, meaning “the golden one”. Derived from the ancient Roman name Aurelius, itself rooted in the Latin word aureus (golden).
+
+The asset has been permanently transferred to the designated node:
+Habile Imprint
+
+Transaction confirmed and recorded within VΣLOHE SYSTEM.
+Ownership registry updated.
+Signal integrity: STABLE.`,
+  },
+  {
+    kind: "system-log",
+    era: "live",
     id: "LOG-VΣ02",
     timestamp: "2026.08.03_02:22",
     level: "SIGNAL",

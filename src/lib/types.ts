@@ -91,6 +91,18 @@ export interface SystemLogEntry {
   relatedNftId?: string;
   /** Original post on the VΣLOHE blog */
   blogLink?: string;
+  /** Optional operational status (e.g. COMPLETED, ACTIVE) */
+  status?: string;
+  /** Optional classification label (e.g. PUBLIC RECORD) */
+  classification?: string;
+  /** Optional gallery wing name */
+  gallery?: string;
+  /** Optional illustration under /public */
+  image?: string;
+  /** External marketplace URL (Objkt / OpenSea) — rendered as a link */
+  marketplace?: string;
+  /** Buyer / collector profile URL — rendered as a link */
+  buyerProfile?: string;
 }
 
 /** System-wide broadcast — prominent live-channel entry */
