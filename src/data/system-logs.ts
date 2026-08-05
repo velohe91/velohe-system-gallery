@@ -51,13 +51,28 @@ Signal integrity: STABLE.`,
     timestamp: "2026.08.03_02:22",
     level: "SIGNAL",
     title: "LOG-VΣ02 // NB-0000 — NEONBYTE BUNNIES PROTOCOL",
-    message: `NEONBYTE BUNNIES PROTOCOL has been initialized and registered within VΣLOHE SYSTEM.
+    status: "ACTIVE",
+    classification: "PUBLIC RECORD",
+    systemArchitect: "LUNARYA",
+    image: "/logs/NB-0000.jpg",
+    collectionLink:
+      "https://opensea.io/collection/neonbyte-bunnies/overview",
+    message: `PROTOCOL RELEASE // SYSTEM ANNOUNCEMENT
+
+NEONBYTE BUNNIES PROTOCOL has been initialized and registered within VΣLOHE SYSTEM.
+
+This entry is a protocol release — not an asset sale or transfer.
+Designation: NB-0000
+System Architect: LUNARYA
 
 Status: ACTIVE
 Classification: PUBLIC RECORD
-System Architect: LUNARYA
 
-Protocol registration complete. Live channel index updated. Awaiting subsequent NEONBYTE directives.`,
+Protocol registration complete.
+Live channel index updated.
+Awaiting subsequent NEONBYTE directives.
+
+Open the Collection link below for the external protocol overview.`,
   },
   {
     kind: "system-log",

@@ -103,6 +103,10 @@ export interface SystemLogEntry {
   marketplace?: string;
   /** Buyer / collector profile URL — rendered as a link */
   buyerProfile?: string;
+  /** Protocol / collection overview URL (not a sale) — rendered as a link */
+  collectionLink?: string;
+  /** Optional system architect credit */
+  systemArchitect?: string;
 }
 
 /** System-wide broadcast — prominent live-channel entry */

@@ -76,12 +76,23 @@ function LogActions({
   const hasActions =
     entry.marketplace ||
     entry.buyerProfile ||
+    entry.collectionLink ||
     entry.relatedNftId ||
     entry.blogLink;
   if (!hasActions) return null;
 
   return (
     <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-neon-cyan/10 pt-3">
+      {entry.collectionLink && (
+        <a
+          href={entry.collectionLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${linkClass} rounded border border-violet-400/40 bg-violet-500/10 px-2.5 py-1.5 text-violet-200 hover:border-violet-300/60 hover:bg-violet-500/15 hover:text-violet-100`}
+        >
+          Collection →
+        </a>
+      )}
       {entry.marketplace && (
         <a
           href={entry.marketplace}
@@ -204,6 +215,12 @@ export function SystemLogLine({
                 </p>
               )}
 
+              {entry.systemArchitect && (
+                <p className="text-[10px] uppercase tracking-[0.2em] text-muted">
+                  Architect // {entry.systemArchitect}
+                </p>
+              )}
+
               <p className="whitespace-pre-line text-[11px] leading-relaxed text-neon-cyan/90 sm:text-xs">
                 <span className="mr-1 select-none text-neon-cyan/35" aria-hidden>
                   &gt;
@@ -228,6 +245,12 @@ export function SystemLogLine({
             {entry.gallery && (
               <p className="mt-1 text-[10px] uppercase tracking-widest text-violet-300/80">
                 Gallery // {entry.gallery}
+              </p>
+            )}
+
+            {entry.systemArchitect && (
+              <p className="mt-1 text-[10px] uppercase tracking-widest text-muted">
+                Architect // {entry.systemArchitect}
               </p>
             )}
 
