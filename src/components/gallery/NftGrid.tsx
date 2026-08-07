@@ -9,7 +9,7 @@ import { NftModal } from "@/components/gallery/NftModal";
 export function NftGrid({ items }: { items: NftItem[] }) {
   const [selected, setSelected] = useState<NftItem | null>(null);
 
-  // Newest first (highest VEL-### id). Safe even if source array is chronological.
+  // Newest first: VEL-015 … VEL-001, then genesis CPC005 … CPC001 at the bottom.
   const ordered = useMemo(
     () =>
       [...items].sort((a, b) => nftIdNumber(b.id) - nftIdNumber(a.id)),

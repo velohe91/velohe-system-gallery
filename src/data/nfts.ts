@@ -1,14 +1,17 @@
 /**
  * NFT catalog for the VΣLOHE archive.
  *
- * Source order: genesis VEL-CPC001–005 first, then VEL-001…
- * Display: CPC001–005 first, then main VEL-### newest-first.
+ * Source (chronological):
+ *   VEL-CPC001 … VEL-CPC005 → VEL-001 … VEL-015
+ *
+ * Display (newest first):
+ *   VEL-015 … VEL-001 → VEL-CPC005 … VEL-CPC001
  *
  * HOW TO UPDATE ASSETS:
  * 1. Place stills in  /public/nfts/images/  (e.g. VEL-016.png)
  * 2. Place videos in  /public/nfts/videos/  (e.g. VEL-016.mp4)
  * 3. Append new main-line pieces at the END of `nftCatalog`
- * 4. Genesis CPC ids live at the top of this file (do not renumber casually)
+ * 4. Genesis CPC ids stay at the top of this file (oldest layer)
  *
  * rarity values (code): common | rare | super-rare | epic | legendary | mythic
  */
@@ -16,24 +19,26 @@
 import type { NftItem } from "@/lib/types";
 
 /**
- * Sort key for gallery order (higher = closer to top).
- * - Genesis VEL-CPC001…005 first (base layer at the start of the Archive)
- * - Then main VEL-### newest-first (VEL-015 … VEL-001)
+ * Sort key for gallery order (higher = closer to top / newer).
+ * - Main VEL-### → 10000 + n  (VEL-015 at top, VEL-001 after)
+ * - Genesis CPC → n only       (CPC005 … CPC001 at the bottom)
  */
 export function nftIdNumber(id: string): number {
   const cpc = id.match(/CPC(\d+)/i);
   if (cpc) {
-    // CPC001 > CPC002 > … so genesis reads 001 → 005 at the top
-    return 30000 - parseInt(cpc[1], 10);
+    // Oldest layer: 1 … 5 (always below main line)
+    return parseInt(cpc[1], 10);
   }
 
   const match = id.match(/(\d+)\s*$/);
+  // Main exhibition line: offset so VEL-001 (10001) > CPC005 (5)
   return match ? 10000 + parseInt(match[1], 10) : 0;
 }
 
 /**
- * Source catalog — genesis (CPC) first, then main line.
- * Display order is derived via nftIdNumber (do not reverse manually).
+ * Source catalog — chronological oldest → newest:
+ * CPC001–005, then VEL-001–015.
+ * Export `nfts` reverses via nftIdNumber for newest-first display.
  */
 const nftCatalog: NftItem[] = [
   // ─── Genesis // Compressed baseline (CyborgPunks Club) ───
@@ -403,8 +408,9 @@ A rare convergence where balance meets evolution.
 ];
 
 /**
- * Public catalog for the Gallery — newest first (VEL-015 … VEL-001).
- * New entries appended to `nftCatalog` surface at the top automatically.
+ * Public catalog for the Gallery — newest first:
+ * VEL-015 … VEL-001 → VEL-CPC005 … VEL-CPC001
+ * Append new main-line pieces at the END of `nftCatalog` so they surface at the top.
  */
 export const nfts: NftItem[] = [...nftCatalog].sort(
   (a, b) => nftIdNumber(b.id) - nftIdNumber(a.id),
