@@ -22,7 +22,8 @@ export type NftStatus =
   | "Signal Suspension"
   | "Archived"
   | "Restricted"
-  | "Unresolved";
+  | "Unresolved"
+  | "Compressed";
 
 export interface NftItem {
   /** Unique catalog ID, e.g. "VEL-001" */

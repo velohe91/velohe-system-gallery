@@ -1,29 +1,139 @@
 /**
- * NFT catalog for the VΣLOHE archive (15 exhibition pieces).
+ * NFT catalog for the VΣLOHE archive.
+ *
+ * Source order: genesis VEL-CPC001–005 first, then VEL-001…
+ * Display: CPC001–005 first, then main VEL-### newest-first.
  *
  * HOW TO UPDATE ASSETS:
  * 1. Place stills in  /public/nfts/images/  (e.g. VEL-016.png)
  * 2. Place videos in  /public/nfts/videos/  (e.g. VEL-016.mp4)
- * 3. Append a new object at the END of `nftCatalog` below
- * 4. Gallery sorts by id number (newest first) automatically —
- *    VEL-016 will appear before VEL-015 without reordering this file
+ * 3. Append new main-line pieces at the END of `nftCatalog`
+ * 4. Genesis CPC ids live at the top of this file (do not renumber casually)
  *
- * rarity values (code): common | rare | epic | legendary | mythic
+ * rarity values (code): common | rare | super-rare | epic | legendary | mythic
  */
 
 import type { NftItem } from "@/lib/types";
 
-/** Extract numeric suffix from ids like "VEL-015" → 15 */
+/**
+ * Sort key for gallery order (higher = closer to top).
+ * - Genesis VEL-CPC001…005 first (base layer at the start of the Archive)
+ * - Then main VEL-### newest-first (VEL-015 … VEL-001)
+ */
 export function nftIdNumber(id: string): number {
+  const cpc = id.match(/CPC(\d+)/i);
+  if (cpc) {
+    // CPC001 > CPC002 > … so genesis reads 001 → 005 at the top
+    return 30000 - parseInt(cpc[1], 10);
+  }
+
   const match = id.match(/(\d+)\s*$/);
-  return match ? parseInt(match[1], 10) : 0;
+  return match ? 10000 + parseInt(match[1], 10) : 0;
 }
 
 /**
- * Source catalog — keep chronological / append-new-at-end order.
- * Do not reverse this array manually; display order is derived below.
+ * Source catalog — genesis (CPC) first, then main line.
+ * Display order is derived via nftIdNumber (do not reverse manually).
  */
 const nftCatalog: NftItem[] = [
+  // ─── Genesis // Compressed baseline (CyborgPunks Club) ───
+  {
+    id: "VEL-CPC001",
+    title: "CYBORG PUNK 001",
+    image: "/nfts/videos/VEL-CPC001.gif",
+    video: "/nfts/videos/VEL-CPC001.gif",
+    description:
+      "Is the first registered baseline identity node within the CyborgPunks Club subsystem.",
+    lore: `This node originates from a human-based identity profile and defines the standard compression schema used for subsequent CyborgPunks. Its configuration prioritizes visual inspection and system-level recognition.
+
+FUNCTION:
+The X-Ray Vision ability, amplified through a dedicated visual accessory, designates this node for inspection-oriented recognition.`,
+    series: "CyborgPunks",
+    rarity: "common",
+    marketplace:
+      "https://opensea.io/item/ethereum/0xe110f0241d85cd433e9e986798dce3f07f3a7651/98439090886058811582421597826978266380524413624233041484877946910506515169283",
+    status: "Compressed",
+    year: 2025,
+    tags: ["genesis", "compressed", "x-ray"],
+  },
+  {
+    id: "VEL-CPC002",
+    title: "CYBORG PUNK 002",
+    image: "/nfts/videos/VEL-CPC002.gif",
+    video: "/nfts/videos/VEL-CPC002.gif",
+    description:
+      "Is the first non-baseline identity node derived from the CyborgPunk 001 schema.",
+    lore: `While maintaining a human-origin identity profile, this node introduces a functional variation optimized for low-visibility environments, expanding the operational range of the identity layer.
+
+FUNCTION:
+The Nocturne Vision ability, enhanced through night-vision optics, configures this node for recognition under reduced luminosity conditions.`,
+    series: "CyborgPunks",
+    rarity: "common",
+    marketplace:
+      "https://opensea.io/item/ethereum/0xe110f0241d85cd433e9e986798dce3f07f3a7651/98439090886058811582421597826978266380524413624233041484877946910506515169284",
+    status: "Compressed",
+    year: 2025,
+    tags: ["genesis", "compressed", "nocturne"],
+  },
+  {
+    id: "VEL-CPC003",
+    title: "CYBORG PUNK 003",
+    image: "/nfts/videos/VEL-CPC003.gif",
+    video: "/nfts/videos/VEL-CPC003.gif",
+    description:
+      "CyborgPunk 003 is a derived identity node configured for active scanning and signal interrogation within the CyborgPunks Club subsystem.",
+    lore: `Built upon the baseline human identity schema, this node emphasizes real-time analysis and structured detection across system layers.
+
+FUNCTION:
+The Scanning Vision ability, enabled by a dedicated scanning artefact, configures this node for continuous observation and pattern detection.`,
+    series: "CyborgPunks",
+    rarity: "common",
+    marketplace:
+      "https://opensea.io/item/ethereum/0xe110f0241d85cd433e9e986798dce3f07f3a7651/98439090886058811582421597826978266380524413624233041484877946910506515169285",
+    status: "Compressed",
+    year: 2025,
+    tags: ["genesis", "compressed", "scanning"],
+  },
+  {
+    id: "VEL-CPC004",
+    title: "CYBORG PUNK 004",
+    image: "/nfts/videos/VEL-CPC004.gif",
+    video: "/nfts/videos/VEL-CPC004.gif",
+    description:
+      "CyborgPunk 004 is a derived identity node configured for logical processing and code-oriented interaction within the CyborgPunks Club subsystem.",
+    lore: `Built upon the baseline human identity schema, this node emphasizes structured problem solving and symbolic interpretation across system layers.
+
+FUNCTION:
+The Programmer ability, enabled through a dedicated cyberspace visual interface, configures this node for interaction with abstract and logic-driven system environments.`,
+    series: "CyborgPunks",
+    rarity: "common",
+    marketplace:
+      "https://opensea.io/item/ethereum/0xe110f0241d85cd433e9e986798dce3f07f3a7651/98439090886058811582421597826978266380524413624233041484877946910506515169286",
+    status: "Compressed",
+    year: 2025,
+    tags: ["genesis", "compressed", "programmer"],
+  },
+  {
+    id: "VEL-CPC005",
+    title: "CYBORG PUNK 005",
+    image: "/nfts/videos/VEL-CPC005.gif",
+    video: "/nfts/videos/VEL-CPC005.gif",
+    description:
+      "CyborgPunk 005 is a derived identity node configured for unauthorized access simulation and boundary probing within the CyborgPunks Club subsystem.",
+    lore: `While retaining a human-origin identity schema, this node represents an aggressive interaction profile, optimized for testing system integrity and access thresholds.
+
+FUNCTION:
+The Hacker ability, mediated through a matrix-aligned visual interface, configures this node for penetration-style interaction with protected system layers.`,
+    series: "CyborgPunks",
+    rarity: "common",
+    marketplace:
+      "https://opensea.io/item/ethereum/0xe110f0241d85cd433e9e986798dce3f07f3a7651/98439090886058811582421597826978266380524413624233041484877946910506515169287",
+    status: "Compressed",
+    year: 2025,
+    tags: ["genesis", "compressed", "hacker"],
+  },
+
+  // ─── Main exhibition line ───
   {
     id: "VEL-001",
     title: "CBPS-VS-001 // VIREX",
