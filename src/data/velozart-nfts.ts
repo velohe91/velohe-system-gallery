@@ -77,7 +77,7 @@ const velozartCatalog: NftItem[] = [
   {
     id: "VeLozArt-005",
     title: "NeonByte Bunnies",
-    image: "/nfts/velozart/images/VeLozArt-005.jpg",
+    image: "/nfts/velozart/images/VeLozArt-005.png",
     video: "/nfts/velozart/videos/VeLozArt-005.gif",
     description:
       "A vibrant NFT collection where adorable cyber rabbits come to life through futuristic fashion, neon aesthetics, and endless personality.",
