@@ -74,9 +74,24 @@ const velozartCatalog: NftItem[] = [
       "https://objkt.com/collections/KT1LHNnUxB7jSwjfuAaNRhfdJ9QQCxupZKr5",
     tags: ["watercolor", "fantasy", "home"],
   },
+  {
+    id: "VeLozArt-005",
+    title: "NeonByte Bunnies",
+    image: "/nfts/velozart/images/VeLozArt-005.jpg",
+    video: "/nfts/velozart/videos/VeLozArt-005.gif",
+    description:
+      "A vibrant NFT collection where adorable cyber rabbits come to life through futuristic fashion, neon aesthetics, and endless personality.",
+    lore: `Every NeonByte Bunny is an autonomous process running inside the VΣLOHE SYSTEM. They are never seen by ordinary users, yet every operation inside the VΣLOHE SYSTEM depends on them. Every NeonByte Bunny is an autonomous background process silently executing to keep the system alive.
+
+"If the NeonByte Bunnies ever stop running... the VΣLOHE SYSTEM stops dreaming." `,
+    series: "VeLozArt",
+    rarity: "mythic",
+    marketplace: "https://opensea.io/collection/neonbyte-bunnies",
+    tags: ["neonbyte", "bunnies", "workforce"],
+  },
 ];
 
-/** Public catalog — newest first (VeLozArt-004 → 001). */
+/** Public catalog — newest first (VeLozArt-005 → 001). */
 export const velozartNfts: NftItem[] = [...velozartCatalog].sort(
   (a, b) => nftIdNumber(b.id) - nftIdNumber(a.id),
 );
