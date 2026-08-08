@@ -7,13 +7,13 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const STATUS_BADGES = [
   "UNDER CONSTRUCTION",
-  "RESTRICTED ACCESS",
-  "PROTOTYPE",
+  "ACTIVE DEVELOPMENT",
+  "WEB3 OPTIONAL",
 ] as const;
 
 /**
- * Placeholder shell for the upcoming interactive game layer.
- * Does not alter existing archive / gallery content.
+ * Short Game Protocol hub — /game
+ * Deep vision lives at /game/whitepaper
  */
 export function GameProtocolView() {
   const reduced = usePrefersReducedMotion();
@@ -38,8 +38,8 @@ export function GameProtocolView() {
             GAME PROTOCOL — IN DEVELOPMENT
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg font-mono text-sm leading-relaxed text-muted">
-            A new interactive layer is being constructed within VΣLOHE SYSTEM
+          <p className="mx-auto mt-4 max-w-md font-mono text-sm leading-relaxed text-muted sm:text-base">
+            Build your Node. Expand the Network. Reach the Aethergrid.
           </p>
 
           <ul className="mt-6 flex flex-wrap items-center justify-center gap-2">
@@ -53,35 +53,19 @@ export function GameProtocolView() {
             ))}
           </ul>
 
-          <div className="mx-auto mt-8 max-w-md space-y-3 border-t border-neon-cyan/15 pt-6 text-left">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-neon-cyan/60">
-              Placeholder // Brief
-            </p>
-            <p className="font-mono text-xs leading-relaxed text-muted sm:text-sm">
-              This sector is reserved for an upcoming interactive experience.
-              Mechanics, objectives, and reward channels will be indexed here
-              once the protocol stabilizes. Existing exhibition content remains
-              unchanged.
-            </p>
-          </div>
-
-          <p
-            className="mt-8 font-mono text-xs text-neon-cyan/80 sm:text-sm"
-            role="status"
-          >
-            <span className="mr-1.5 text-neon-cyan/40" aria-hidden>
-              &gt;
-            </span>
-            Awaiting further system directives...
-            <motion.span
-              className="ml-1 inline-block h-3.5 w-1.5 bg-neon-cyan/80 align-middle"
-              animate={reduced ? undefined : { opacity: [1, 0, 1] }}
-              transition={{ repeat: Infinity, duration: 1 }}
-              aria-hidden
-            />
+          <p className="mx-auto mt-8 max-w-lg font-mono text-xs leading-relaxed text-muted sm:text-sm">
+            The interactive game layer is in active development. Operators will
+            build Nodes, deploy agents, and push toward contact with the
+            Aethergrid — while the exhibition archive remains fully intact.
           </p>
 
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <NeonButton
+              href="/game/whitepaper"
+              className="min-w-[220px] text-glow-sm"
+            >
+              Read Whitepaper
+            </NeonButton>
             <NeonButton href="/" variant="outline" className="min-w-[220px]">
               Return to Archive
             </NeonButton>

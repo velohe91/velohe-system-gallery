@@ -5,11 +5,11 @@ import { PageTransition } from "@/components/ui/PageTransition";
 export const metadata: Metadata = {
   title: "Game Protocol",
   description:
-    "GAME PROTOCOL — interactive layer under construction within VΣLOHE SYSTEM.",
+    "Build your Node. Expand the Network. Reach the Aethergrid. — VΣLOHE game layer in active development.",
 };
 
 /**
- * Isolated game wing — does not alter archive or gallery content.
+ * Short game hub — whitepaper lives at /game/whitepaper
  */
 export default function GamePage() {
   return (
