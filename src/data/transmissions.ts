@@ -14,6 +14,20 @@ import type { TransmissionArticle } from "@/lib/types";
 
 export const transmissionArticles: TransmissionArticle[] = [
   // ─── Live (TX-VΣ##) — sorted newest-first in feed.ts ───
+{
+    kind: "transmission",
+    era: "live",
+    id: "TX-VΣ02",
+    date: "2026.08.09_07:11",
+    title: "CHAPTER 1: THE PULSE INITIALIZATION",
+    tags: ["chapter 1", "pulse initialization", "cyborgpunks", "lunarya"],
+    content: `The buzz of government drones drowned out any other sound in the streets of San Salvador. Through the armored monitors of her clandestine lab, Lunarya watched the "pacification" forces deploy. They were beasts of metal and soulless algorithms, funded by a paranoid State looking to suffocate the imminent civil war. They wanted to hijack the VΣLOHE SYSTEM's core. They wanted to turn her surveillance network into an omniscient executioner.
+
+But Lunarya was always one step ahead. ♟️ Her fingers flew across the holographic keyboard, isolating her private network from the government's mainframe. On the main screen, an encrypted folder opened, harmlessly classified under the name: CyborgPunks Club. To the State's auditors, these files were nothing more than a bizarre collection of digital art—pixelated avatars, urban aesthetics, and vibrant colors. Digital trash.
+
+What the censors didn't know was that every pixel, color palette, and geometric stroke concealed terabytes of genetic code and biomechanical assembly schematics. The CyborgPunks weren't just art; they were a dormant army. 🧬 🦾 A red alert flashed on the screen. The government forces had begun their assault on the east sector. It was now or never. Lunarya knew that conventional channels would be intercepted in seconds by government algorithms. She needed an immutable path. A network that belonged to no one, and therefore, no one could shut down. She invoked the protocols of the old decentralized web, hiding the ignition sequences within smart contracts on the Ethereum and Tezos blockchains.`,
+  },
+  
   {
     kind: "transmission",
     era: "live",
