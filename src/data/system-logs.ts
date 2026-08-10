@@ -17,6 +17,27 @@ export const systemLogs: SystemLogEntry[] = [
   {
     kind: "system-log",
     era: "live",
+    id: "LOG-VΣ04",
+    timestamp: "2026.08.08",
+    level: "SIGNAL",
+    title: "LOG-VΣ04 // 14# NeoPop Pandas — Asset Acquisition Confirmed",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VΣLOHE SYSTEM ARCHIVE",
+    image: "/logs/neopop-pandas.jpeg",
+    marketplace:
+      "https://objkt.com/tokens/KT1QLSm9Qs3TRm35fTF1JikyC787P5kM2oRP/13?ref=tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse",
+    buyerProfile:
+      "https://x.com/velohe91/status/2086120339726037443?s=20",
+    message: `System Log // NFT Acquired from @khaleghi_NFT. VΣLOHE SYSTEM just collected this cute neon panda! 🐼
+
+It is more than cute. It’s rebellion wrapped in bubblegum and neon. NeoPop Pandas are here to break the rules — with style. Be part of the movement. ✨
+
+The asset has been successfully integrated into the VΣLOHE exhibition system. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+  },
+  {
+    kind: "system-log",
+    era: "live",
     id: "LOG-VΣ03",
     timestamp: "2026.08.04",
     level: "SIGNAL",
