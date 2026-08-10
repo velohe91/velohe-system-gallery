@@ -59,14 +59,23 @@ export function GameProtocolView() {
             Aethergrid — while the exhibition archive remains fully intact.
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <NeonButton
               href="/game/whitepaper"
-              className="min-w-[220px] text-glow-sm"
+              className="min-w-[200px] text-glow-sm"
             >
               Read Whitepaper
             </NeonButton>
-            <NeonButton href="/" variant="outline" className="min-w-[220px]">
+            
+            <NeonButton 
+              href="/game/theaethergrid" 
+              variant="outline" 
+              className="min-w-[200px] border-red-500/50 text-red-400 hover:border-red-500 hover:text-red-300"
+            >
+              Access Unknown Sector
+            </NeonButton>
+
+            <NeonButton href="/" variant="outline" className="min-w-[200px]">
               Return to Archive
             </NeonButton>
           </div>
