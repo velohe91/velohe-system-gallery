@@ -65,15 +65,22 @@ export default function AethergridPageTwo() {
           When these cores begin to manifest in the physical world, the laws of 2045 won&apos;t be enough to contain them. The revolution has just initialized. ⚡
         </p>
 
-        {/* Barra de Navegación Final */}
-        <div className="mt-12 pt-6 border-t border-cyan-500/30 flex justify-between items-center">
+        {/* Barra de Navegación Final con Estilo Cyan Tradicional */}
+        <div className="mt-12 pt-6 border-t border-cyan-500/30 flex flex-col md:flex-row justify-between items-center gap-4">
           <Link 
             href="/game"
             className="inline-flex items-center gap-2 text-sm font-mono text-cyan-400 border border-cyan-500/30 px-6 py-3 rounded bg-cyan-950/20 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all"
           >
             <span>&larr;</span> RETURN TO GAME PROTOCOL
           </Link>
-          <span className="text-xs text-cyan-600 font-mono">[ END OF FRAGMENT 02 ]</span>
+
+          {/* Botón intermitente hacia el Capítulo 1 en Cyan */}
+          <Link 
+            href="/game/theaethergrid/chapter-1"
+            className="inline-flex items-center gap-2 text-sm font-mono text-cyan-400 border border-cyan-500/50 px-6 py-3 rounded bg-cyan-950/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all animate-pulse font-bold"
+          >
+            DECRYPT CHAPTER 1: THE PULSE INITIALIZATION <span>&rarr;</span>
+          </Link>
         </div>
       </motion.div>
     </div>
