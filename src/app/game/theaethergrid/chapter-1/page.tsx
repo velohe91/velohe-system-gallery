@@ -110,7 +110,7 @@ export default function Chapter1Page() {
           </div>
 
           <p className="mb-6">
-            The buzz of government drones drowned out any other sound in the streets of San Salvador. Through the armored monitors of her clandestine lab, Lunarya watched the &quot;pacification&quot; forces deploy. They were beasts of metal and soulless algorithms, funded by a paranoid State looking to suffocate the imminent civil war. They wanted to hijack the VΣLOHE SYSTEM&apos;s core. They wanted to turn her surveillance network into an omniscient executioner.
+            The buzz of government drones drowned out any other sound in the streets of San Salvador. Through the armored monitors of her clandestine lab, Lunarya watched the &quot;pacification&quot; forces deploy. They were beasts of metal and soulless algorithms, funded by a paranoid State looking to suffocate the imminent civil war. They wanted to hijack the V&Sigma;LOHE SYSTEM&apos;s core. They wanted to turn her surveillance network into an omniscient executioner.
           </p>
 
           <p className="mb-6 italic text-cyan-200">
