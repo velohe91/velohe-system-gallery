@@ -65,14 +65,12 @@ export default function AethergridPageTwo() {
           When these cores begin to manifest in the physical world, the laws of 2045 won&apos;t be enough to contain them. The revolution has just initialized. ⚡
         </p>
 
+
         {/* Barra de Navegación Final con Estilo Cyan Tradicional */}
         <div className="mt-12 pt-6 border-t border-cyan-500/30 flex flex-col md:flex-row justify-between items-center gap-4">
-          <Link 
-            href="/game"
-            className="inline-flex items-center gap-2 text-sm font-mono text-cyan-400 border border-cyan-500/30 px-6 py-3 rounded bg-cyan-950/20 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all"
-          >
-            <span>&larr;</span> RETURN TO GAME PROTOCOL
-          </Link>
+          <div className="text-center font-mono text-xs tracking-widest text-cyan-400/70 my-6">
+  [ FRAGMENT 02 ENDED ]
+</div>
 
           {/* Botón intermitente hacia el Capítulo 1 en Cyan */}
           <Link 

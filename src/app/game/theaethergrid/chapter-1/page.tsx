@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import EncryptedFolder from './EncryptedFolder';
+import CryogenicMonitor from '@/components/CryogenicMonitor';
 
 export default function Chapter1Page() {
   const [isHacking, setIsHacking] = useState(true);
@@ -112,11 +114,18 @@ export default function Chapter1Page() {
           </p>
 
           <p className="mb-6 italic text-cyan-200">
-            *But Lunarya was always one step ahead.* ♟️ Her fingers flew across the holographic keyboard, isolating her private network from the government&apos;s mainframe. On the main screen, an encrypted folder opened, harmlessly classified under the name: <a href="https://opensea.io/collection/cyborgpunksclub" target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 hover:text-cyan-300 font-sans not-italic text-lg">CyborgPunks Club</a>. To the State&apos;s auditors, these files were nothing more than a bizarre collection of digital art—pixelated avatars, urban aesthetics, and vibrant colors. Digital trash.
+            *But Lunarya was always one step ahead.* Her fingers flew across the holographic keyboard, isolating her private network from the government&apos;s mainframe. On the main screen, an encrypted folder opened, harmlessly classified under the name: <a href="https://opensea.io/collection/cyborgpunksclub" target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 hover:text-cyan-300 font-sans not-italic text-lg">CyborgPunks Club</a>. To the State&apos;s auditors, these files were nothing more than a bizarre collection of digital art—pixelated avatars, urban aesthetics, and vibrant colors. Digital trash.
           </p>
+<p>
+  ...To the State's auditors, these files were nothing more than a bizarre collection of digital art—pixelated avatars, urban aesthetics, and vibrant colors. <span className="text-cyan-300">Digital trash.</span>
+</p>
+
+{/* Aquí colocamos tu componente interactivo */}
+<EncryptedFolder />
+
 
           <p className="mb-6">
-            What the censors didn&apos;t know was that every pixel, color palette, and geometric stroke concealed terabytes of genetic code and biomechanical assembly schematics. The CyborgPunks weren&apos;t just art; they were a dormant army. 🧬 🦾
+            What the censors didn&apos;t know was that every pixel, color palette, and geometric stroke concealed terabytes of genetic code and biomechanical assembly schematics. The CyborgPunks weren&apos;t just art; they were a dormant army.
           </p>
 
           <p className="mb-6">
@@ -124,37 +133,31 @@ export default function Chapter1Page() {
           </p>
 
           <p className="mb-6">
-            She invoked the protocols of the old decentralized web, hiding the ignition sequences within smart contracts on the <strong className="text-cyan-300 font-mono">Ethereum</strong> and <strong className="text-cyan-300 font-mono">Tezos</strong> blockchains. <em>&quot;Approve smart contract,&quot;</em> she whispered into the void of the lab, breaking the final security seal. <em>&quot;<a href="https://opensea.io/collection/cyborg-punk-states" target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 hover:text-cyan-300 font-sans text-lg">CyborgPunk States Protocol</a>. Sign and execute.&quot;</em> 🌐 🔓
+            She invoked the protocols of the old decentralized web, hiding the ignition sequences within smart contracts on the <strong className="text-cyan-300 font-mono">Ethereum</strong> and <strong className="text-cyan-300 font-mono">Tezos</strong> blockchains. <em>&quot;Approve smart contract,&quot;</em> she whispered into the void of the lab, breaking the final security seal. <em>&quot;<a href="https://opensea.io/collection/cyborg-punk-states" target="_blank" rel="noopener noreferrer" className="underline text-cyan-400 hover:text-cyan-300 font-sans text-lg">CyborgPunk States Protocol</a>. Sign and execute.&quot;</em> 
           </p>
 
           <p className="mb-6">
-            The entire lab plunged into a deep, electric blue gloom. The nodes validated the initial pulse in fractions of a second, decrypting the biomechanical genomes and injecting them directly into the lower-level incubation pods. *First pulse. System online. Block confirmed.* ⛓️ ⚙️
+            The entire lab plunged into a deep, electric blue gloom. The nodes validated the initial pulse in fractions of a second, decrypting the biomechanical genomes and injecting them directly into the lower-level incubation pods. *First pulse. System online. Block confirmed.* 
           </p>
 
           {/* Bloque de Nodos con colores estrictos */}
-          <div className="border-l-2 border-cyan-500 pl-4 my-8 bg-cyan-950/20 py-4 space-y-3 font-mono text-base">
-            <p className="font-bold text-cyan-400">The cryogenic fluids began to drain. In the darkness, four main nodes awakened simultaneously:</p>
-            <p>• <span className="text-purple-400 font-bold">VIREX:</span> Igniting his interpretation layer, optimizing the tactical network&apos;s data flow in milliseconds.</p>
-            <p>• <span className="text-green-400 font-bold">NULLA:</span> Activating passive monitoring, observing the environment in absolute silence.</p>
-            <p>• <span className="text-blue-400 font-bold">LYNX:</span> Taking visual supervision from the upper shadows, securing optical control of the critical zone.</p>
-            <p>• <span className="text-yellow-400 font-bold">STRIPE:</span> Synchronizing traversal pathways, activating unstoppable mobility for the journey to the surface.</p>
-          </div>
+        {/* Terminal Interactiva de Nodos Criogénicos */}
+<CryogenicMonitor />
 
           <p className="mb-6">
-            The government thought they had control of the city. But the network now belongs to the Punks. The awakening has begun. 👁️ 🔥
+            The government thought they had control of the city. But the network now belongs to the Punks. The awakening has begun.
           </p>
 
           {/* Botones de Navegación Final */}
           <div className="mt-12 pt-6 border-t border-cyan-500/30 flex justify-between items-center">
-            <Link 
-              href="/game/theaethergrid/page-2"
-              className="inline-flex items-center gap-2 text-xs md:text-sm font-mono text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
-              <span>&larr;</span> PREVIOUS FRAGMENT
-            </Link>
+            
+            <div className="text-center font-mono text-xs tracking-widest text-cyan-400/70 my-6">
+  [ CHAPTER 01 ENDED ]
+</div>
+            
             
             <Link 
-              href="/game/theaethergrid"
+              href="/game"
               className="inline-flex items-center gap-2 text-sm font-mono text-white bg-cyan-600/20 border border-cyan-400 px-6 py-3 rounded hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all"
             >
               RETURN TO GAME PROTOCOL <span>&rarr;</span>
