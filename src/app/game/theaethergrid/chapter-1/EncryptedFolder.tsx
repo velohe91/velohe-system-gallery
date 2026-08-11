@@ -60,7 +60,7 @@ export default function EncryptedFolder() {
                  OPEN ENCRYPTED FOLDER →
               </button>
                <p className="text-[10px] font-mono text-cyan-500/60 mt-3 tracking-tighter">
-                   // DECRYPTING LOCAL ASSETS: CYBORGPUNKS CLUB //
+                   {/* DECRYPTING LOCAL ASSETS: CYBORGPUNKS CLUB */}
                </p>
           </div>
         ) : (
