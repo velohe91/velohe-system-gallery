@@ -22,7 +22,6 @@ export default function EncryptedFolder() {
     }
   };
 
-  // Soporte para cerrar el modal presionando la tecla Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSelectedPunk(null);
@@ -51,7 +50,7 @@ export default function EncryptedFolder() {
          </div>
 
         {!isOpen ? (
-          // ESTADO CERRADO
+          /* ESTADO CERRADO */
           <div className="text-center relative z-10 py-4">
               <button
                 onClick={() => handleToggle(true)}
@@ -64,7 +63,7 @@ export default function EncryptedFolder() {
                </p>
           </div>
         ) : (
-          // ESTADO ABIERTO
+          /* ESTADO ABIERTO */
           <div className="relative z-10 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
               {cipherPunks.map((punk) => (
