@@ -1,161 +1,163 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
 
-const cipherPunks = [
-  { id: 'VEL-CPC001', name: 'CYBORG PUNK 001', image: '/nfts/videos/VEL-CPC001.gif', rarity: 'COMMON', description: 'Derived identity node. Synchronized via encrypted channels.' },
-  { id: 'VEL-CPC002', name: 'CYBORG PUNK 002', image: '/nfts/videos/VEL-CPC002.gif', rarity: 'COMMON', description: 'Derived identity node. Synchronized via encrypted channels.' },
-  { id: 'VEL-CPC003', name: 'CYBORG PUNK 003', image: '/nfts/videos/VEL-CPC003.gif', rarity: 'COMMON', description: 'Derived identity node. Synchronized via encrypted channels.' },
-  { id: 'VEL-CPC004', name: 'CYBORG PUNK 004', image: '/nfts/videos/VEL-CPC004.gif', rarity: 'COMMON', description: 'Derived identity node. Synchronized via encrypted channels.' },
-];
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import EncryptedFolder from './EncryptedFolder';
+import CryogenicMonitor from '@/components/CryogenicMonitor';
 
-type CyborgPunk = typeof cipherPunks[0];
-
-export default function EncryptedFolder() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedPunk, setSelectedPunk] = useState<CyborgPunk | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleToggle = (openState: boolean) => {
-    setIsOpen(openState);
-    if (!openState && containerRef.current) {
-      containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+export default function Chapter1Page() {
+  const [isHacking, setIsHacking] = useState(true);
+  const [progress, setProgress] = useState(10);
+  const [statusLog, setStatusLog] = useState("INITIALIZING HANDSHAKE PROTOCOL...");
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSelectedPunk(null);
+    if (!isHacking) return;
+
+    const runLoadingSequence = async () => {
+      await simulateProgress(10, 80, 40);
+      await simulateProgress(80, 90, 120);
+      await simulateProgress(90, 95, 300);
+
+      setStatusLog("BYPASSING FINAL FIREWALL & ANOMALY FILTER...");
+      setProgress(99);
+      
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+      setIsHacking(false);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+
+    runLoadingSequence();
+  }, [isHacking]);
+
+  const simulateProgress = (start: number, end: number, speed: number) => {
+    return new Promise<void>((resolve) => {
+      let current = start;
+      const interval = setInterval(() => {
+        current++;
+        setProgress(current);
+
+        if (current === 50) setStatusLog("ESTABLISHING SECURE OBSERVER CHANNEL...");
+        if (current === 85) setStatusLog("DECRYPTING RESTRICTED SECTOR CORES...");
+
+        if (current >= end) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, speed);
+    });
+  };
 
   return (
-    <>
-      <div ref={containerRef} className="my-8 border border-cyan-900/60 bg-[#060911]/80 p-6 relative overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.05)]">
-         {/* Efecto de líneas de escaneo */}
-         <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
-         
-         {/* Cabecera del contenedor */}
-         <div className="flex items-center justify-between mb-4 relative z-10 border-b border-cyan-900/50 pb-2">
-              <h4 className="text-xs font-mono text-cyan-400 tracking-widest">
-                  [ SECURE FOLDER // CYBORGPUNKS_CLUB ]
-              </h4>
-              <button 
-                onClick={() => handleToggle(!isOpen)}
-                className="text-xs font-mono text-cyan-500/80 hover:text-cyan-300 transition cursor-pointer"
-              >
-                STATUS: {isOpen ? '[ DECRYPTED (CLICK TO LOCK) ]' : 'LOCKED'}
-              </button>
-         </div>
+    <div className="min-h-screen bg-[#03050a] text-cyan-500 font-mono p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden">
+      
+      {/* Scanlines inmersivas */}
+      <div className="absolute inset-0 pointer-events-none bg-[url('/scanlines.png')] opacity-10 z-50 mix-blend-overlay"></div>
 
-        {!isOpen ? (
-          <div className="text-center relative z-10 py-4">
-              <button
-                onClick={() => handleToggle(true)}
-                className="px-6 py-3 font-mono text-xs tracking-wider border border-cyan-500/60 text-cyan-300 bg-cyan-950/30 hover:bg-cyan-500/20 hover:border-cyan-400 hover:text-white transition-all duration-300 shadow-[0_0_10px_rgba(0,255,255,0.2)] cursor-pointer"
-              >
-                 OPEN ENCRYPTED FOLDER →
-              </button>
-               <p className="text-[10px] font-mono text-cyan-500/60 mt-3 tracking-tighter">
-                   {/* DECRYPTING LOCAL ASSETS: CYBORGPUNKS CLUB */}
-               </p>
-          </div>
-        ) : (
-          <div className="relative z-10 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
-              {cipherPunks.map((punk) => (
-                <div
-                  key={punk.id}
-                  onClick={() => setSelectedPunk(punk)}
-                  className="bg-[#03050a] border border-cyan-900/80 p-3 group hover:border-cyan-500 transition duration-300 flex flex-col cursor-pointer transform hover:-translate-y-1 hover:shadow-[0_4px_10px_rgba(0,255,255,0.2)]"
-                >
-                  <div className="relative aspect-square mb-3 overflow-hidden bg-black/40 border border-cyan-950">
-                    <img
-                      src={punk.image}
-                      alt={punk.name}
-                      className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition duration-300"
-                    />
-                  </div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-mono text-[10px] text-cyan-600 tracking-widest">{punk.id}</span>
-                    <span className="font-mono text-[10px] text-cyan-400 bg-cyan-950/80 px-2 py-0.5 border border-cyan-800/60">
-                      {punk.rarity}
-                    </span>
-                  </div>
-                  <h5 className="font-sans text-base font-bold text-cyan-100 tracking-wide">{punk.name}</h5>
-                  <p className="font-mono text-[11px] text-cyan-400/70 mt-1">Derived identity node</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center pt-2 border-t border-cyan-900/40">
-              <button
-                onClick={() => handleToggle(false)}
-                className="px-4 py-2 font-mono text-[11px] tracking-wider border border-red-500/50 text-red-300 bg-red-950/20 hover:bg-red-500/20 hover:text-white transition-all duration-300 cursor-pointer"
-              >
-                 ← LOCK FOLDER (SECURE ASSETS)
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {selectedPunk && (
-        <div 
-          onClick={() => setSelectedPunk(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
+      {isHacking ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-3xl w-full text-sm md:text-base space-y-4"
         >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg bg-[#060911] border border-cyan-500/60 p-6 shadow-[0_0_30px_rgba(0,255,255,0.15)] overflow-hidden cursor-default"
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0, 1] }}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            className="text-red-500 font-bold tracking-widest"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
-
-            <div className="flex justify-between items-center border-b border-cyan-900/50 pb-3 mb-4 relative z-10">
-              <span className="font-mono text-xs text-cyan-400 tracking-widest">[ ASSET DETAILS // {selectedPunk.id} ]</span>
-              <button 
-                onClick={() => setSelectedPunk(null)}
-                className="font-mono text-xs text-cyan-400 hover:text-white hover:bg-cyan-900/50 border border-cyan-800/60 px-3 py-1 bg-cyan-950/40 transition cursor-pointer"
-              >
-                [ CLOSE ✕ ]
-              </button>
-            </div>
-
-            <div className="relative z-10 space-y-4">
-              <div className="aspect-square w-full bg-black/60 border border-cyan-900/80 p-2 flex items-center justify-center overflow-hidden">
-                <img 
-                  src={selectedPunk.image} 
-                  alt={selectedPunk.name} 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-sans text-xl font-bold text-cyan-100">{selectedPunk.name}</h3>
-                  <span className="font-mono text-xs text-cyan-300 bg-cyan-950 px-2 py-1 border border-cyan-800">
-                    {selectedPunk.rarity}
-                  </span>
-                </div>
-                <p className="font-mono text-xs text-cyan-400/80 leading-relaxed">
-                  {selectedPunk.description}
-                </p>
-              </div>
-
-              <div className="pt-2 text-right">
-                <button
-                  onClick={() => setSelectedPunk(null)}
-                  className="px-4 py-2 font-mono text-[11px] border border-cyan-700/60 text-cyan-300 bg-cyan-950/40 hover:bg-cyan-500/20 hover:text-white transition cursor-pointer"
-                >
-                  RETURN TO EXHIBITION
-                </button>
-              </div>
-            </div>
-
+            &gt; SYSTEM ALERT: DECRYPTING CHAPTER 1...
+          </motion.p>
+          
+          <p className="text-cyan-400">&gt; {statusLog}</p>
+          
+          <div className="w-full bg-cyan-950/40 border border-cyan-500/30 p-1 rounded">
+            <div 
+              className="bg-cyan-400 h-3 transition-all duration-150 shadow-[0_0_12px_rgba(0,255,255,0.8)]"
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
-        </div>
+
+          <div className="flex justify-between text-xs text-cyan-600 font-mono">
+            <span>DECRYPTION STATUS: [ {progress}% ]</span>
+            <span className="text-cyan-400 animate-pulse">THE AETHERGRID HAS DECRYPTED CHAPTER 1.</span>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="max-w-3xl w-full text-gray-300 font-sans leading-relaxed text-lg"
+        >
+          {/* Barra de navegación superior */}
+          <div className="mb-6 flex justify-between items-center">
+            <Link 
+              href="/game/theaethergrid/page-2"
+              className="inline-flex items-center gap-2 text-xs md:text-sm font-mono text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded bg-cyan-950/20 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(0,255,255,0.1)]"
+            >
+              <span>&larr;</span> PREVIOUS FRAGMENT
+            </Link>
+            <span className="text-xs text-cyan-600 font-mono">FILE: CHAPTER 1 // THE PULSE INITIALIZATION</span>
+          </div>
+
+          <div className="mb-10 border-b border-cyan-500/30 pb-6">
+            <h1 className="text-3xl md:text-4xl font-mono text-white tracking-widest">
+              CHAPTER 1
+            </h1>
+            <h2 className="text-sm md:text-base font-mono text-cyan-400 tracking-wider mt-2 uppercase">
+              THE PULSE INITIALIZATION
+            </h2>
+          </div>
+
+          <p className="mb-6">
+            The buzz of government drones drowned out any other sound in the streets of San Salvador. Through the armored monitors of her clandestine lab, Lunarya watched the &quot;pacification&quot; forces deploy. They were beasts of metal and soulless algorithms, funded by a paranoid State looking to suffocate the imminent civil war. They wanted to hijack the V&Sigma;LOHE SYSTEM&apos;s core. They wanted to turn her surveillance network into an omniscient executioner.
+          </p>
+
+          <p className="mb-6 italic text-cyan-200">
+            But Lunarya was always one step ahead. Her fingers flew across the holographic keyboard, isolating her private network from the government&apos;s mainframe. On the main screen, an encrypted folder opened, harmlessly classified under the name: CyborgPunks Club. To the State&apos;s auditors, these files were nothing more than a bizarre collection of digital art—pixelated avatars, urban aesthetics, and vibrant colors. Digital trash.
+          </p>
+
+          {/* Carpeta interactiva de los CyborgPunks */}
+          <EncryptedFolder />
+
+          <p className="mb-6">
+            What the censors didn&apos;t know was that every pixel, color palette, and geometric stroke concealed terabytes of genetic code and biomechanical assembly schematics. The CyborgPunks weren&apos;t just art; they were a dormant army.
+          </p>
+
+          <p className="mb-6">
+            A red alert flashed on the screen. The government forces had begun their assault on the east sector. It was now or never. Lunarya knew that conventional channels would be intercepted in seconds by government algorithms. She needed an immutable path. A network that belonged to no one, and therefore, no one could shut down.
+          </p>
+
+          <p className="mb-6">
+            She invoked the protocols of the old decentralized web, hiding the ignition sequences within smart contracts on the <strong className="text-cyan-300 font-mono">Ethereum</strong> and <strong className="text-cyan-300 font-mono">Tezos</strong> blockchains. <em>&quot;Approve smart contract,&quot;</em> she whispered into the void of the lab, breaking the final security seal. <em>&quot;CyborgPunk States Protocol. Sign and execute.&quot;</em> 
+          </p>
+
+          <p className="mb-6">
+            The entire lab plunged into a deep, electric blue gloom. The nodes validated the initial pulse in fractions of a second, decrypting the biomechanical genomes and injecting them directly into the lower-level incubation pods. First pulse. System online. Block confirmed. 
+          </p>
+
+          {/* Terminal interactiva de Nodos Criogénicos */}
+          <CryogenicMonitor />
+
+          <p className="mb-6">
+            The government thought they had control of the city. But the network now belongs to the Punks. The awakening has begun.
+          </p>
+
+          {/* Botones de Navegación Final */}
+          <div className="mt-12 pt-6 border-t border-cyan-500/30 flex justify-between items-center">
+            <div className="text-center font-mono text-xs tracking-widest text-cyan-400/70 my-6">
+              [ CHAPTER 01 ENDED ]
+            </div>
+            
+            <Link 
+              href="/game"
+              className="inline-flex items-center gap-2 text-sm font-mono text-white bg-cyan-600/20 border border-cyan-400 px-6 py-3 rounded hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all"
+            >
+              RETURN TO GAME PROTOCOL <span>&rarr;</span>
+            </Link>
+          </div>
+        </motion.div>
       )}
-    </>
+    </div>
   );
 }

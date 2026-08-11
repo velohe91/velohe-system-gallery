@@ -50,7 +50,6 @@ export default function EncryptedFolder() {
          </div>
 
         {!isOpen ? (
-          /* ESTADO CERRADO */
           <div className="text-center relative z-10 py-4">
               <button
                 onClick={() => handleToggle(true)}
@@ -63,7 +62,6 @@ export default function EncryptedFolder() {
                </p>
           </div>
         ) : (
-          /* ESTADO ABIERTO */
           <div className="relative z-10 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
               {cipherPunks.map((punk) => (
@@ -91,7 +89,6 @@ export default function EncryptedFolder() {
               ))}
             </div>
 
-            {/* Botón para volver a cerrar la carpeta */}
             <div className="text-center pt-2 border-t border-cyan-900/40">
               <button
                 onClick={() => handleToggle(false)}
@@ -104,7 +101,6 @@ export default function EncryptedFolder() {
         )}
       </div>
 
-      {/* MODAL CON ESTILO DE ARCHIVO Y SALIDA CORRECTA */}
       {selectedPunk && (
         <div 
           onClick={() => setSelectedPunk(null)}
@@ -114,10 +110,8 @@ export default function EncryptedFolder() {
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-lg bg-[#060911] border border-cyan-500/60 p-6 shadow-[0_0_30px_rgba(0,255,255,0.15)] overflow-hidden cursor-default"
           >
-            {/* Líneas de escaneo */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
 
-            {/* Cabecera del modal */}
             <div className="flex justify-between items-center border-b border-cyan-900/50 pb-3 mb-4 relative z-10">
               <span className="font-mono text-xs text-cyan-400 tracking-widest">[ ASSET DETAILS // {selectedPunk.id} ]</span>
               <button 
@@ -128,7 +122,6 @@ export default function EncryptedFolder() {
               </button>
             </div>
 
-            {/* Contenido */}
             <div className="relative z-10 space-y-4">
               <div className="aspect-square w-full bg-black/60 border border-cyan-900/80 p-2 flex items-center justify-center overflow-hidden">
                 <img 
@@ -150,7 +143,6 @@ export default function EncryptedFolder() {
                 </p>
               </div>
 
-              {/* Botón inferior de retorno */}
               <div className="pt-2 text-right">
                 <button
                   onClick={() => setSelectedPunk(null)}
