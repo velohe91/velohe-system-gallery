@@ -42,12 +42,19 @@ const nodesData = [
 ];
 
 export default function CryogenicMonitor() {
-  const [activeNode, setActiveNode] = useState<typeof nodesData[0] | null>(null);
+  // Estado para controlar qué modal de nodo está abierto (o null si está cerrado)
+  const [activeModalNodeId, setActiveModalNodeId] = useState<string | null>(null);
+
+  // Buscar el objeto de datos del nodo activo basado en el ID almacenado en el estado
+  const activeModalNode = nodesData.find(node => node.id === activeModalNodeId) || null;
+
+  // Función para cerrar el modal
+  const closeModal = () => setActiveModalNodeId(null);
 
   return (
     <div className="my-8 border border-cyan-900/60 bg-[#060911]/80 p-6 relative overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.05)]">
       {/* Efecto de líneas de escaneo CRT */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none z-20" />
 
       {/* Cabecera de la terminal */}
       <div className="flex items-center justify-between mb-4 relative z-10 border-b border-cyan-900/50 pb-2">
@@ -55,18 +62,18 @@ export default function CryogenicMonitor() {
           [ CRYOGENIC SYSTEM // VΣLOHE SYSTEM NODES ]
         </h4>
         <span className="text-xs font-mono text-cyan-500/80">
-          {activeNode ? `ACTIVE NODE: ${activeNode.id}` : 'STATUS: ALL NODES AWAKENING'}
+          STATUS: ALL NODES AWAKENING
         </span>
       </div>
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <div className="relative z-10 flex flex-col gap-6">
         
-        {/* Contenedor Multimedia (Video) */}
-        <div className="lg:col-span-5 flex flex-col items-center">
-          <div className={`relative w-full overflow-hidden bg-black/60 border border-cyan-900/80 shadow-[0_0_20px_rgba(0,255,255,0.1)] flex items-center justify-center ${activeNode ? 'aspect-[9/16] max-w-[280px]' : 'aspect-video'}`}>
+        {/* Contenedor Multimedia FIJO (Video 16:9) */}
+        <div className="w-full flex flex-col items-center">
+          <div className="relative w-full aspect-video overflow-hidden bg-black/60 border border-cyan-900/80 shadow-[0_0_20px_rgba(0,255,255,0.1)] flex items-center justify-center">
+            {/* Este video NUNCA cambia su fuente */}
             <video
-              key={activeNode ? activeNode.video : 'all-nodes'}
-              src={activeNode ? activeNode.video : '/nfts/nodes/all-nodes.mp4'}
+              src="/nfts/nodes/all-nodes.mp4"
               autoPlay
               loop
               muted
@@ -74,51 +81,34 @@ export default function CryogenicMonitor() {
               className="w-full h-full object-cover transition-all duration-500"
             />
           </div>
-          {activeNode && (
-            <button
-              onClick={() => setActiveNode(null)}
-              className="mt-3 px-3 py-1 font-mono text-[10px] tracking-wider border border-cyan-500/50 text-cyan-300 bg-cyan-950/40 hover:bg-cyan-500/20 hover:text-white transition cursor-pointer"
-            >
-              ↺ RETURN TO ALL NODES VIEW
-            </button>
-          )}
         </div>
 
         {/* Panel de Texto y Botones Interactivos */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="w-full space-y-4">
           <p className="font-mono text-xs text-cyan-300/90 leading-relaxed">
             The cryogenic fluids began to drain. In the darkness, four main nodes awakened simultaneously:
           </p>
 
           <div className="space-y-3">
             {nodesData.map((node) => {
-              const isSelected = activeNode?.id === node.id;
               return (
                 <div
                   key={node.id}
-                  onClick={() => setActiveNode(node)}
-                  className={`p-3 border transition-all duration-300 cursor-pointer flex flex-col gap-1 ${
-                    isSelected 
-                      ? 'bg-cyan-950/40 border-cyan-400 shadow-[0_0_10px_rgba(0,255,255,0.2)]' 
-                      : 'bg-[#03050a]/80 border-cyan-900/60 hover:border-cyan-500/50'
-                  }`}
+                  // Al hacer clic, establecemos el ID en el estado para abrir el modal
+                  onClick={() => setActiveModalNodeId(node.id)}
+                  className="p-3 border transition-all duration-300 cursor-pointer flex flex-col gap-1 bg-[#03050a]/80 border-cyan-900/60 hover:border-cyan-500/50 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className={`font-mono text-xs font-bold tracking-wider px-2 py-0.5 border ${node.badgeBg}`}>
                       {node.id}
                     </span>
-                    <span className="font-mono text-[10px] text-cyan-500/60">
-                      {isSelected ? '[ MONITORING FEED ]' : 'CLICK TO INSPECT →'}
+                    <span className="font-mono text-[10px] text-cyan-500/60 group-hover:text-cyan-300">
+                      [ CLICK TO INSPECT → ]
                     </span>
                   </div>
                   <p className="font-sans text-xs text-cyan-100/90 leading-normal mt-1">
                     <strong className="font-mono">{node.name}:</strong> {node.description}
                   </p>
-                  {isSelected && (
-                    <p className="font-mono text-[10px] text-cyan-400 mt-2 pt-2 border-t border-cyan-900/50 tracking-tight">
-                      {node.metrics}
-                    </p>
-                  )}
                 </div>
               );
             })}
@@ -127,6 +117,64 @@ export default function CryogenicMonitor() {
         </div>
 
       </div>
+
+{/* COMPONENTE MODAL (se renderiza solo si activeModalNode no es null) */}
+      {activeModalNode && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-all"
+          onClick={closeModal} // Cerrar al hacer clic fuera
+        >
+          {/* Contenedor del Modal: Se quitó 'items-center' y se agregó 'w-full' para evitar el corte superior */}
+          <div 
+            className="bg-[#03050a] border border-cyan-500/80 p-5 shadow-[0_0_30px_rgba(0,255,255,0.3)] relative overflow-y-auto flex flex-col w-full max-w-sm max-h-[90vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-cyan-950/20 [&::-webkit-scrollbar-thumb]:bg-cyan-500/50 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-400"
+            onClick={(e) => e.stopPropagation()} // Prevenir cierre al hacer clic dentro
+          >
+            {/* Cabecera del Modal */}
+            <div className="w-full flex items-center justify-between mb-4 border-b border-cyan-900/50 pb-2">
+              <h5 className={`text-xs font-mono font-bold tracking-widest ${activeModalNode.color}`}>
+                [ NODE INSPECTION: {activeModalNode.id} ]
+              </h5>
+              <button 
+                onClick={closeModal}
+                className="text-cyan-500/60 hover:text-white font-mono text-sm cursor-pointer"
+              >
+                [ X ]
+              </button>
+            </div>
+
+            {/* Video del Nodo (9:16) */}
+            <div className="relative w-full shrink-0 overflow-hidden bg-black/60 border border-cyan-900/80 shadow-[0_0_20px_rgba(0,255,255,0.1)] flex items-center justify-center aspect-[9/16]">
+              <video
+                src={activeModalNode.video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Texto del Nodo */}
+            <div className="w-full mt-4">
+              <p className="font-sans text-xs text-cyan-100/90 leading-normal">
+                <strong className="font-mono">{activeModalNode.name}:</strong> {activeModalNode.description}
+              </p>
+              <p className="font-mono text-[10px] text-cyan-400 mt-2 pt-2 border-t border-cyan-900/50 tracking-tight">
+                {activeModalNode.metrics}
+              </p>
+            </div>
+
+            {/* Botón de Cierre */}
+            <button
+              onClick={closeModal}
+              className="mt-6 px-4 py-1.5 font-mono text-[10px] tracking-wider border border-cyan-500/50 text-cyan-300 bg-cyan-950/40 hover:bg-cyan-500/20 hover:text-white transition cursor-pointer w-full"
+            >
+              [ CLOSE ]
+            </button>
+            
+          </div>
+        </div>
+      )}
     </div>
   );
 }
