@@ -52,7 +52,7 @@ export default function CryogenicMonitor() {
       {/* Cabecera de la terminal */}
       <div className="flex items-center justify-between mb-4 relative z-10 border-b border-cyan-900/50 pb-2">
         <h4 className="text-xs font-mono text-cyan-400 tracking-widest">
-          [ CRYOGENIC SYSTEM // AETHERGRID NODES ]
+          [ CRYOGENIC SYSTEM // VΣLOHE SYSTEM NODES ]
         </h4>
         <span className="text-xs font-mono text-cyan-500/80">
           {activeNode ? `ACTIVE NODE: ${activeNode.id}` : 'STATUS: ALL NODES AWAKENING'}
