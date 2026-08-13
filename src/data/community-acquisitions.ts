@@ -1,0 +1,52 @@
+/**
+ * NFT Exhibition Node — community artworks acquired by VΣLOHE SYSTEM.
+ *
+ * HOW TO ADD A PIECE:
+ * 1. Add its image, GIF, or video under public/logs/ (or a dedicated public/nfts/community/ folder).
+ * 2. Append a NftItem below.
+ * 3. Use the OBJKT / marketplace URL in the objkt or marketplace field.
+ */
+
+import type { NftItem } from "@/lib/types";
+
+export const communityAcquisitions: NftItem[] = [
+  {
+    id: "NODE-002",
+    title: "𝙈𝙖𝙩𝙧𝙞𝙭 𝙈𝙞𝙭",
+    image: "/logs/matrix-mix.gif",
+    video: "/logs/matrix-mix.gif",
+    description:
+      "A community acquisition from the Ferezila collection, now preserved in the VΣLOHE SYSTEM exhibition.",
+    lore: `NFT acquired from @Ferezila collection.
+
+Thrilled to add this amazing piece to the VΣLOHE SYSTEM exhibition.
+
+The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+    series: "Ferezila Collection",
+    rarity: "rare",
+    objkt:
+      "https://objkt.com/tokens/KT1StD4NB74LmSkkY4EwhuE7HAiQxrpFoE4f/7",
+    status: "Archived",
+    year: 2026,
+    tags: ["community", "acquisition", "matrix-mix", "ferezila"],
+  },
+  {
+    id: "NODE-001",
+    title: "14# NeoPop Pandas",
+    image: "/logs/neopop-pandas.jpeg",
+    description:
+      "A neon panda acquired from the NeoPop Pandas movement and integrated into the community exhibition node.",
+    lore: `NFT acquired from @khaleghi_NFT.
+
+More than cute: rebellion wrapped in bubblegum and neon. NeoPop Pandas are here to break the rules — with style.
+
+The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+    series: "NeoPop Pandas",
+    rarity: "rare",
+    objkt:
+      "https://objkt.com/tokens/KT1QLSm9Qs3TRm35fTF1JikyC787P5kM2oRP/13?ref=tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse",
+    status: "Archived",
+    year: 2026,
+    tags: ["community", "acquisition", "neopop-pandas", "khaleghi"],
+  },
+];
