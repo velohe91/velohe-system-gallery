@@ -5,13 +5,16 @@
  * 1. Add its image, GIF, or video under public/logs/ (or a dedicated public/nfts/community/ folder).
  * 2. Append a NftItem below.
  * 3. Use the OBJKT / marketplace URL in the objkt or marketplace field.
+ *
+ * IDs use ACQ-### (Acquisition Registry) to keep community acquisitions
+ * distinct from canonical CyborgPunk Nodes.
  */
 
 import type { NftItem } from "@/lib/types";
 
 export const communityAcquisitions: NftItem[] = [
   {
-    id: "NODE-002",
+    id: "ACQ-002",
     title: "𝙈𝙖𝙩𝙧𝙞𝙭 𝙈𝙞𝙭",
     image: "/logs/matrix-mix.gif",
     video: "/logs/matrix-mix.gif",
@@ -22,7 +25,7 @@ export const communityAcquisitions: NftItem[] = [
 Thrilled to add this amazing piece to the VΣLOHE SYSTEM exhibition.
 
 The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
-    series: "Ferezila Collection",
+    series: "Cassette Chronicles 📼",
     rarity: "rare",
     objkt:
       "https://objkt.com/tokens/KT1StD4NB74LmSkkY4EwhuE7HAiQxrpFoE4f/7",
@@ -31,7 +34,7 @@ The asset has been successfully integrated into the exhibition node. Ownership r
     tags: ["community", "acquisition", "matrix-mix", "ferezila"],
   },
   {
-    id: "NODE-001",
+    id: "ACQ-001",
     title: "14# NeoPop Pandas",
     image: "/logs/neopop-pandas.jpeg",
     description:
