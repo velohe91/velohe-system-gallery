@@ -7,7 +7,7 @@ export type GalleryHubAccent = "cyan" | "violet";
 export type GalleryHubStatus = "online" | "standby";
 
 export type GalleryHubEntry = {
-  id: "archive" | "velozart";
+  id: "archive" | "velozart" | "exhibition-node";
   title: string;
   description: string;
   href: string;
@@ -41,6 +41,18 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     seriesHint: "VeLozArt · AI collection",
     cta: "Enter VeLozArt",
     accent: "violet",
+    status: "online",
+  },
+  {
+    id: "exhibition-node",
+    title: "NFT Exhibition Node",
+    description:
+      "A curated record of artworks acquired from the VΣLOHE community and preserved within the system.",
+    href: "/gallery/exhibition-node",
+    badge: "COMMUNITY ACQUISITIONS",
+    seriesHint: "Verified community artworks · expanding archive",
+    cta: "Enter Exhibition Node",
+    accent: "cyan",
     status: "online",
   },
 ];
