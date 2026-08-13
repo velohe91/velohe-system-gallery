@@ -14,6 +14,31 @@ import type { SystemLogEntry } from "@/lib/types";
 
 export const systemLogs: SystemLogEntry[] = [
   // ─── Live (LOG-VΣ##) — sorted newest-first in feed.ts ───
+    {
+    kind: "system-log",
+    era: "live",
+    id: "LOG-VΣ05",
+    timestamp: "2026.08.12",
+    level: "SIGNAL",
+    title:
+      "LOG-VΣ05 // 𝙈𝙖𝙩𝙧𝙞𝙭 𝙈𝙞𝙭 — Asset Acquisition Confirmed",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VΣLOHE SYSTEM ARCHIVE",
+    image: "/logs/matrix-mix.gif",
+    marketplace:
+      "https://objkt.com/tokens/KT1StD4NB74LmSkkY4EwhuE7HAiQxrpFoE4f/7",
+    buyerProfile:
+      "https://objkt.com/users/tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse/owned",
+    message: `System Log // NFT Acquired from @Ferezila collection!
+
+Thrilled to add this amazing piece to the VΣLOHE SYSTEM exhibition!
+
+Asset designation: Matrix Mix
+
+The asset has been successfully integrated into the VΣLOHE exhibition system. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+  },
+
   {
     kind: "system-log",
     era: "live",
