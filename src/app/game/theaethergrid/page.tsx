@@ -215,30 +215,33 @@ export default function AethergridSector() {
                   </div>
                 </button>
 
-                {/* Chapter 01 */}
-                <div className="border border-cyan-500/10 bg-black/30 p-5 opacity-60">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] uppercase tracking-[0.25em] text-cyan-500/35">
-                      DIRECTORY
-                    </span>
+                {/* Chapters */}
+<Link
+  href="/game/theaethergrid/chapters"
+  className="group block border border-cyan-500/30 bg-cyan-950/[0.06] p-5 transition-all duration-300 hover:border-cyan-400/70 hover:bg-cyan-500/[0.05] hover:shadow-[0_0_30px_rgba(0,220,255,0.08)]"
+>
+  <div className="flex items-center justify-between">
+    <span className="text-[9px] uppercase tracking-[0.25em] text-cyan-500/50">
+      DIRECTORY
+    </span>
 
-                    <span className="text-[9px] text-amber-400/60">
-                      LOCKED
-                    </span>
-                  </div>
+    <span className="text-[9px] text-cyan-300">
+      AVAILABLE
+    </span>
+  </div>
 
-                  <h2 className="mt-6 text-lg font-semibold tracking-[0.15em] text-white/70">
-                    /CHAPTER_01
-                  </h2>
+  <h2 className="mt-6 text-lg font-semibold tracking-[0.15em] text-white">
+    /CHAPTERS
+  </h2>
 
-                  <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-cyan-500/35">
-                    PULSE INITIALIZATION
-                  </p>
+  <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-cyan-400/60">
+    NARRATIVE ARCHIVE
+  </p>
 
-                  <div className="mt-8 border-t border-cyan-500/10 pt-4 text-[9px] uppercase tracking-[0.18em] text-cyan-500/30">
-                    ACCESS RESTRICTED
-                  </div>
-                </div>
+  <div className="mt-8 border-t border-cyan-500/15 pt-4 text-[9px] uppercase tracking-[0.18em] text-cyan-500/50">
+    ACCESS DIRECTORY →
+  </div>
+</Link>
 
                 {/* Unknown data */}
                 <div className="border border-red-500/15 bg-red-950/[0.03] p-5 opacity-60">

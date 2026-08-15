@@ -1,184 +1,187 @@
-'use client';
-import { useState } from 'react';
+"use client";
 
-// Definición de los nodos criogénicos con sus rutas de video 9:16 y atributos
+import { useState } from "react";
+import ArchiveModal, {
+  type ArchiveModalData,
+} from "@/components/game/ArchiveModal";
+
 const nodesData = [
   {
-    id: 'VIREX',
-    name: 'VIREX',
-    color: 'text-purple-400 border-purple-500/50 bg-purple-950/20 hover:bg-purple-500/20',
-    badgeBg: 'bg-purple-950/80 border-purple-800/60 text-purple-300',
-    video: '/nfts/nodes/virex.mp4',
-    description: 'Igniting his interpretation layer, optimizing the tactical network\'s data flow in milliseconds.',
-    metrics: 'STATUS: ACTIVE // LAYER: TACTICAL OPTIMIZATION // TEMP: -196°C'
+    id: "VIREX",
+    name: "VIREX",
+    color:
+      "text-purple-400 border-purple-500/50 bg-purple-950/20 hover:bg-purple-500/20",
+    badgeBg:
+      "bg-purple-950/80 border-purple-800/60 text-purple-300",
+    video: "/nfts/nodes/virex.mp4",
+    description:
+      "Igniting his interpretation layer, optimizing the tactical network's data flow in milliseconds.",
+    metrics:
+      "STATUS: ACTIVE // LAYER: TACTICAL OPTIMIZATION // TEMP: -196°C",
   },
   {
-    id: 'NULLA',
-    name: 'NULLA',
-    color: 'text-green-400 border-green-500/50 bg-green-950/20 hover:bg-green-500/20',
-    badgeBg: 'bg-green-950/80 border-green-800/60 text-green-300',
-    video: '/nfts/nodes/nulla.mp4',
-    description: 'Activating passive monitoring, observing the environment in absolute silence.',
-    metrics: 'STATUS: PASSIVE // MONITORING: OMNIDIRECTIONAL // TEMP: -196°C'
+    id: "NULLA",
+    name: "NULLA",
+    color:
+      "text-green-400 border-green-500/50 bg-green-950/20 hover:bg-green-500/20",
+    badgeBg:
+      "bg-green-950/80 border-green-800/60 text-green-300",
+    video: "/nfts/nodes/nulla.mp4",
+    description:
+      "Activating passive monitoring, observing the environment in absolute silence.",
+    metrics:
+      "STATUS: PASSIVE // MONITORING: OMNIDIRECTIONAL // TEMP: -196°C",
   },
   {
-    id: 'LYNX',
-    name: 'LYNX',
-    color: 'text-blue-400 border-blue-500/50 bg-blue-950/20 hover:bg-blue-500/20',
-    badgeBg: 'bg-blue-950/80 border-blue-800/60 text-blue-300',
-    video: '/nfts/nodes/lynx.mp4',
-    description: 'Taking visual supervision from the upper shadows, securing optical control of the critical zone.',
-    metrics: 'STATUS: OPTICAL // SECTOR: UPPER SHADOWS // TEMP: -196°C'
+    id: "LYNX",
+    name: "LYNX",
+    color:
+      "text-blue-400 border-blue-500/50 bg-blue-950/20 hover:bg-blue-500/20",
+    badgeBg:
+      "bg-blue-950/80 border-blue-800/60 text-blue-300",
+    video: "/nfts/nodes/lynx.mp4",
+    description:
+      "Taking visual supervision from the upper shadows, securing optical control of the critical zone.",
+    metrics:
+      "STATUS: OPTICAL // SECTOR: UPPER SHADOWS // TEMP: -196°C",
   },
   {
-    id: 'STRIPE',
-    name: 'STRIPE',
-    color: 'text-yellow-400 border-yellow-500/50 bg-yellow-950/20 hover:bg-yellow-500/20',
-    badgeBg: 'bg-yellow-950/80 border-yellow-800/60 text-yellow-300',
-    video: '/nfts/nodes/stripe.mp4',
-    description: 'Synchronizing traversal pathways, activating unstoppable mobility for the journey to the surface.',
-    metrics: 'STATUS: MOBILE // TRAVERSAL: SYNCHRONIZED // TEMP: -196°C'
+    id: "STRIPE",
+    name: "STRIPE",
+    color:
+      "text-yellow-400 border-yellow-500/50 bg-yellow-950/20 hover:bg-yellow-500/20",
+    badgeBg:
+      "bg-yellow-950/80 border-yellow-800/60 text-yellow-300",
+    video: "/nfts/nodes/stripe.mp4",
+    description:
+      "Synchronizing traversal pathways, activating unstoppable mobility for the journey to the surface.",
+    metrics:
+      "STATUS: MOBILE // TRAVERSAL: SYNCHRONIZED // TEMP: -196°C",
   },
 ];
 
+type CryogenicNode = (typeof nodesData)[number];
+
 export default function CryogenicMonitor() {
-  // Estado para controlar qué modal de nodo está abierto (o null si está cerrado)
-  const [activeModalNodeId, setActiveModalNodeId] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] =
+    useState<CryogenicNode | null>(null);
 
-  // Buscar el objeto de datos del nodo activo basado en el ID almacenado en el estado
-  const activeModalNode = nodesData.find(node => node.id === activeModalNodeId) || null;
+  const closeNode = () => {
+    setSelectedNode(null);
+  };
 
-  // Función para cerrar el modal
-  const closeModal = () => setActiveModalNodeId(null);
+  const modalData: ArchiveModalData | null = selectedNode
+    ? {
+        id: selectedNode.id,
+        name: selectedNode.name,
+        description: selectedNode.description,
+        video: selectedNode.video,
+        classification: "CRYOGENIC NODE // VΣLOHE SYSTEM",
+        status: selectedNode.metrics.split(" // ")[0].replace("STATUS: ", ""),
+        metrics: selectedNode.metrics,
+        accentClass: selectedNode.color.split(" ")[0],
+      }
+    : null;
 
   return (
-    <div className="my-8 border border-cyan-900/60 bg-[#060911]/80 p-6 relative overflow-hidden shadow-[0_0_15px_rgba(0,255,255,0.05)]">
-      {/* Efecto de líneas de escaneo CRT */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none z-20" />
+    <>
+      <div className="relative my-8 overflow-hidden border border-cyan-900/60 bg-[#060911]/80 p-4 shadow-[0_0_15px_rgba(0,255,255,0.05)] sm:p-5">
+        {/* CRT scanlines */}
+        <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(rgba(18,255,255,0.02)_1px,transparent_1px)] bg-[size:100%_4px]" />
 
-      {/* Cabecera de la terminal */}
-      <div className="flex items-center justify-between mb-4 relative z-10 border-b border-cyan-900/50 pb-2">
-        <h4 className="text-xs font-mono text-cyan-400 tracking-widest">
-          [ CRYOGENIC SYSTEM // VΣLOHE SYSTEM NODES ]
-        </h4>
-        <span className="text-xs font-mono text-cyan-500/80">
-          STATUS: ALL NODES AWAKENING
-        </span>
-      </div>
+        {/* Header */}
+        <div className="relative z-10 mb-4 flex flex-col gap-2 border-b border-cyan-900/50 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <h4 className="font-mono text-[10px] tracking-[0.2em] text-cyan-400 sm:text-xs">
+            [ CRYOGENIC SYSTEM // VΣLOHE SYSTEM NODES ]
+          </h4>
 
-      <div className="relative z-10 flex flex-col gap-6">
-        
-        {/* Contenedor Multimedia FIJO (Video 16:9) */}
-        <div className="w-full flex flex-col items-center">
-          <div className="relative w-full aspect-video overflow-hidden bg-black/60 border border-cyan-900/80 shadow-[0_0_20px_rgba(0,255,255,0.1)] flex items-center justify-center">
-            {/* Este video NUNCA cambia su fuente */}
-            <video
-              src="/nfts/nodes/all-nodes.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover transition-all duration-500"
-            />
-          </div>
+          <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cyan-500/60 sm:text-[10px]">
+            STATUS: ALL NODES AWAKENING
+          </span>
         </div>
 
-        {/* Panel de Texto y Botones Interactivos */}
-        <div className="w-full space-y-4">
-          <p className="font-mono text-xs text-cyan-300/90 leading-relaxed">
-            The cryogenic fluids began to drain. In the darkness, four main nodes awakened simultaneously:
-          </p>
+        <div className="relative z-10 flex flex-col gap-5">
+          {/* Main cinematic sequence */}
+          <div className="w-full">
+            <div className="relative aspect-video w-full overflow-hidden border border-cyan-900/80 bg-black/60 shadow-[0_0_20px_rgba(0,255,255,0.1)]">
+              <video
+                src="/nfts/nodes/all-nodes.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
 
-          <div className="space-y-3">
-            {nodesData.map((node) => {
-              return (
-                <div
-                  key={node.id}
-                  // Al hacer clic, establecemos el ID en el estado para abrir el modal
-                  onClick={() => setActiveModalNodeId(node.id)}
-                  className="p-3 border transition-all duration-300 cursor-pointer flex flex-col gap-1 bg-[#03050a]/80 border-cyan-900/60 hover:border-cyan-500/50 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`font-mono text-xs font-bold tracking-wider px-2 py-0.5 border ${node.badgeBg}`}>
-                      {node.id}
-                    </span>
-                    <span className="font-mono text-[10px] text-cyan-500/60 group-hover:text-cyan-300">
-                      [ CLICK TO INSPECT → ]
-                    </span>
-                  </div>
-                  <p className="font-sans text-xs text-cyan-100/90 leading-normal mt-1">
-                    <strong className="font-mono">{node.name}:</strong> {node.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-
-      </div>
-
-{/* COMPONENTE MODAL (se renderiza solo si activeModalNode no es null) */}
-      {activeModalNode && (
-        <div 
-          className="fixed inset-0 z-[9999] overflow-y-auto bg-black/80 backdrop-blur-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-cyan-500/50 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-400"
-          onClick={closeModal} // Cerrar al hacer clic en el fondo
-        >
-          {/* Contenedor Flex para centrar */}
-          <div className="flex min-h-full items-center justify-center p-4 py-8">
-            
-            {/* Caja del Modal: Ancho forzado a 280px para que sea claramente más pequeño */}
-            <div 
-              className="w-full max-w-[280px] bg-[#03050a] border border-cyan-500/80 p-4 shadow-[0_0_30px_rgba(0,255,255,0.3)] relative"
-              onClick={(e) => e.stopPropagation()} // Prevenir cierre al hacer clic dentro
-            >
-              {/* Cabecera del Modal (Texto restaurado) */}
-              <div className="flex items-center justify-between mb-3 border-b border-cyan-900/50 pb-2">
-                <h5 className={`text-[10px] font-mono font-bold tracking-widest ${activeModalNode.color}`}>
-                  [ NODE INSPECTION: {activeModalNode.id} ]
-                </h5>
-                <button 
-                  onClick={closeModal}
-                  className="text-cyan-500/60 hover:text-white font-mono text-sm cursor-pointer ml-2"
-                >
-                  [ X ]
-                </button>
-              </div>
-
-              {/* Video del Nodo (9:16) */}
-              <div className="relative w-full bg-black/60 border border-cyan-900/80 shadow-[0_0_20px_rgba(0,255,255,0.1)] flex items-center justify-center aspect-[9/16] overflow-hidden">
-                <video
-                  src={activeModalNode.video}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Texto del Nodo */}
-              <div className="mt-3">
-                <p className="font-sans text-[11px] text-cyan-100/90 leading-normal">
-                  <strong className="font-mono">{activeModalNode.name}:</strong> {activeModalNode.description}
-                </p>
-                <p className="font-mono text-[9px] text-cyan-400 mt-2 pt-2 border-t border-cyan-900/50 tracking-tight">
-                  {activeModalNode.metrics}
-                </p>
-              </div>
-
-              {/* Botón de Cierre */}
-              <button
-                onClick={closeModal}
-                className="mt-4 px-4 py-1.5 w-full font-mono text-[10px] tracking-wider border border-cyan-500/50 text-cyan-300 bg-cyan-950/40 hover:bg-cyan-500/20 hover:text-white transition cursor-pointer"
-              >
-                [ CLOSE ]
-              </button>
-              
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(18,255,255,0.015)_1px,transparent_1px)] bg-[size:100%_4px]" />
             </div>
           </div>
+
+          {/* Narrative */}
+          <p className="font-mono text-xs leading-relaxed text-cyan-300/90">
+            The cryogenic fluids began to drain. In the darkness, four main
+            nodes awakened simultaneously:
+          </p>
+
+          {/* Node directory */}
+          <div className="space-y-2">
+            <div className="mb-2 flex items-center justify-between border-b border-cyan-900/30 pb-2">
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/40">
+                NODE DIRECTORY
+              </span>
+
+              <span className="font-mono text-[9px] uppercase tracking-[0.15em] text-cyan-500/40">
+                04 ACTIVE RECORDS
+              </span>
+            </div>
+
+            {nodesData.map((node) => (
+              <button
+                key={node.id}
+                type="button"
+                onClick={() => setSelectedNode(node)}
+                className="group flex w-full items-center gap-3 border border-cyan-900/50 bg-[#03050a]/80 px-3 py-3 text-left transition-all duration-300 hover:border-cyan-500/60 hover:bg-cyan-500/[0.04] hover:shadow-[0_0_18px_rgba(0,255,255,0.06)] sm:px-4"
+              >
+                {/* Node indicator */}
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center border ${node.badgeBg}`}
+                >
+                  <span className="font-mono text-[9px] font-bold">
+                    {node.id.slice(0, 1)}
+                  </span>
+                </div>
+
+                {/* Node information */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                    <span
+                      className={`font-mono text-[10px] font-bold tracking-[0.14em] ${node.color.split(" ")[0]}`}
+                    >
+                      {node.id}
+                    </span>
+
+                    <span className="font-sans text-xs font-semibold tracking-wide text-cyan-100/90">
+                      {node.name}
+                    </span>
+                  </div>
+
+                  <p className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.12em] text-cyan-500/35">
+                    {node.metrics.split(" // ")[0]}
+                  </p>
+                </div>
+
+                {/* Inspection action */}
+                <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.12em] text-cyan-500/40 transition group-hover:text-cyan-300">
+                  INSPECT →
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* Shared archive modal */}
+      <ArchiveModal item={modalData} onClose={closeNode} />
+    </>
   );
 }

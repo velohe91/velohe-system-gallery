@@ -156,13 +156,27 @@ export default function PrologueFragment02() {
             <span className="text-center font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/40">
               [ MEMORY FRAGMENT 02 // COMPLETE ]
             </span>
+            <div className="mt-12 border-t border-cyan-500/20 pt-6">
+  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <Link
+      href="/game/theaethergrid/prologue/fragment-01"
+      className="inline-flex items-center justify-center gap-2 border border-cyan-500/30 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
+    >
+      ← PREVIOUS MEMORY
+    </Link>
 
-            <Link
-              href="/game/theaethergrid/chapter-1"
-              className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
-            >
-              CHAPTER 01 →
-            </Link>
+    <span className="text-center font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/40">
+      [ MEMORY FRAGMENT 02 // COMPLETE ]
+    </span>
+
+    <Link
+      href="/game/theaethergrid"
+      className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
+    >
+      RETURN TO ARCHIVE →
+    </Link>
+  </div>
+</div>
           </div>
         </div>
 
