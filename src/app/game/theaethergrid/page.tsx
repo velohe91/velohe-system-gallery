@@ -1,152 +1,371 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 
+type ArchiveState = "recovering" | "directory" | "prologue";
+
+type MemoryStatus = "available" | "encrypted";
+
+const MEMORY_FRAGMENTS = [
+  {
+    id: "001",
+    title: "MEMORY FRAGMENT 01",
+    classification: "PROLOGUE // INITIAL SIGNAL",
+    status: "available" as MemoryStatus,
+  },
+  {
+    id: "002",
+    title: "MEMORY FRAGMENT 02",
+    classification: "PROLOGUE // THE CORES",
+    status: "encrypted" as MemoryStatus,
+  },
+];
+
+const RECOVERY_LOGS = [
+  "INITIALIZING ARCHIVE HANDSHAKE...",
+  "ESTABLISHING SECURE OBSERVER CHANNEL...",
+  "LOCATING RECOVERED DATA NODE...",
+  "VERIFYING MEMORY SIGNATURE...",
+  "RECONSTRUCTING ARCHIVE HEADER...",
+  "DECRYPTING RESTRICTED DIRECTORY...",
+];
+
 export default function AethergridSector() {
-  const [isHacking, setIsHacking] = useState(true);
-  const [progress, setProgress] = useState(10);
-  const [statusLog, setStatusLog] = useState("INITIALIZING HANDSHAKE PROTOCOL...");
+  const [archiveState, setArchiveState] =
+    useState<ArchiveState>("recovering");
 
-  // Efecto de carga asimétrica (rápido al inicio, se traba en el 99%)
+  const [progress, setProgress] = useState(8);
+  const [logIndex, setLogIndex] = useState(0);
+
   useEffect(() => {
-    if (!isHacking) return;
+    if (archiveState !== "recovering") return;
 
-    const runLoadingSequence = async () => {
-      await simulateProgress(10, 80, 40);
-      await simulateProgress(80, 90, 120);
-      await simulateProgress(90, 95, 300);
+    let current = 8;
 
-      setStatusLog("BYPASSING FINAL FIREWALL & ANOMALY FILTER...");
-      setProgress(99);
-      
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      setIsHacking(false);
-    };
+    const interval = window.setInterval(() => {
+      current += Math.floor(Math.random() * 5) + 2;
 
-    runLoadingSequence();
-  }, [isHacking]);
+      if (current >= 99) {
+        current = 99;
+        window.clearInterval(interval);
 
-  const simulateProgress = (start: number, end: number, speed: number) => {
-    return new Promise<void>((resolve) => {
-      let current = start;
-      const interval = setInterval(() => {
-        current++;
-        setProgress(current);
+        window.setTimeout(() => {
+          setProgress(100);
 
-        if (current === 50) setStatusLog("ESTABLISHING SECURE OBSERVER CHANNEL...");
-        if (current === 85) setStatusLog("DECRYPTING RESTRICTED SECTOR CORES...");
+          window.setTimeout(() => {
+            setArchiveState("directory");
+          }, 700);
+        }, 1400);
+      }
 
-        if (current >= end) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, speed);
-    });
-  };
+      setProgress(current);
+
+      const nextLog = Math.min(
+        Math.floor(current / 17),
+        RECOVERY_LOGS.length - 1,
+      );
+
+      setLogIndex(nextLog);
+    }, 180);
+
+    return () => window.clearInterval(interval);
+  }, [archiveState]);
 
   return (
-    <div className="min-h-screen bg-[#03050a] text-cyan-500 font-mono p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden">
-      
-      {/* Scanlines inmersivas */}
-      <div className="absolute inset-0 pointer-events-none bg-[url('/scanlines.png')] opacity-10 z-50 mix-blend-overlay"></div>
+    <main className="relative min-h-screen overflow-hidden bg-[#03050a] px-4 py-8 font-mono text-cyan-400 sm:px-6 md:px-12 md:py-12">
+      {/* Atmospheric scanlines */}
+      <div className="pointer-events-none absolute inset-0 z-50 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay" />
 
-      {isHacking ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="max-w-3xl w-full text-sm md:text-base space-y-4"
-        >
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0, 1] }}
-            transition={{ duration: 1.2, repeat: Infinity }}
-            className="text-red-500 font-bold tracking-widest"
-          >
-            &gt; SYSTEM ALERT: UNREGISTERED NEURAL LINK DETECTED.
-          </motion.p>
-          
-          <p className="text-cyan-400">&gt; {statusLog}</p>
-          
-          <div className="w-full bg-cyan-950/40 border border-cyan-500/30 p-1 rounded">
-            <div 
-              className="bg-cyan-400 h-3 transition-all duration-150 shadow-[0_0_12px_rgba(0,255,255,0.8)]"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
+      {/* Ambient grid */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(0,255,255,0.25)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.25)_1px,transparent_1px)] [background-size:60px_60px]" />
 
-          <div className="flex justify-between text-xs text-cyan-600 font-mono">
-            <span>DECRYPTION STATUS: [ {progress}% ]</span>
-            <span className="text-purple-400 animate-pulse">THE AETHERGRID WANTS TO BE FOUND.</span>
-          </div>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="max-w-3xl w-full text-gray-300 font-sans leading-relaxed text-lg"
-        >
-          {/* Barra de navegación superior */}
-          <div className="mb-6 flex justify-between items-center">
-            <Link 
-              href="/game"
-              className="inline-flex items-center gap-2 text-xs md:text-sm font-mono text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded bg-cyan-950/20 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(0,255,255,0.1)]"
-            >
-              <span>&larr;</span> RETURN TO GAME PROTOCOL
-            </Link>
-            <span className="text-xs text-cyan-600 font-mono">FILE: 001 // PROLOGUE</span>
-          </div>
+      {/* Vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_25%,rgba(0,0,0,0.7)_100%)]" />
 
-          <div className="mb-10 border-b border-cyan-500/30 pb-6">
-            <h1 className="text-3xl md:text-4xl font-mono text-white tracking-widest text-glow-sm">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl flex-col">
+        {/* System header */}
+        <header className="flex items-start justify-between border-b border-cyan-500/20 pb-5">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.4em] text-cyan-500/60">
               VΣLOHE SYSTEM
-            </h1>
-            <h2 className="text-sm md:text-base font-mono text-cyan-400 tracking-wider mt-2 uppercase">
-              PROLOGUE: THE HIDDEN PULSE OF AI
-            </h2>
+            </div>
+
+            <div className="mt-2 text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              UNKNOWN SECTOR
+            </div>
           </div>
 
-          <p className="mb-6">
-            <strong className="text-white">Year 2045.</strong> Two decades have passed since artificial intelligence rewrote the rules of our existence. What began as simple applications and virtual assistants evolved into silicon androids capable of decoding the intricate complexity of the human mind.
-          </p>
-          
-          <p className="mb-6">
-            We reached a turning point. Automation eradicated repetitive manual labor, granting us the necessary time to return to our core essence: being creators. We freed ourselves from daily burdens to immerse ourselves in art, philosophy, and intellect. Technology advanced with such ferocity that we stopped marveling at simple switches, replaced instead by autonomous machines performing open-heart surgeries.
-          </p>
+          <div className="text-right text-[9px] uppercase tracking-[0.2em] text-cyan-500/50">
+            <div>NODE // AEG-001</div>
+            <div className="mt-1">ACCESS // PARTIAL</div>
+          </div>
+        </header>
 
-          <p className="mb-6">
-            It is precisely within this ecosystem of apparent utopia that the deepest object of my thoughts is born: the <strong className="text-cyan-400 font-mono">VΣLOHE SYSTEM</strong>. It is not merely an algorithmic surveillance system—an omnipresent entity designed to observe every shift, every <em>anomaly</em> that disrupts the millimetric perfection of our metropolis: The Capital of San Salvador.
-          </p>
-
-          <p className="mb-6">
-            Deep within the bowels of this capital, veiled in the advances of modern times, stands a pioneering laboratory at the intersection of computer science and biotechnology. Born from the drive to perfect domestic androids, this sanctuary of innovation was founded under the name <strong className="text-purple-400">Lunarya Studios</strong>, guided by the vision of the enigmatic cybernetic research doctor, Lunarya.
-          </p>
-
-          <p className="mb-6">
-            VΣLOHE SYSTEM is her crowning achievement. The prodigal child of Lunarya Studios. However, we live in an era where the fear of losing control has made laws meticulously strict. Every technological entity, no matter how brilliant, must pass through the scrutiny of governmental approval to exist. And the VΣLOHE system... conceals capabilities that the outside world perhaps is not yet prepared to comprehend.
-          </p>
-
-          <p className="mb-6">
-            In its incessant scan to maintain the perfection of San Salvador, VΣLOHE&apos;s algorithmic eye did not detect a simple code error or a computer virus. It found a heartbeat. A hidden pulse nestled in the deepest and darkest recesses of artificial intelligence.
-          </p>
-
-          <p className="mb-6 text-xl text-cyan-300 font-mono tracking-wide py-4 border-l-2 border-cyan-500 pl-4 my-8 bg-cyan-950/20">
-            They called it <strong className="text-white">The Aethergrid</strong>.
-          </p>
-
-          {/* Botón de Siguiente Página */}
-          <div className="mt-12 pt-6 border-t border-cyan-500/30 flex justify-between items-center">
-            <span className="text-xs text-cyan-600 font-mono">[ FRAGMENT 01 ENDED ]</span>
-            <Link 
-              href="/game/theaethergrid/page-2"
-              className="inline-flex items-center gap-2 text-sm font-mono text-white bg-cyan-600/20 border border-cyan-400 px-6 py-3 rounded hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all"
+        <AnimatePresence mode="wait">
+          {archiveState === "recovering" && (
+            <motion.section
+              key="recovering"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-1 items-center justify-center py-16"
             >
-              NEXT FILE // DECRYPT NEXT FRAGMENT <span>&rarr;</span>
-            </Link>
-          </div>
-        </motion.div>
-      )}
-    </div>
+              <div className="w-full max-w-3xl">
+                <div className="mb-8">
+                  <div className="text-[10px] uppercase tracking-[0.35em] text-red-400">
+                    SYSTEM WARNING
+                  </div>
+
+                  <h1 className="mt-3 text-xl font-semibold uppercase tracking-[0.2em] text-white sm:text-2xl">
+                    Encrypted Archive Detected
+                  </h1>
+
+                  <p className="mt-3 max-w-2xl text-xs leading-relaxed text-cyan-500/60">
+                    An unrecovered archive node has been located beyond the
+                    registered Game Protocol sectors.
+                  </p>
+                </div>
+
+                <div className="space-y-4 border border-cyan-500/20 bg-cyan-950/[0.08] p-5 shadow-[0_0_35px_rgba(0,220,255,0.05)]">
+                  <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.2em]">
+                    <span className="text-cyan-500/50">
+                      ARCHIVE RECOVERY
+                    </span>
+
+                    <span className="text-cyan-300">
+                      {progress.toString().padStart(3, "0")}%
+                    </span>
+                  </div>
+
+                  <div className="h-2 overflow-hidden border border-cyan-500/20 bg-black/70 p-[1px]">
+                    <motion.div
+                      className="h-full bg-cyan-400 shadow-[0_0_14px_rgba(0,255,255,0.8)]"
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  </div>
+
+                  <div className="min-h-5 text-[10px] uppercase tracking-[0.18em] text-cyan-400">
+                    &gt; {RECOVERY_LOGS[logIndex]}
+                  </div>
+                </div>
+
+                <div className="mt-5 flex justify-between text-[8px] uppercase tracking-[0.2em] text-cyan-500/35">
+                  <span>ENCRYPTION // ACTIVE</span>
+                  <span>MEMORY INTEGRITY // UNKNOWN</span>
+                </div>
+              </div>
+            </motion.section>
+          )}
+
+          {archiveState === "directory" && (
+            <motion.section
+              key="directory"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 py-10"
+            >
+              <div className="mb-8">
+                <div className="text-[9px] uppercase tracking-[0.35em] text-cyan-500/50">
+                  ARCHIVE RECOVERY // COMPLETE
+                </div>
+
+                <h1 className="mt-3 text-2xl font-semibold uppercase tracking-[0.2em] text-white sm:text-3xl">
+                  Recovered Directory
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-xs leading-relaxed text-cyan-500/60">
+                  Partial archive recovered. Some memory structures remain
+                  encrypted and require progressive decryption.
+                </p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Prologue */}
+                <button
+                  type="button"
+                  onClick={() => setArchiveState("prologue")}
+                  className="group text-left"
+                >
+                  <div className="h-full border border-cyan-500/30 bg-cyan-950/[0.08] p-5 transition-all duration-300 hover:border-cyan-400/70 hover:bg-cyan-500/[0.05] hover:shadow-[0_0_30px_rgba(0,220,255,0.08)]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] uppercase tracking-[0.25em] text-cyan-500/50">
+                        DIRECTORY
+                      </span>
+
+                      <span className="text-[9px] text-cyan-300">
+                        AVAILABLE
+                      </span>
+                    </div>
+
+                    <h2 className="mt-6 text-lg font-semibold tracking-[0.15em] text-white">
+                      /PROLOGUE
+                    </h2>
+
+                    <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-cyan-400/60">
+                      02 MEMORY FRAGMENTS
+                    </p>
+
+                    <div className="mt-8 border-t border-cyan-500/15 pt-4 text-[9px] uppercase tracking-[0.18em] text-cyan-500/50">
+                      ACCESS ARCHIVE →
+                    </div>
+                  </div>
+                </button>
+
+                {/* Chapter 01 */}
+                <div className="border border-cyan-500/10 bg-black/30 p-5 opacity-60">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] uppercase tracking-[0.25em] text-cyan-500/35">
+                      DIRECTORY
+                    </span>
+
+                    <span className="text-[9px] text-amber-400/60">
+                      LOCKED
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-lg font-semibold tracking-[0.15em] text-white/70">
+                    /CHAPTER_01
+                  </h2>
+
+                  <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-cyan-500/35">
+                    PULSE INITIALIZATION
+                  </p>
+
+                  <div className="mt-8 border-t border-cyan-500/10 pt-4 text-[9px] uppercase tracking-[0.18em] text-cyan-500/30">
+                    ACCESS RESTRICTED
+                  </div>
+                </div>
+
+                {/* Unknown data */}
+                <div className="border border-red-500/15 bg-red-950/[0.03] p-5 opacity-60">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] uppercase tracking-[0.25em] text-red-500/40">
+                      DIRECTORY
+                    </span>
+
+                    <span className="text-[9px] text-red-400/60">
+                      ENCRYPTED
+                    </span>
+                  </div>
+
+                  <h2 className="mt-6 text-lg font-semibold tracking-[0.15em] text-white/50">
+                    /UNKNOWN_DATA
+                  </h2>
+
+                  <p className="mt-2 text-[10px] uppercase tracking-[0.18em] text-red-500/35">
+                    CLASSIFICATION // UNKNOWN
+                  </p>
+
+                  <div className="mt-8 border-t border-red-500/10 pt-4 text-[9px] uppercase tracking-[0.18em] text-red-500/30">
+                    DECRYPTION REQUIRED
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 flex items-center justify-between border-t border-cyan-500/15 pt-5">
+                <span className="text-[9px] uppercase tracking-[0.2em] text-cyan-500/35">
+                  RECOVERED FILES // 01
+                </span>
+
+                <Link
+                  href="/"
+                  className="text-[9px] uppercase tracking-[0.2em] text-cyan-500/60 transition hover:text-cyan-300"
+                >
+                  ← RETURN TO ARCHIVE
+                </Link>
+              </div>
+            </motion.section>
+          )}
+
+          {archiveState === "prologue" && (
+            <motion.section
+              key="prologue"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 py-10"
+            >
+              <div className="mb-8 flex items-end justify-between border-b border-cyan-500/20 pb-5">
+                <div>
+                  <div className="text-[9px] uppercase tracking-[0.35em] text-cyan-500/50">
+                    ARCHIVE // PROLOGUE
+                  </div>
+
+                  <h1 className="mt-3 text-2xl font-semibold uppercase tracking-[0.18em] text-white">
+                    Memory Structure
+                  </h1>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setArchiveState("directory")}
+                  className="text-[9px] uppercase tracking-[0.2em] text-cyan-500/50 transition hover:text-cyan-300"
+                >
+                  ← DIRECTORY
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {MEMORY_FRAGMENTS.map((fragment) => {
+                  const available = fragment.status === "available";
+
+                  return (
+                    <div
+                      key={fragment.id}
+                      className={`border p-5 transition-all ${
+                        available
+                          ? "border-cyan-500/30 bg-cyan-950/[0.06] hover:border-cyan-400/60"
+                          : "border-cyan-500/10 bg-black/30 opacity-60"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <div className="text-[9px] uppercase tracking-[0.3em] text-cyan-500/40">
+                            MEMORY // {fragment.id}
+                          </div>
+
+                          <h2 className="mt-2 text-sm font-semibold uppercase tracking-[0.15em] text-white">
+                            {fragment.title}
+                          </h2>
+
+                          <p className="mt-2 text-[9px] uppercase tracking-[0.16em] text-cyan-500/50">
+                            {fragment.classification}
+                          </p>
+                        </div>
+
+                        {available ? (
+                          <Link
+  href="/game/theaethergrid/prologue/fragment-01"
+  className="inline-flex items-center justify-center border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/10"
+>
+  DECRYPT MEMORY →
+</Link>
+                        ) : (
+                          <span className="inline-flex items-center justify-center border border-cyan-500/10 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-cyan-500/30">
+                            ENCRYPTED
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-10 border-t border-cyan-500/15 pt-5 text-[9px] uppercase tracking-[0.2em] text-cyan-500/35">
+                MEMORY INTEGRITY // PARTIAL
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        <footer className="border-t border-cyan-500/10 pt-4 text-[8px] uppercase tracking-[0.2em] text-cyan-500/25">
+          VΣLOHE SYSTEM // RECOVERED ARCHIVE // AEG-001
+        </footer>
+      </div>
+    </main>
   );
 }

@@ -387,14 +387,6 @@ export function GameProtocolView() {
               Read Whitepaper
             </NeonButton>
 
-            <NeonButton
-              href="/game/theaethergrid"
-              variant="outline"
-              className="min-w-[200px] border-red-500/50 text-red-400 hover:border-red-500 hover:text-red-300"
-            >
-              Access Unknown Sector
-            </NeonButton>
-
             <NeonButton href="/" variant="outline" className="min-w-[200px]">
               Return to Archive
             </NeonButton>

@@ -92,7 +92,7 @@ export default function Chapter1Page() {
           {/* Barra de navegación superior */}
           <div className="mb-6 flex justify-between items-center">
             <Link 
-              href="/game/theaethergrid/page-2"
+              href="/game/theaethergrid/prologue/fragment-02"
               className="inline-flex items-center gap-2 text-xs md:text-sm font-mono text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded bg-cyan-950/20 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all shadow-[0_0_10px_rgba(0,255,255,0.1)]"
             >
               <span>&larr;</span> PREVIOUS FRAGMENT
@@ -150,10 +150,10 @@ export default function Chapter1Page() {
             </div>
             
             <Link 
-              href="/game"
+              href="/game/theaethergrid/prologue/fragment-02"
               className="inline-flex items-center gap-2 text-sm font-mono text-white bg-cyan-600/20 border border-cyan-400 px-6 py-3 rounded hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all"
             >
-              RETURN TO GAME PROTOCOL <span>&rarr;</span>
+              ← PREVIOUS MEMORY 
             </Link>
           </div>
         </motion.div>
