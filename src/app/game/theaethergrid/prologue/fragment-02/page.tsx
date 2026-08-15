@@ -117,7 +117,8 @@ export default function PrologueFragment02() {
             <div className="flex items-start gap-3 text-gray-400">
               <span>•</span>
               <span>
-                <strong>Void Core:</strong> The absolute silence beyond mainstream algorithmic surveillance.
+                <strong>Void Core:</strong> The absolute silence beyond
+                mainstream algorithmic surveillance.
               </span>
             </div>
 
@@ -146,6 +147,7 @@ export default function PrologueFragment02() {
         {/* Fragment navigation */}
         <div className="mt-12 border-t border-cyan-500/20 pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            {/* Previous fragment */}
             <Link
               href="/game/theaethergrid/prologue/fragment-01"
               className="inline-flex items-center justify-center gap-2 border border-cyan-500/30 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
@@ -153,33 +155,22 @@ export default function PrologueFragment02() {
               ← PREVIOUS MEMORY
             </Link>
 
+            {/* Fragment status */}
             <span className="text-center font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/40">
               [ MEMORY FRAGMENT 02 // COMPLETE ]
             </span>
-            <div className="mt-12 border-t border-cyan-500/20 pt-6">
-  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-    <Link
-      href="/game/theaethergrid/prologue/fragment-01"
-      className="inline-flex items-center justify-center gap-2 border border-cyan-500/30 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
-    >
-      ← PREVIOUS MEMORY
-    </Link>
 
-    <span className="text-center font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/40">
-      [ MEMORY FRAGMENT 02 // COMPLETE ]
-    </span>
-
-    <Link
-      href="/game/theaethergrid"
-      className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
-    >
-      RETURN TO ARCHIVE →
-    </Link>
-  </div>
-</div>
+            {/* Return to archive */}
+            <Link
+              href="/game/theaethergrid"
+              className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
+            >
+              RETURN TO ARCHIVE →
+            </Link>
           </div>
         </div>
 
+        {/* Footer */}
         <footer className="mt-8 border-t border-cyan-500/10 pt-4 text-[8px] uppercase tracking-[0.2em] text-cyan-500/25">
           VΣLOHE SYSTEM // AEG-001 // PRLG-002
         </footer>
