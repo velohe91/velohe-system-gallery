@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { GlowOrb } from "@/components/effects/GlowOrb";
-import { LoreSection } from "@/components/lore/LoreSection";
+import { ExpandableLoreCard } from "@/components/lore/ExpandableLoreCard";
+import { LoreDecryptVideo } from "@/components/lore/LoreDecryptVideo";
 import { TerminalNote } from "@/components/lore/TerminalNote";
 import { NeonButton } from "@/components/ui/NeonButton";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -37,25 +38,49 @@ export function AboutView() {
           />
         </motion.div>
 
+        {/* Same Decrypt / Collapse pattern as Full Lore & Archives */}
         <div className="flex flex-col gap-6">
-          <LoreSection
+          <ExpandableLoreCard
+            tone="cyan"
             eyebrow={aboutLore.whatIs.eyebrow}
             title={aboutLore.whatIs.title}
+            summary={aboutLore.whatIs.summary}
             paragraphs={[...aboutLore.whatIs.paragraphs]}
             delay={0.05}
-          />
-          <LoreSection
+          >
+            <LoreDecryptVideo
+              src={aboutLore.whatIs.video}
+              title={aboutLore.whatIs.title}
+            />
+          </ExpandableLoreCard>
+
+          <ExpandableLoreCard
+            tone="cyan"
             eyebrow={aboutLore.aethergrid.eyebrow}
             title={aboutLore.aethergrid.title}
+            summary={aboutLore.aethergrid.summary}
             paragraphs={[...aboutLore.aethergrid.paragraphs]}
             delay={0.08}
-          />
-          <LoreSection
+          >
+            <LoreDecryptVideo
+              src={aboutLore.aethergrid.video}
+              title={aboutLore.aethergrid.title}
+            />
+          </ExpandableLoreCard>
+
+          <ExpandableLoreCard
+            tone="cyan"
             eyebrow={aboutLore.sigma.eyebrow}
             title={aboutLore.sigma.title}
+            summary={aboutLore.sigma.summary}
             paragraphs={[...aboutLore.sigma.paragraphs]}
             delay={0.11}
-          />
+          >
+            <LoreDecryptVideo
+              src={aboutLore.sigma.video}
+              title={aboutLore.sigma.title}
+            />
+          </ExpandableLoreCard>
         </div>
 
         <div className="mt-10 flex flex-wrap gap-3">
