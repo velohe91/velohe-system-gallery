@@ -7,7 +7,7 @@ export type GalleryHubAccent = "cyan" | "violet";
 export type GalleryHubStatus = "online" | "standby";
 
 export type GalleryHubEntry = {
-  id: "archive" | "velozart" | "exhibition-node";
+  id: "archive" | "exhibition-node" | "velozart";
   title: string;
   description: string;
   href: string;
@@ -32,18 +32,6 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     status: "online",
   },
   {
-    id: "velozart",
-    title: "NFT VeLozArt Gallery",
-    description:
-      "A separate collection of AI artworks under the VeLozArt label",
-    href: "/gallery/velozart",
-    badge: "EXTERNAL WING",
-    seriesHint: "VeLozArt · AI collection",
-    cta: "Enter VeLozArt",
-    accent: "violet",
-    status: "online",
-  },
-  {
     id: "exhibition-node",
     title: "NFT Exhibition Node",
     description:
@@ -52,7 +40,21 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     badge: "COMMUNITY ACQUISITIONS",
     seriesHint: "Verified community artworks · expanding archive",
     cta: "Enter Exhibition Node",
+    accent: "violet",
+    status: "online",
+  },
+
+   {
+    id: "velozart",
+    title: "NFT VeLozArt Gallery",
+    description:
+      "A separate collection of AI artworks under the VeLozArt label",
+    href: "/gallery/velozart",
+    badge: "EXTERNAL WING",
+    seriesHint: "VeLozArt · AI collection",
+    cta: "Enter VeLozArt",
     accent: "cyan",
     status: "online",
   },
+
 ];
