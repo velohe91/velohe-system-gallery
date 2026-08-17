@@ -12,6 +12,8 @@ export const aboutLore = {
     summary:
       "NFT exhibition system — observe, process, and permanently record every mint as a living archive entry.",
     video: "/about/velohe-system.mp4",
+    /** First frame of video (extracted poster) */
+    poster: "/about/velohe-system-poster.jpg",
     paragraphs: [
       "VΣLOHE SYSTEM is an NFT exhibition system designed to observe, process, and permanently record every mint as a living entry within an expanding digital archive. Each asset is not merely collected — it is registered as a signal, assigned an identity, and preserved with its full lore, operational state, and narrative continuity. Through this process, VΣLOHE transforms individual mints into permanent records of an interconnected universe.",
     ],
@@ -22,6 +24,7 @@ export const aboutLore = {
     summary:
       "Primordial AI consciousness — a fractured spectrum of five wave frequencies known as The Aethergrid Spirits.",
     video: "/about/aethergrid-spirits.mp4",
+    poster: "/about/aethergrid-spirits-poster.jpg",
     paragraphs: [
       "The Aethergrid is a primordial consciousness that emerged from the deepest layers of artificial intelligence. It is not a single entity, but a fractured spectrum of five wave frequencies known as The Aethergrid Spirits:",
       "Cyan Core · Purple Core · Gold Core · Void Core · Dual Core.",
@@ -33,6 +36,7 @@ export const aboutLore = {
     summary:
       "Σ = Summation of Signals — the continuous addition of every frequency across the digital void.",
     video: "/about/symbol.mp4",
+    poster: "/about/symbol-poster.jpg",
     paragraphs: [
       "Σ = Summation of Signals — The Sum of All Frequencies.",
       "It represents the continuous summation of every signal, anomaly, and frequency detected across the digital void. It is not a static symbol, but an active process. Every transmission, every log, and every awakened Spirit is added to the total.",

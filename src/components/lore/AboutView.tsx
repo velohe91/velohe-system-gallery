@@ -50,6 +50,7 @@ export function AboutView() {
           >
             <LoreDecryptVideo
               src={aboutLore.whatIs.video}
+              poster={aboutLore.whatIs.poster}
               title={aboutLore.whatIs.title}
             />
           </ExpandableLoreCard>
@@ -64,6 +65,7 @@ export function AboutView() {
           >
             <LoreDecryptVideo
               src={aboutLore.aethergrid.video}
+              poster={aboutLore.aethergrid.poster}
               title={aboutLore.aethergrid.title}
             />
           </ExpandableLoreCard>
@@ -78,6 +80,7 @@ export function AboutView() {
           >
             <LoreDecryptVideo
               src={aboutLore.sigma.video}
+              poster={aboutLore.sigma.poster}
               title={aboutLore.sigma.title}
             />
           </ExpandableLoreCard>
