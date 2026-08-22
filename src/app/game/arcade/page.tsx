@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type GameState = "start" | "playing" | "complete" | "gameover";
+type GameState =
+  | "start"
+  | "playing"
+  | "complete"
+  | "gameover";
 
 type PlayerState = {
   x: number;
@@ -44,22 +48,73 @@ type Enemy = {
   alive: boolean;
 };
 
+/* =========================================================
+WORLD
+========================================================= */
+
 const WORLD_WIDTH = 3200;
 const WORLD_HEIGHT = 560;
 
 const FLOOR_Y = 470;
 
+/* =========================================================
+PLAYER HITBOX
+========================================================= */
+
 const PLAYER_WIDTH = 48;
 const PLAYER_HEIGHT = 72;
 
-const ENEMY_WIDTH = 42;
-const ENEMY_HEIGHT = 58;
+/*
+ * IMPORTANT:
+ * The gameplay hitbox remains 48x72.
+ *
+ * The visual sprite is independent from the hitbox.
+ *
+ * IDLE PNGs:
+ * 1024 x 1536
+ *
+ * RUN PNGs:
+ * 1536 x 1024
+ *
+ * We therefore control the visual HEIGHT only
+ * and allow the browser to calculate the width
+ * automatically according to each PNG's aspect ratio.
+ */
+
+const VIREX_IDLE_HEIGHT = 105;
+const VIREX_RUN_HEIGHT = 100;
+
+const VIREX_IDLE_FRAMES = [
+  "/game/arcade/sprites/virex/idle/frame-01.png",
+  "/game/arcade/sprites/virex/idle/frame-02.png",
+  "/game/arcade/sprites/virex/idle/frame-03.png",
+  "/game/arcade/sprites/virex/idle/frame-04.png",
+  "/game/arcade/sprites/virex/idle/frame-05.png",
+  "/game/arcade/sprites/virex/idle/frame-06.png",
+];
+
+const VIREX_RUN_FRAMES = [
+  "/game/arcade/sprites/virex/run/frame-01.png",
+  "/game/arcade/sprites/virex/run/frame-02.png",
+  "/game/arcade/sprites/virex/run/frame-03.png",
+  "/game/arcade/sprites/virex/run/frame-04.png",
+  "/game/arcade/sprites/virex/run/frame-05.png",
+  "/game/arcade/sprites/virex/run/frame-06.png",
+];
+
+/* =========================================================
+MOVEMENT
+========================================================= */
 
 const MOVE_SPEED = 5;
 const JUMP_FORCE = -13;
 const GRAVITY = 0.65;
 
 const INITIAL_HP = 3;
+
+/* =========================================================
+INITIAL PLAYER
+========================================================= */
 
 const INITIAL_PLAYER: PlayerState = {
   x: 180,
@@ -69,6 +124,10 @@ const INITIAL_PLAYER: PlayerState = {
   attacking: false,
   onGround: true,
 };
+
+/* =========================================================
+PLATFORMS
+========================================================= */
 
 const PLATFORMS: Platform[] = [
   {
@@ -120,6 +179,10 @@ const PLATFORMS: Platform[] = [
     height: 16,
   },
 ];
+
+/* =========================================================
+NEOBYTES
+========================================================= */
 
 const INITIAL_NEOBYTES: Neobyte[] = [
   {
@@ -190,6 +253,10 @@ const INITIAL_NEOBYTES: Neobyte[] = [
   },
 ];
 
+/* =========================================================
+OBSTACLES
+========================================================= */
+
 const OBSTACLES: Obstacle[] = [
   {
     id: 1,
@@ -221,10 +288,13 @@ const OBSTACLES: Obstacle[] = [
   },
 ];
 
-/*
- * BUILD 04
- * Basic enemies.
- */
+/* =========================================================
+ENEMIES
+========================================================= */
+
+const ENEMY_WIDTH = 42;
+const ENEMY_HEIGHT = 58;
+
 const INITIAL_ENEMIES: Enemy[] = [
   {
     id: 1,
@@ -260,6 +330,10 @@ const INITIAL_ENEMIES: Enemy[] = [
   },
 ];
 
+/* =========================================================
+HELPERS
+========================================================= */
+
 function intersects(
   a: {
     x: number;
@@ -283,7 +357,10 @@ function intersects(
 }
 
 function formatTime(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
+  const minutes = Math.floor(
+    totalSeconds / 60,
+  );
+
   const seconds = totalSeconds % 60;
 
   return `${minutes
@@ -293,32 +370,67 @@ function formatTime(totalSeconds: number) {
     .padStart(2, "0")}`;
 }
 
+/* =========================================================
+PAGE
+========================================================= */
+
 export default function ArcadePage() {
   const [gameState, setGameState] =
     useState<GameState>("start");
 
   const [player, setPlayer] =
-    useState<PlayerState>(INITIAL_PLAYER);
+    useState<PlayerState>(
+      INITIAL_PLAYER,
+    );
 
   const [score, setScore] = useState(0);
-  const [neobytes, setNeobytes] = useState(0);
+
+  const [neobytes, setNeobytes] =
+    useState(0);
+
   const [combo, setCombo] = useState(0);
-  const [maxCombo, setMaxCombo] = useState(0);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [cameraX, setCameraX] = useState(0);
-  const [hp, setHp] = useState(INITIAL_HP);
+
+  const [maxCombo, setMaxCombo] =
+    useState(0);
+
+  const [elapsedTime, setElapsedTime] =
+    useState(0);
+
+  const [cameraX, setCameraX] =
+    useState(0);
+
+  const [hp, setHp] =
+    useState(INITIAL_HP);
 
   const [enemies, setEnemies] =
-    useState<Enemy[]>(INITIAL_ENEMIES);
+    useState<Enemy[]>(
+      INITIAL_ENEMIES,
+    );
 
-  const [neobytesState, setNeobytesState] =
-    useState<Neobyte[]>(INITIAL_NEOBYTES);
+  const [
+    neobytesState,
+    setNeobytesState,
+  ] = useState<Neobyte[]>(
+    INITIAL_NEOBYTES,
+  );
+
+  const [idleFrame, setIdleFrame] =
+    useState(0);
+
+  const [
+    virexRunFrame,
+    setVirexRunFrame,
+  ] = useState(0);
 
   const keysRef =
-    useRef<Set<string>>(new Set());
+    useRef<Set<string>>(
+      new Set(),
+    );
 
   const playerRef =
-    useRef<PlayerState>(INITIAL_PLAYER);
+    useRef<PlayerState>(
+      INITIAL_PLAYER,
+    );
 
   const viewportRef =
     useRef<HTMLDivElement>(null);
@@ -327,7 +439,9 @@ export default function ArcadePage() {
     useRef<GameState>("start");
 
   const enemiesRef =
-    useRef<Enemy[]>(INITIAL_ENEMIES);
+    useRef<Enemy[]>(
+      INITIAL_ENEMIES,
+    );
 
   const hpRef =
     useRef(INITIAL_HP);
@@ -344,32 +458,153 @@ export default function ArcadePage() {
   const timerRef =
     useRef<number | null>(null);
 
+  /* =======================================================
+  PLAYER REF
+  ======================================================= */
+
   useEffect(() => {
     playerRef.current = player;
   }, [player]);
 
+  /* =======================================================
+  GAME STATE REF
+  ======================================================= */
+
   useEffect(() => {
-    gameStateRef.current = gameState;
+    gameStateRef.current =
+      gameState;
   }, [gameState]);
 
-  /*
-   * START / RESET GAME
-   */
+  /* =======================================================
+  MOVEMENT STATE
+  ======================================================= */
+
+  const isVirexMoving =
+    gameState === "playing" &&
+    (
+      keysRef.current.has(
+        "arrowleft",
+      ) ||
+      keysRef.current.has(
+        "arrowright",
+      ) ||
+      keysRef.current.has("a") ||
+      keysRef.current.has("d")
+    );
+
+  /* =======================================================
+  RUN ANIMATION
+  ======================================================= */
+
+  useEffect(() => {
+    if (!isVirexMoving) {
+      setVirexRunFrame(0);
+      return;
+    }
+
+    const interval =
+      window.setInterval(() => {
+        setVirexRunFrame(
+          (previous) =>
+            (previous + 1) %
+            VIREX_RUN_FRAMES.length,
+        );
+      }, 90);
+
+    return () => {
+      window.clearInterval(
+        interval,
+      );
+    };
+  }, [isVirexMoving]);
+
+  /* =======================================================
+  PRELOAD ALL VIREX SPRITES
+  ======================================================= */
+
+  useEffect(() => {
+    [
+      ...VIREX_IDLE_FRAMES,
+      ...VIREX_RUN_FRAMES,
+    ].forEach((src) => {
+      const image = new Image();
+      image.src = src;
+    });
+  }, []);
+
+  /* =======================================================
+  IDLE ANIMATION
+  ======================================================= */
+
+  useEffect(() => {
+    if (gameState !== "playing") {
+      return;
+    }
+
+    const idleInterval =
+      window.setInterval(() => {
+        const current =
+          playerRef.current;
+
+        const moving =
+          keysRef.current.has(
+            "arrowleft",
+          ) ||
+          keysRef.current.has(
+            "arrowright",
+          ) ||
+          keysRef.current.has("a") ||
+          keysRef.current.has("d");
+
+        const isIdle =
+          !moving &&
+          current.onGround &&
+          !current.attacking;
+
+        if (isIdle) {
+          setIdleFrame(
+            (previous) =>
+              (previous + 1) %
+              VIREX_IDLE_FRAMES.length,
+          );
+        } else {
+          setIdleFrame(0);
+        }
+      }, 140);
+
+    return () => {
+      window.clearInterval(
+        idleInterval,
+      );
+    };
+  }, [gameState]);
+
+  /* =======================================================
+  START / RESET
+  ======================================================= */
+
   const startGame = () => {
     const resetPlayer = {
       ...INITIAL_PLAYER,
     };
 
     const resetEnemies =
-      INITIAL_ENEMIES.map((enemy) => ({
-        ...enemy,
-        alive: true,
-      }));
+      INITIAL_ENEMIES.map(
+        (enemy) => ({
+          ...enemy,
+          alive: true,
+        }),
+      );
 
-    playerRef.current = resetPlayer;
-    enemiesRef.current = resetEnemies;
+    playerRef.current =
+      resetPlayer;
 
-    hpRef.current = INITIAL_HP;
+    enemiesRef.current =
+      resetEnemies;
+
+    hpRef.current =
+      INITIAL_HP;
+
     comboRef.current = 0;
 
     setPlayer(resetPlayer);
@@ -383,98 +618,126 @@ export default function ArcadePage() {
     setElapsedTime(0);
     setCameraX(0);
 
+    setIdleFrame(0);
+    setVirexRunFrame(0);
+
     setNeobytesState(
-      INITIAL_NEOBYTES.map((byte) => ({
-        ...byte,
-        collected: false,
-      })),
+      INITIAL_NEOBYTES.map(
+        (byte) => ({
+          ...byte,
+          collected: false,
+        }),
+      ),
     );
 
-    damageCooldownRef.current = 0;
+    damageCooldownRef.current =
+      0;
 
     keysRef.current.clear();
 
-    if (attackTimeoutRef.current) {
+    if (
+      attackTimeoutRef.current
+    ) {
       window.clearTimeout(
         attackTimeoutRef.current,
       );
 
-      attackTimeoutRef.current = null;
+      attackTimeoutRef.current =
+        null;
     }
 
-    gameStateRef.current = "playing";
+    gameStateRef.current =
+      "playing";
+
     setGameState("playing");
   };
 
-  /*
-   * RETURN TO INITIAL NODE
-   *
-   * This does NOT navigate to the same URL.
-   * It completely resets the local game state
-   * and returns to the Initial Node screen.
-   */
-  const returnToInitialNode = () => {
-    const resetPlayer = {
-      ...INITIAL_PLAYER,
+  /* =======================================================
+  RETURN TO INITIAL NODE
+  ======================================================= */
+
+  const returnToInitialNode =
+    () => {
+      const resetPlayer = {
+        ...INITIAL_PLAYER,
+      };
+
+      const resetEnemies =
+        INITIAL_ENEMIES.map(
+          (enemy) => ({
+            ...enemy,
+            alive: true,
+          }),
+        );
+
+      playerRef.current =
+        resetPlayer;
+
+      enemiesRef.current =
+        resetEnemies;
+
+      hpRef.current =
+        INITIAL_HP;
+
+      comboRef.current = 0;
+
+      setPlayer(resetPlayer);
+      setEnemies(resetEnemies);
+
+      setHp(INITIAL_HP);
+      setScore(0);
+      setNeobytes(0);
+      setCombo(0);
+      setMaxCombo(0);
+      setElapsedTime(0);
+      setCameraX(0);
+
+      setIdleFrame(0);
+      setVirexRunFrame(0);
+
+      setNeobytesState(
+        INITIAL_NEOBYTES.map(
+          (byte) => ({
+            ...byte,
+            collected: false,
+          }),
+        ),
+      );
+
+      damageCooldownRef.current =
+        0;
+
+      keysRef.current.clear();
+
+      if (
+        attackTimeoutRef.current
+      ) {
+        window.clearTimeout(
+          attackTimeoutRef.current,
+        );
+
+        attackTimeoutRef.current =
+          null;
+      }
+
+      if (timerRef.current) {
+        window.clearInterval(
+          timerRef.current,
+        );
+
+        timerRef.current = null;
+      }
+
+      gameStateRef.current =
+        "start";
+
+      setGameState("start");
     };
 
-    const resetEnemies =
-      INITIAL_ENEMIES.map((enemy) => ({
-        ...enemy,
-        alive: true,
-      }));
+  /* =======================================================
+  TIMER
+  ======================================================= */
 
-    playerRef.current = resetPlayer;
-    enemiesRef.current = resetEnemies;
-
-    hpRef.current = INITIAL_HP;
-    comboRef.current = 0;
-
-    setPlayer(resetPlayer);
-    setEnemies(resetEnemies);
-
-    setHp(INITIAL_HP);
-    setScore(0);
-    setNeobytes(0);
-    setCombo(0);
-    setMaxCombo(0);
-    setElapsedTime(0);
-    setCameraX(0);
-
-    setNeobytesState(
-      INITIAL_NEOBYTES.map((byte) => ({
-        ...byte,
-        collected: false,
-      })),
-    );
-
-    damageCooldownRef.current = 0;
-
-    keysRef.current.clear();
-
-    if (attackTimeoutRef.current) {
-      window.clearTimeout(
-        attackTimeoutRef.current,
-      );
-
-      attackTimeoutRef.current = null;
-    }
-
-    if (timerRef.current) {
-      window.clearInterval(
-        timerRef.current,
-      );
-
-      timerRef.current = null;
-    }
-
-    gameStateRef.current = "start";
-    setGameState("start");
-  };
-
-  /*
-   * TIMER
-   */
   useEffect(() => {
     if (gameState !== "playing") {
       if (timerRef.current) {
@@ -491,7 +754,8 @@ export default function ArcadePage() {
     timerRef.current =
       window.setInterval(() => {
         setElapsedTime(
-          (previous) => previous + 1,
+          (previous) =>
+            previous + 1,
         );
       }, 1000);
 
@@ -506,9 +770,10 @@ export default function ArcadePage() {
     };
   }, [gameState]);
 
-  /*
-   * KEYBOARD INPUT
-   */
+  /* =======================================================
+  KEYBOARD INPUT
+  ======================================================= */
+
   useEffect(() => {
     const handleKeyDown = (
       event: KeyboardEvent,
@@ -540,9 +805,8 @@ export default function ArcadePage() {
         return;
       }
 
-      /*
-       * JUMP
-       */
+      /* JUMP */
+
       if (
         key === " " ||
         key === "arrowup"
@@ -553,20 +817,22 @@ export default function ArcadePage() {
         if (current.onGround) {
           const nextPlayer = {
             ...current,
-            velocityY: JUMP_FORCE,
+            velocityY:
+              JUMP_FORCE,
             onGround: false,
           };
 
           playerRef.current =
             nextPlayer;
 
-          setPlayer(nextPlayer);
+          setPlayer(
+            nextPlayer,
+          );
         }
       }
 
-      /*
-       * ATTACK
-       */
+      /* ATTACK */
+
       if (
         key === "x" ||
         key === "j"
@@ -600,17 +866,17 @@ export default function ArcadePage() {
 
         attackTimeoutRef.current =
           window.setTimeout(() => {
-            setPlayer(
-              (previous) => ({
-                ...previous,
-                attacking: false,
-              }),
-            );
-
-            playerRef.current = {
+            const nextPlayer = {
               ...playerRef.current,
               attacking: false,
             };
+
+            playerRef.current =
+              nextPlayer;
+
+            setPlayer(
+              nextPlayer,
+            );
           }, 180);
       }
     };
@@ -646,9 +912,10 @@ export default function ArcadePage() {
     };
   }, []);
 
-  /*
-   * MAIN GAME LOOP
-   */
+  /* =======================================================
+  MAIN GAME LOOP
+  ======================================================= */
+
   useEffect(() => {
     let animationFrame = 0;
 
@@ -690,9 +957,8 @@ export default function ArcadePage() {
         keys.has("arrowright") ||
         keys.has("d");
 
-      /*
-       * HORIZONTAL MOVEMENT
-       */
+      /* HORIZONTAL MOVEMENT */
+
       if (movingLeft) {
         nextX -= MOVE_SPEED;
         nextFacing = "left";
@@ -703,10 +969,12 @@ export default function ArcadePage() {
         nextFacing = "right";
       }
 
-      /*
-       * WORLD BOUNDARIES
-       */
-      nextX = Math.max(20, nextX);
+      /* WORLD BOUNDARIES */
+
+      nextX = Math.max(
+        20,
+        nextX,
+      );
 
       nextX = Math.min(
         WORLD_WIDTH -
@@ -715,37 +983,42 @@ export default function ArcadePage() {
         nextX,
       );
 
-      /*
-       * GRAVITY
-       */
-      nextVelocityY += GRAVITY;
-      nextY += nextVelocityY;
+      /* GRAVITY */
+
+      nextVelocityY +=
+        GRAVITY;
+
+      nextY +=
+        nextVelocityY;
 
       const previousBottom =
         current.y +
         PLAYER_HEIGHT;
 
-      /*
-       * FLOOR COLLISION
-       */
+      /* FLOOR */
+
       const floorPosition =
         FLOOR_Y -
         PLAYER_HEIGHT;
 
       if (
-        nextY >= floorPosition &&
-        previousBottom <= FLOOR_Y
+        nextY >=
+          floorPosition &&
+        previousBottom <=
+          FLOOR_Y
       ) {
-        nextY = floorPosition;
+        nextY =
+          floorPosition;
+
         nextVelocityY = 0;
         nextOnGround = true;
       }
 
-      /*
-       * PLATFORM COLLISION
-       */
+      /* PLATFORMS */
+
       for (
-        const platform of PLATFORMS
+        const platform of
+          PLATFORMS
       ) {
         const playerBottom =
           nextY +
@@ -781,9 +1054,8 @@ export default function ArcadePage() {
         }
       }
 
-      /*
-       * OBSTACLE COLLISION
-       */
+      /* OBSTACLES */
+
       const nextPlayerBox = {
         x: nextX,
         y: nextY,
@@ -792,7 +1064,8 @@ export default function ArcadePage() {
       };
 
       for (
-        const obstacle of OBSTACLES
+        const obstacle of
+          OBSTACLES
       ) {
         const obstacleBox = {
           x: obstacle.x,
@@ -830,9 +1103,8 @@ export default function ArcadePage() {
         }
       }
 
-      /*
-       * PLAYER BOX
-       */
+      /* PLAYER BOX */
+
       const playerBox = {
         x: nextX,
         y: nextY,
@@ -840,9 +1112,8 @@ export default function ArcadePage() {
         height: PLAYER_HEIGHT,
       };
 
-      /*
-       * COMBAT
-       */
+      /* COMBAT */
+
       const attackRange = {
         x:
           nextFacing === "right"
@@ -856,7 +1127,8 @@ export default function ArcadePage() {
 
       if (current.attacking) {
         let defeatedEnemyId:
-          number | null = null;
+          | number
+          | null = null;
 
         enemiesRef.current =
           enemiesRef.current.map(
@@ -872,8 +1144,10 @@ export default function ArcadePage() {
               const enemyBox = {
                 x: enemy.x,
                 y: enemy.y,
-                width: enemy.width,
-                height: enemy.height,
+                width:
+                  enemy.width,
+                height:
+                  enemy.height,
               };
 
               if (
@@ -896,10 +1170,12 @@ export default function ArcadePage() {
           );
 
         if (
-          defeatedEnemyId !== null
+          defeatedEnemyId !==
+          null
         ) {
           const nextCombo =
-            comboRef.current + 1;
+            comboRef.current +
+            1;
 
           comboRef.current =
             nextCombo;
@@ -924,15 +1200,14 @@ export default function ArcadePage() {
                 ),
           );
 
-          setEnemies(
-            [...enemiesRef.current],
-          );
+          setEnemies([
+            ...enemiesRef.current,
+          ]);
         }
       }
 
-      /*
-       * ENEMY CONTACT DAMAGE
-       */
+      /* ENEMY CONTACT DAMAGE */
+
       if (
         damageCooldownRef.current >
         0
@@ -955,8 +1230,10 @@ export default function ArcadePage() {
               const enemyBox = {
                 x: enemy.x,
                 y: enemy.y,
-                width: enemy.width,
-                height: enemy.height,
+                width:
+                  enemy.width,
+                height:
+                  enemy.height,
               };
 
               return intersects(
@@ -984,9 +1261,6 @@ export default function ArcadePage() {
           damageCooldownRef.current =
             60;
 
-          /*
-           * Small knockback.
-           */
           nextX =
             nextFacing === "right"
               ? nextX - 18
@@ -1001,13 +1275,15 @@ export default function ArcadePage() {
             );
 
             keysRef.current.clear();
+
+            setIdleFrame(0);
+            setVirexRunFrame(0);
           }
         }
       }
 
-      /*
-       * COLLECT NEOBYTES
-       */
+      /* COLLECT NEOBYTES */
+
       let collectedSomething =
         false;
 
@@ -1015,7 +1291,9 @@ export default function ArcadePage() {
         (previous) =>
           previous.map(
             (byte) => {
-              if (byte.collected) {
+              if (
+                byte.collected
+              ) {
                 return byte;
               }
 
@@ -1046,9 +1324,12 @@ export default function ArcadePage() {
           ),
       );
 
-      if (collectedSomething) {
+      if (
+        collectedSomething
+      ) {
         const nextCombo =
-          comboRef.current + 1;
+          comboRef.current +
+          1;
 
         comboRef.current =
           nextCombo;
@@ -1085,9 +1366,8 @@ export default function ArcadePage() {
         );
       }
 
-      /*
-       * CAMERA
-       */
+      /* CAMERA */
+
       const viewportWidth =
         viewportRef.current
           ?.clientWidth ??
@@ -1095,8 +1375,7 @@ export default function ArcadePage() {
 
       const desiredCamera =
         nextX -
-        viewportWidth *
-          0.42;
+        viewportWidth * 0.42;
 
       const maxCamera =
         Math.max(
@@ -1118,9 +1397,8 @@ export default function ArcadePage() {
         boundedCamera,
       );
 
-      /*
-       * UPDATE PLAYER
-       */
+      /* UPDATE PLAYER */
+
       const nextPlayer = {
         ...current,
         x: nextX,
@@ -1128,17 +1406,19 @@ export default function ArcadePage() {
         velocityY:
           nextVelocityY,
         facing: nextFacing,
-        onGround: nextOnGround,
+        onGround:
+          nextOnGround,
       };
 
       playerRef.current =
         nextPlayer;
 
-      setPlayer(nextPlayer);
+      setPlayer(
+        nextPlayer,
+      );
 
-      /*
-       * REACH END
-       */
+      /* FINISH */
+
       const finishLine =
         WORLD_WIDTH - 150;
 
@@ -1155,6 +1435,9 @@ export default function ArcadePage() {
         );
 
         keysRef.current.clear();
+
+        setIdleFrame(0);
+        setVirexRunFrame(0);
       }
 
       animationFrame =
@@ -1175,14 +1458,12 @@ export default function ArcadePage() {
     };
   }, []);
 
-  /*
-   * PASSIVE SCORE
-   */
+  /* =======================================================
+  PASSIVE SCORE
+  ======================================================= */
+
   useEffect(() => {
-    if (
-      gameState !==
-      "playing"
-    ) {
+    if (gameState !== "playing") {
       return;
     }
 
@@ -1210,9 +1491,10 @@ export default function ArcadePage() {
       );
   }, [gameState]);
 
-  /*
-   * MOBILE CONTROLS
-   */
+  /* =======================================================
+  MOBILE CONTROLS
+  ======================================================= */
+
   const holdKey = (
     key: string,
   ) => {
@@ -1229,7 +1511,9 @@ export default function ArcadePage() {
   const releaseKey = (
     key: string,
   ) => {
-    keysRef.current.delete(key);
+    keysRef.current.delete(
+      key,
+    );
   };
 
   const triggerJump = () => {
@@ -1249,7 +1533,8 @@ export default function ArcadePage() {
 
     const nextPlayer = {
       ...current,
-      velocityY: JUMP_FORCE,
+      velocityY:
+        JUMP_FORCE,
       onGround: false,
     };
 
@@ -1275,7 +1560,9 @@ export default function ArcadePage() {
         },
       );
 
-    window.dispatchEvent(event);
+    window.dispatchEvent(
+      event,
+    );
   };
 
   const progress = Math.min(
@@ -1288,510 +1575,178 @@ export default function ArcadePage() {
     ),
   );
 
-  /*
-   * START SCREEN
-   */
-  if (gameState === "start") {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#03050a] px-4 py-8 font-mono text-cyan-400">
-        <div className="relative w-full max-w-2xl overflow-hidden border border-cyan-500/30 bg-[#050912] p-8 text-center shadow-[0_0_50px_rgba(0,255,255,0.08)] sm:p-12">
-          <div className="pointer-events-none absolute inset-0 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay" />
+  /* =======================================================
+  RENDER
+  ======================================================= */
 
-          <div className="relative z-10">
-            <div className="text-[9px] uppercase tracking-[0.45em] text-cyan-500/50">
-              VΣLOHE SYSTEM
-            </div>
-
-            <h1 className="mt-4 text-2xl font-bold uppercase tracking-[0.25em] text-white sm:text-4xl">
-              ARCADE
-            </h1>
-
-            <div className="mt-3 text-[10px] uppercase tracking-[0.3em] text-cyan-400">
-              INITIAL NODE // AEG-001
-            </div>
-
-            <div className="mx-auto my-10 h-px w-32 bg-cyan-400/30" />
-
-            <div className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-              NEOBYTE RUN
-            </div>
-
-            <p className="mx-auto mt-4 max-w-md text-[9px] uppercase leading-relaxed tracking-[0.15em] text-cyan-500/45">
-              Enter the recovered sector.
-              Collect available Neobytes.
-              Survive hostile nodes.
-              Reach the archive node.
-            </p>
-
-            <button
-              type="button"
-              onClick={startGame}
-              className="mt-10 border border-cyan-400/70 bg-cyan-500/10 px-10 py-4 text-xs uppercase tracking-[0.3em] text-cyan-200 transition-all hover:border-cyan-300 hover:bg-cyan-400/20 hover:shadow-[0_0_25px_rgba(0,255,255,0.2)]"
-            >
-              START RUN →
-            </button>
-
-            <div className="mt-10 grid grid-cols-3 gap-4 border-t border-cyan-500/10 pt-6 text-[8px] uppercase tracking-[0.18em] text-cyan-500/35">
-              <div>
-                <div className="text-cyan-500/60">
-                  MOVE
-                </div>
-                <div className="mt-1">
-                  A / D
-                </div>
-              </div>
-
-              <div>
-                <div className="text-cyan-500/60">
-                  JUMP
-                </div>
-                <div className="mt-1">
-                  SPACE
-                </div>
-              </div>
-
-              <div>
-                <div className="text-cyan-500/60">
-                  ATTACK
-                </div>
-                <div className="mt-1">
-                  X / J
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  /*
-   * GAME OVER SCREEN
-   */
-  if (gameState === "gameover") {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#03050a] px-4 py-8 font-mono text-cyan-400">
-        <div className="relative w-full max-w-2xl overflow-hidden border border-red-500/30 bg-[#050912] p-8 shadow-[0_0_50px_rgba(255,0,80,0.08)] sm:p-12">
-          <div className="pointer-events-none absolute inset-0 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay" />
-
-          <div className="relative z-10">
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-[0.4em] text-red-500/50">
-                VΣLOHE SYSTEM
-              </div>
-
-              <h1 className="mt-4 text-2xl font-bold uppercase tracking-[0.18em] text-white sm:text-3xl">
-                YOU WERE TERMINATED
-              </h1>
-
-              <div className="mt-3 text-[9px] uppercase tracking-[0.3em] text-red-400/70">
-                NODE AEG-001 // IDENTITY SIGNAL LOST
-              </div>
-            </div>
-
-            <div className="mx-auto my-8 h-px w-full bg-red-500/15" />
-
-            <div className="grid grid-cols-2 gap-px border border-red-500/10 bg-red-500/10 sm:grid-cols-4">
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-red-500/40">
-                  SCORE
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-cyan-300">
-                  {score
-                    .toString()
-                    .padStart(6, "0")}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-red-500/40">
-                  NEOBYTES
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-purple-300">
-                  {neobytes
-                    .toString()
-                    .padStart(2, "0")}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-red-500/40">
-                  TIME
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-cyan-200">
-                  {formatTime(
-                    elapsedTime,
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-red-500/40">
-                  MAX COMBO
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-yellow-300">
-                  x{maxCombo}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 border border-red-500/10 bg-red-950/[0.04] p-5 text-center">
-              <div className="text-[8px] uppercase tracking-[0.25em] text-red-500/40">
-                NODE STATUS
-              </div>
-
-              <div className="mt-2 text-sm tracking-[0.25em] text-red-400">
-                CONNECTION LOST
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <button
-                type="button"
-                onClick={startGame}
-                className="border border-cyan-400/70 bg-cyan-500/10 px-10 py-4 text-xs uppercase tracking-[0.3em] text-cyan-200 transition-all hover:border-cyan-300 hover:bg-cyan-400/20 hover:shadow-[0_0_25px_rgba(0,255,255,0.2)]"
-              >
-                RETRY RUN →
-              </button>
-
-              <button
-                type="button"
-                onClick={returnToInitialNode}
-                className="border border-cyan-500/30 bg-cyan-950/20 px-8 py-3 text-[10px] uppercase tracking-[0.25em] text-cyan-400/70 transition-all hover:border-cyan-400/60 hover:bg-cyan-500/10 hover:text-cyan-300"
-              >
-                ← RETURN TO INITIAL NODE
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  /*
-   * RESULT SCREEN
-   */
-  if (gameState === "complete") {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#03050a] px-4 py-8 font-mono text-cyan-400">
-        <div className="relative w-full max-w-2xl overflow-hidden border border-cyan-500/30 bg-[#050912] p-8 shadow-[0_0_50px_rgba(0,255,255,0.08)] sm:p-12">
-          <div className="pointer-events-none absolute inset-0 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay" />
-
-          <div className="relative z-10">
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-[0.4em] text-cyan-500/50">
-                VΣLOHE SYSTEM
-              </div>
-
-              <h1 className="mt-4 text-2xl font-bold uppercase tracking-[0.2em] text-white sm:text-3xl">
-                RUN COMPLETE
-              </h1>
-
-              <div className="mt-3 text-[9px] uppercase tracking-[0.3em] text-cyan-400/70">
-                ARCHIVE NODE AEG-001 REACHED
-              </div>
-            </div>
-
-            <div className="mx-auto my-8 h-px w-full bg-cyan-500/15" />
-
-            <div className="grid grid-cols-2 gap-px border border-cyan-500/10 bg-cyan-500/10 sm:grid-cols-4">
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-cyan-500/40">
-                  SCORE
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-cyan-300">
-                  {score
-                    .toString()
-                    .padStart(6, "0")}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-cyan-500/40">
-                  NEOBYTES
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-purple-300">
-                  {neobytes
-                    .toString()
-                    .padStart(2, "0")}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-cyan-500/40">
-                  TIME
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-cyan-200">
-                  {formatTime(
-                    elapsedTime,
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-[#050912] p-5 text-center">
-                <div className="text-[8px] uppercase tracking-[0.2em] text-cyan-500/40">
-                  MAX COMBO
-                </div>
-
-                <div className="mt-2 text-xl font-bold text-yellow-300">
-                  x{maxCombo}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 border border-cyan-500/10 bg-cyan-950/[0.04] p-5 text-center">
-              <div className="text-[8px] uppercase tracking-[0.25em] text-cyan-500/40">
-                ARCHIVE PROGRESS
-              </div>
-
-              <div className="mt-2 text-sm tracking-[0.25em] text-cyan-300">
-                {progress}%
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-col items-center gap-3">
-              <button
-                type="button"
-                onClick={startGame}
-                className="border border-cyan-400/70 bg-cyan-500/10 px-10 py-4 text-xs uppercase tracking-[0.3em] text-cyan-200 transition-all hover:border-cyan-300 hover:bg-cyan-400/20 hover:shadow-[0_0_25px_rgba(0,255,255,0.2)]"
-              >
-                PLAY AGAIN →
-              </button>
-
-              <button
-                type="button"
-                onClick={returnToInitialNode}
-                className="border border-cyan-500/30 bg-cyan-950/20 px-8 py-3 text-[10px] uppercase tracking-[0.25em] text-cyan-400/70 transition-all hover:border-cyan-400/60 hover:bg-cyan-500/10 hover:text-cyan-300"
-              >
-                ← RETURN TO INITIAL NODE
-              </button>
-            </div>
-
-            <div className="mt-8 border-t border-cyan-500/10 pt-5 text-center text-[8px] uppercase tracking-[0.2em] text-cyan-500/25">
-              RUN DATA // TEMPORARY SESSION RECORD
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  /*
-   * PLAY SCREEN
-   */
   return (
-    <main className="min-h-screen bg-[#03050a] px-3 py-4 font-mono text-cyan-400 sm:px-5 sm:py-6 md:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col">
+    <main className="min-h-screen bg-[#050914] px-3 py-4 text-cyan-100 sm:px-6 sm:py-6">
+      <div className="mx-auto w-full max-w-[1200px]">
 
-        {/* HUD */}
-        <header className="mb-3 flex flex-col gap-3 border-b border-cyan-500/20 pb-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* HEADER */}
+
+        <header className="mb-3 flex items-center justify-between border-b border-cyan-500/20 pb-3">
           <div>
-            <div className="text-[8px] uppercase tracking-[0.4em] text-cyan-500/50 sm:text-[9px]">
+            <div className="text-[10px] uppercase tracking-[0.35em] text-cyan-400/70 sm:text-xs">
               VΣLOHE SYSTEM
             </div>
 
-            <h1 className="mt-1 text-xs font-bold uppercase tracking-[0.25em] text-white sm:text-sm">
-              ARCADE // INITIAL NODE
-            </h1>
+            <div className="mt-1 text-sm font-bold uppercase tracking-[0.25em] text-cyan-200">
+              ARCADE NODE
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-5 text-right">
-
-            {/* HP */}
+          <div className="text-right text-[8px] uppercase tracking-[0.2em] text-cyan-500/40 sm:text-[9px]">
             <div>
-              <div className="text-[7px] uppercase tracking-[0.2em] text-cyan-500/40">
-                HP
-              </div>
-
-              <div className="flex gap-1 text-base sm:text-lg">
-                {[1, 2, 3].map(
-                  (heart) => (
-                    <span
-                      key={heart}
-                      className={
-                        heart <= hp
-                          ? "text-red-400"
-                          : "text-red-950"
-                      }
-                    >
-                      ◆
-                    </span>
-                  ),
-                )}
-              </div>
+              BUILD // 04
             </div>
 
-            {/* SCORE */}
-            <div>
-              <div className="text-[7px] uppercase tracking-[0.2em] text-cyan-500/40">
-                SCORE
-              </div>
-
-              <div className="text-base font-bold tracking-widest text-cyan-300 sm:text-lg">
-                {score
-                  .toString()
-                  .padStart(6, "0")}
-              </div>
-            </div>
-
-            {/* NEOBYTES */}
-            <div>
-              <div className="text-[7px] uppercase tracking-[0.2em] text-cyan-500/40">
-                NEOBYTES
-              </div>
-
-              <div className="text-base font-bold tracking-widest text-purple-300 sm:text-lg">
-                {neobytes
-                  .toString()
-                  .padStart(3, "0")}
-              </div>
-            </div>
-
-            {/* TIME */}
-            <div>
-              <div className="text-[7px] uppercase tracking-[0.2em] text-cyan-500/40">
-                TIME
-              </div>
-
-              <div className="text-base font-bold tracking-widest text-cyan-200 sm:text-lg">
-                {formatTime(
-                  elapsedTime,
-                )}
-              </div>
-            </div>
-
-            {/* COMBO */}
-            <div>
-              <div className="text-[7px] uppercase tracking-[0.2em] text-cyan-500/40">
-                COMBO
-              </div>
-
-              <div className="text-base font-bold tracking-widest text-yellow-300 sm:text-lg">
-                x{combo}
-              </div>
+            <div className="mt-1">
+              AEG-001
             </div>
           </div>
         </header>
 
-        {/* GAME VIEWPORT */}
-        <section
-          ref={viewportRef}
-          className="relative h-[clamp(500px,70dvh,560px)] w-full overflow-hidden border border-cyan-500/20 bg-[#050912] shadow-[0_0_40px_rgba(0,255,255,0.05)]"
-        >
-          {/* Scanlines */}
-          <div className="pointer-events-none absolute inset-0 z-40 bg-[url('/scanlines.png')] opacity-10 mix-blend-overlay" />
+        {/* START SCREEN */}
 
-          {/* Grid */}
-          <div className="pointer-events-none absolute inset-0 z-20 opacity-[0.08] [background-image:linear-gradient(rgba(0,255,255,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.3)_1px,transparent_1px)] [background-size:50px_50px]" />
+        {gameState === "start" && (
+          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-cyan-500/20 bg-[#07101f]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,220,255,0.08),transparent_55%)]" />
 
-          {/* Atmosphere */}
-          <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(0,255,255,0.08),transparent_45%)]" />
+            <div className="relative z-10 text-center">
+              <div className="text-[9px] uppercase tracking-[0.5em] text-cyan-500/50">
+                ARCHIVE NODE // AEG-001
+              </div>
 
-          {/* WORLD */}
-          <div
-            className="absolute left-0 top-0"
-            style={{
-              width: `${WORLD_WIDTH}px`,
-              height: `${WORLD_HEIGHT}px`,
-              transform: `translateX(-${cameraX}px)`,
-            }}
+              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-cyan-300 sm:text-5xl">
+                VIREX
+              </h1>
+
+              <p className="mt-3 text-[9px] uppercase tracking-[0.3em] text-cyan-500/50">
+                AETHERGRID ARCADE PROTOCOL
+              </p>
+
+              <button
+                type="button"
+                onClick={startGame}
+                className="mt-8 border border-cyan-400/50 bg-cyan-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-200 transition hover:bg-cyan-400/20"
+              >
+                INITIALIZE
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* GAME */}
+
+        {gameState === "playing" && (
+          <section
+            ref={viewportRef}
+            className="relative h-[560px] overflow-hidden border border-cyan-500/20 bg-[#060b16]"
           >
-            {/* Sector labels */}
-            <div className="absolute left-12 top-16 text-[8px] uppercase tracking-[0.3em] text-cyan-500/20">
-              SECTOR // 001
-            </div>
 
-            <div className="absolute left-[1050px] top-16 text-[8px] uppercase tracking-[0.3em] text-cyan-500/20">
-              SECTOR // 002
-            </div>
-
-            <div className="absolute left-[2050px] top-16 text-[8px] uppercase tracking-[0.3em] text-cyan-500/20">
-              SECTOR // 003
-            </div>
-
-            {/* Background structures */}
-            <div className="absolute bottom-[90px] left-[300px] h-[180px] w-[70px] border border-cyan-500/10 bg-cyan-500/[0.02]" />
-
-            <div className="absolute bottom-[90px] left-[380px] h-[240px] w-[90px] border border-cyan-500/10 bg-cyan-500/[0.02]" />
-
-            <div className="absolute bottom-[90px] left-[1100px] h-[220px] w-[100px] border border-purple-500/10 bg-purple-500/[0.02]" />
-
-            <div className="absolute bottom-[90px] left-[1900px] h-[280px] w-[110px] border border-cyan-500/10 bg-cyan-500/[0.02]" />
-
-            {/* FLOOR */}
-            <div
-              className="absolute left-0 right-0 h-px bg-cyan-400 shadow-[0_0_15px_rgba(0,255,255,0.8)]"
-              style={{
-                top: `${FLOOR_Y}px`,
-              }}
-            />
+            {/* WORLD */}
 
             <div
-              className="absolute left-0 right-0 bg-gradient-to-b from-cyan-500/[0.04] to-transparent"
+              className="absolute left-0 top-0 h-full"
               style={{
-                top: `${FLOOR_Y + 1}px`,
-                height: "90px",
+                width: `${WORLD_WIDTH}px`,
+                transform: `translateX(-${cameraX}px)`,
               }}
-            />
+            >
 
-            {/* PLATFORMS */}
-            {PLATFORMS.map(
-              (platform) => (
-                <div
-                  key={`${platform.x}-${platform.y}`}
-                  className="absolute border border-cyan-400/60 bg-cyan-400/10 shadow-[0_0_12px_rgba(0,255,255,0.15)]"
-                  style={{
-                    left: `${platform.x}px`,
-                    top: `${platform.y}px`,
-                    width: `${platform.width}px`,
-                    height: `${platform.height}px`,
-                  }}
-                >
-                  <div className="absolute left-0 right-0 top-0 h-px bg-cyan-300 shadow-[0_0_8px_rgba(0,255,255,0.8)]" />
-                </div>
-              ),
-            )}
+              {/* SKY */}
 
-            {/* OBSTACLES */}
-            {OBSTACLES.map(
-              (obstacle) => (
-                <div
-                  key={obstacle.id}
-                  className="absolute border border-red-500/50 bg-red-500/10 shadow-[0_0_18px_rgba(255,0,80,0.12)]"
-                  style={{
-                    left: `${obstacle.x}px`,
-                    top: `${obstacle.y}px`,
-                    width: `${obstacle.width}px`,
-                    height: `${obstacle.height}px`,
-                  }}
-                >
-                  <div className="absolute inset-x-1 top-2 h-px bg-red-400/60" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,200,255,0.10),transparent_45%)]" />
 
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[7px] tracking-widest text-red-400/50">
-                    !
+              {/* GRID */}
+
+              <div
+                className="absolute inset-0 opacity-20"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(0,220,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,220,255,0.08) 1px, transparent 1px)",
+                  backgroundSize:
+                    "40px 40px",
+                }}
+              />
+
+              {/* FLOOR */}
+
+              <div
+                className="absolute left-0 border-t border-cyan-400/30 bg-[#091322]"
+                style={{
+                  top: `${FLOOR_Y}px`,
+                  width: `${WORLD_WIDTH}px`,
+                  height: `${WORLD_HEIGHT - FLOOR_Y}px`,
+                }}
+              />
+
+              {/* PLATFORMS */}
+
+              {PLATFORMS.map(
+                (platform) => (
+                  <div
+                    key={platform.x}
+                    className="absolute border border-cyan-400/30 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,220,255,0.08)]"
+                    style={{
+                      left: `${platform.x}px`,
+                      top: `${platform.y}px`,
+                      width: `${platform.width}px`,
+                      height: `${platform.height}px`,
+                    }}
+                  />
+                ),
+              )}
+
+              {/* OBSTACLES */}
+
+              {OBSTACLES.map(
+                (obstacle) => (
+                  <div
+                    key={obstacle.id}
+                    className="absolute border border-purple-400/30 bg-purple-500/10"
+                    style={{
+                      left: `${obstacle.x}px`,
+                      top: `${obstacle.y}px`,
+                      width: `${obstacle.width}px`,
+                      height: `${obstacle.height}px`,
+                    }}
+                  />
+                ),
+              )}
+
+              {/* NEOBYTES */}
+
+              {neobytesState
+                .filter(
+                  (byte) =>
+                    !byte.collected,
+                )
+                .map((byte) => (
+                  <div
+                    key={byte.id}
+                    className="absolute flex h-5 w-5 items-center justify-center rounded-full border border-cyan-200 bg-cyan-400/20 text-[7px] text-cyan-100 shadow-[0_0_14px_rgba(0,255,255,0.7)]"
+                    style={{
+                      left: `${byte.x - 10}px`,
+                      top: `${byte.y - 10}px`,
+                    }}
+                  >
+                    ◆
                   </div>
-                </div>
-              ),
-            )}
+                ))}
 
-            {/* ENEMIES */}
-            {enemies.map(
-              (enemy) => {
-                if (!enemy.alive) {
-                  return null;
-                }
+              {/* ENEMIES */}
 
-                return (
+              {enemies
+                .filter(
+                  (enemy) =>
+                    enemy.alive,
+                )
+                .map((enemy) => (
                   <div
                     key={enemy.id}
-                    className="absolute"
+                    className="absolute border border-fuchsia-500/40 bg-fuchsia-500/10 shadow-[0_0_14px_rgba(255,0,200,0.15)]"
                     style={{
                       left: `${enemy.x}px`,
                       top: `${enemy.y}px`,
@@ -1799,188 +1754,349 @@ export default function ArcadePage() {
                       height: `${enemy.height}px`,
                     }}
                   >
-                    <div className="absolute inset-0 border border-red-400/70 bg-red-500/10 shadow-[0_0_18px_rgba(255,0,80,0.35)]" />
-
-                    <div className="absolute left-1/2 top-3 h-4 w-4 -translate-x-1/2 border border-red-300 bg-red-500/30 shadow-[0_0_12px_rgba(255,0,80,0.8)]" />
-
-                    <div className="absolute left-2 top-8 h-7 w-8 border border-red-500/60 bg-red-500/10" />
-
-                    <div className="absolute bottom-0 left-2 h-4 w-2 bg-red-500/70" />
-
-                    <div className="absolute bottom-0 right-2 h-4 w-2 bg-red-500/70" />
-
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[6px] uppercase tracking-widest text-red-400/50">
-                      HOSTILE
-                    </div>
+                    <div className="absolute left-1/2 top-1/3 h-2 w-2 -translate-x-1/2 rounded-full bg-fuchsia-400 shadow-[0_0_8px_rgba(255,0,200,0.8)]" />
                   </div>
-                );
-              },
-            )}
+                ))}
 
-            {/* NEOBYTES */}
-            {neobytesState.map(
-              (byte) => {
-                if (byte.collected) {
-                  return null;
-                }
+              {/* =================================================
+              VIREX
+              ================================================= */}
 
-                return (
-                  <div
-                    key={byte.id}
-                    className="absolute flex h-6 w-6 items-center justify-center"
+              <div
+                className="absolute"
+                style={{
+                  left: `${player.x}px`,
+                  top: `${player.y}px`,
+                  width: `${PLAYER_WIDTH}px`,
+                  height: `${PLAYER_HEIGHT}px`,
+                }}
+              >
+
+                {/* VISUAL SPRITE */}
+
+                <div
+                  className="absolute bottom-0 left-1/2"
+                  style={{
+                    /*
+                     * IDLE = 105px
+                     * RUN  = 100px
+                     *
+                     * Width remains automatic.
+                     * This preserves the original
+                     * aspect ratio of each PNG.
+                     */
+
+                    height: `${
+                      isVirexMoving
+                        ? VIREX_RUN_HEIGHT
+                        : VIREX_IDLE_HEIGHT
+                    }px`,
+
+                    transform:
+                      player.facing ===
+                      "left"
+                        ? "translateX(-50%) scaleX(-1)"
+                        : "translateX(-50%) scaleX(1)",
+
+                    transformOrigin:
+                      "center bottom",
+                  }}
+                >
+                  <img
+                    src={
+                      isVirexMoving
+                        ? VIREX_RUN_FRAMES[
+                            virexRunFrame
+                          ]
+                        : VIREX_IDLE_FRAMES[
+                            idleFrame
+                          ]
+                    }
+                    alt="VIREX"
+                    draggable={false}
+                    className="pointer-events-none block h-full w-auto max-w-none select-none"
                     style={{
-                      left: `${byte.x - 12}px`,
-                      top: `${byte.y - 12}px`,
+                      imageRendering:
+                        "pixelated",
                     }}
-                  >
-                    <div className="absolute h-3 w-3 rotate-45 border border-purple-300 bg-purple-400/30 shadow-[0_0_14px_rgba(180,80,255,0.9)]" />
+                  />
+                </div>
 
-                    <div className="absolute h-1 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]" />
+                {/* ATTACK VISUAL */}
+
+                {player.attacking && (
+                  <div
+                    className="absolute top-5 h-5 w-10 border-y-2 border-cyan-300 bg-cyan-400/20 shadow-[0_0_20px_rgba(0,255,255,0.8)]"
+                    style={{
+                      left:
+                        player.facing ===
+                        "right"
+                          ? `${PLAYER_WIDTH}px`
+                          : "-40px",
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* FINISH NODE */}
+
+              <div className="absolute right-20 top-[220px] text-center">
+                <div className="text-[8px] uppercase tracking-[0.3em] text-purple-400/50">
+                  ARCHIVE NODE
+                </div>
+
+                <div className="mx-auto mt-2 h-20 w-px bg-purple-400/30 shadow-[0_0_10px_rgba(180,80,255,0.3)]" />
+              </div>
+            </div>
+
+            {/* CAMERA HUD */}
+
+            <div className="absolute left-3 top-3 z-50 text-[7px] uppercase tracking-[0.2em] text-cyan-500/35 sm:left-4 sm:top-4 sm:text-[8px]">
+              <div>
+                POSITION //{" "}
+                {Math.round(
+                  player.x,
+                )
+                  .toString()
+                  .padStart(
+                    4,
+                    "0",
+                  )}
+              </div>
+
+              <div className="mt-1">
+                NODE // AEG-001
+              </div>
+            </div>
+
+            {/* GAME HUD */}
+
+            <div className="absolute right-3 top-3 z-50 text-right text-[7px] uppercase tracking-[0.15em] text-cyan-500/40 sm:right-4 sm:top-4 sm:text-[8px]">
+              <div>
+                HP // {hp}/
+                {INITIAL_HP}
+              </div>
+
+              <div className="mt-1">
+                SCORE // {score}
+              </div>
+
+              <div className="mt-1">
+                NEOBYTES // {neobytes}
+              </div>
+
+              <div className="mt-1">
+                COMBO // x{combo}
+              </div>
+
+              <div className="mt-1">
+                TIME //{" "}
+                {formatTime(
+                  elapsedTime,
+                )}
+              </div>
+            </div>
+
+            {/* DESKTOP CONTROLS */}
+
+            <div className="absolute bottom-3 left-3 z-50 hidden text-[7px] uppercase tracking-[0.18em] text-cyan-500/40 sm:bottom-4 sm:left-4 sm:block sm:text-[8px]">
+              <div>
+                MOVE // A D / ← →
+              </div>
+
+              <div className="mt-1">
+                JUMP // SPACE
+              </div>
+
+              <div className="mt-1">
+                ATTACK // X / J
+              </div>
+            </div>
+
+            {/* PROGRESS */}
+
+            <div className="absolute bottom-3 right-3 z-50 text-right text-[7px] uppercase tracking-[0.18em] text-cyan-500/30 sm:bottom-4 sm:right-4 sm:text-[8px]">
+              <div>
+                ARCHIVE PROGRESS
+              </div>
+
+              <div className="mt-1 text-cyan-400/50">
+                {progress}%
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* COMPLETE */}
+
+        {gameState ===
+          "complete" && (
+          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-cyan-500/20 bg-[#07101f]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,255,0.12),transparent_55%)]" />
+
+            <div className="relative z-10 text-center">
+              <div className="text-[9px] uppercase tracking-[0.4em] text-cyan-400/60">
+                ARCHIVE NODE // COMPLETE
+              </div>
+
+              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-cyan-300 sm:text-5xl">
+                MISSION COMPLETE
+              </h1>
+
+              <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-cyan-500/50">
+                VIREX HAS REACHED THE NEXT NODE
+              </p>
+
+              <div className="mt-8 grid grid-cols-2 gap-3 text-left text-[9px] uppercase tracking-[0.15em]">
+                <div className="border border-cyan-500/20 px-5 py-3">
+                  <div className="text-cyan-500/40">
+                    SCORE
                   </div>
-                );
-              },
-            )}
 
-            {/* PLAYER */}
-            <div
-              className="absolute"
-              style={{
-                left: `${player.x}px`,
-                top: `${player.y}px`,
-                width: `${PLAYER_WIDTH}px`,
-                height: `${PLAYER_HEIGHT}px`,
-                transform:
-                  player.facing === "left"
-                    ? "scaleX(-1)"
-                    : "scaleX(1)",
-              }}
-            >
-              {player.attacking && (
-                <div className="absolute -right-10 top-5 h-5 w-10 border-y-2 border-cyan-300 bg-cyan-400/20 shadow-[0_0_20px_rgba(0,255,255,0.8)]" />
-              )}
+                  <div className="mt-1 text-cyan-200">
+                    {score}
+                  </div>
+                </div>
 
-              <div className="absolute left-3 top-0 h-5 w-5 border border-cyan-300 bg-cyan-950 shadow-[0_0_12px_rgba(0,255,255,0.5)]" />
+                <div className="border border-cyan-500/20 px-5 py-3">
+                  <div className="text-cyan-500/40">
+                    TIME
+                  </div>
 
-              <div className="absolute left-1 top-6 h-9 w-9 border border-cyan-400 bg-cyan-500/20 shadow-[0_0_15px_rgba(0,255,255,0.3)]">
-                <div className="absolute left-2 top-2 h-1 w-5 bg-cyan-300 shadow-[0_0_8px_rgba(0,255,255,0.8)]" />
+                  <div className="mt-1 text-cyan-200">
+                    {formatTime(
+                      elapsedTime,
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="absolute left-2 top-15 h-7 w-2 bg-cyan-500" />
-
-              <div className="absolute left-7 top-15 h-7 w-2 bg-cyan-500" />
-
-              <div className="absolute -right-1 top-8 h-1 w-3 bg-cyan-200" />
+              <button
+                type="button"
+                onClick={
+                  returnToInitialNode
+                }
+                className="mt-8 border border-cyan-400/50 bg-cyan-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-200 transition hover:bg-cyan-400/20"
+              >
+                RETURN TO NODE
+              </button>
             </div>
+          </section>
+        )}
 
-            {/* FINISH NODE */}
-            <div className="absolute right-20 top-[220px] text-center">
-              <div className="text-[8px] uppercase tracking-[0.3em] text-purple-400/50">
-                ARCHIVE NODE
+        {/* GAME OVER */}
+
+        {gameState ===
+          "gameover" && (
+          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-fuchsia-500/20 bg-[#100712]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,0,180,0.10),transparent_55%)]" />
+
+            <div className="relative z-10 text-center">
+              <div className="text-[9px] uppercase tracking-[0.4em] text-fuchsia-400/50">
+                SYSTEM INTERRUPTION
               </div>
 
-              <div className="mx-auto mt-2 h-20 w-px bg-purple-400/30 shadow-[0_0_10px_rgba(180,80,255,0.3)]" />
-            </div>
-          </div>
+              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-fuchsia-300 sm:text-5xl">
+                VIREX OFFLINE
+              </h1>
 
-          {/* CAMERA HUD */}
-          <div className="absolute left-3 top-3 z-50 text-[7px] uppercase tracking-[0.2em] text-cyan-500/35 sm:left-4 sm:top-4 sm:text-[8px]">
-            <div>
-              POSITION //{" "}
-              {Math.round(player.x)
-                .toString()
-                .padStart(4, "0")}
-            </div>
+              <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-fuchsia-500/40">
+                ARCHIVE CONNECTION LOST
+              </p>
 
-            <div className="mt-1">
-              NODE // AEG-001
+              <button
+                type="button"
+                onClick={startGame}
+                className="mt-8 border border-fuchsia-400/40 bg-fuchsia-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-fuchsia-200 transition hover:bg-fuchsia-400/20"
+              >
+                REINITIALIZE
+              </button>
             </div>
-          </div>
-
-          {/* DESKTOP CONTROLS */}
-          <div className="absolute bottom-3 left-3 z-50 hidden text-[7px] uppercase tracking-[0.18em] text-cyan-500/40 sm:bottom-4 sm:left-4 sm:block sm:text-[8px]">
-            <div>
-              MOVE // A D / ← →
-            </div>
-
-            <div className="mt-1">
-              JUMP // SPACE
-            </div>
-
-            <div className="mt-1">
-              ATTACK // X / J
-            </div>
-          </div>
-
-          {/* PROGRESS */}
-          <div className="absolute bottom-3 right-3 z-50 text-right text-[7px] uppercase tracking-[0.18em] text-cyan-500/30 sm:bottom-4 sm:right-4 sm:text-[8px]">
-            <div>
-              ARCHIVE PROGRESS
-            </div>
-
-            <div className="mt-1 text-cyan-400/50">
-              {progress}%
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* MOBILE CONTROLS */}
-        <div className="mt-3 grid grid-cols-4 gap-2 sm:hidden">
-          <button
-            type="button"
-            onPointerDown={() =>
-              holdKey("arrowleft")
-            }
-            onPointerUp={() =>
-              releaseKey("arrowleft")
-            }
-            onPointerCancel={() =>
-              releaseKey("arrowleft")
-            }
-            onPointerLeave={() =>
-              releaseKey("arrowleft")
-            }
-            className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-          >
-            ←
-          </button>
 
-          <button
-            type="button"
-            onClick={triggerJump}
-            className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-[10px] text-cyan-300 active:bg-cyan-500/20"
-          >
-            JUMP
-          </button>
+        {gameState ===
+          "playing" && (
+          <div className="mt-3 grid grid-cols-4 gap-2 sm:hidden">
 
-          <button
-            type="button"
-            onClick={triggerAttack}
-            className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-[10px] text-cyan-300 active:bg-cyan-500/20"
-          >
-            ATTACK
-          </button>
+            <button
+              type="button"
+              onPointerDown={() =>
+                holdKey(
+                  "arrowleft",
+                )
+              }
+              onPointerUp={() =>
+                releaseKey(
+                  "arrowleft",
+                )
+              }
+              onPointerCancel={() =>
+                releaseKey(
+                  "arrowleft",
+                )
+              }
+              onPointerLeave={() =>
+                releaseKey(
+                  "arrowleft",
+                )
+              }
+              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
+            >
+              ←
+            </button>
 
-          <button
-            type="button"
-            onPointerDown={() =>
-              holdKey("arrowright")
-            }
-            onPointerUp={() =>
-              releaseKey("arrowright")
-            }
-            onPointerCancel={() =>
-              releaseKey("arrowright")
-            }
-            onPointerLeave={() =>
-              releaseKey("arrowright")
-            }
-            className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-          >
-            →
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={triggerJump}
+              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-[10px] text-cyan-300 active:bg-cyan-500/20"
+            >
+              JUMP
+            </button>
+
+            <button
+              type="button"
+              onClick={
+                triggerAttack
+              }
+              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-[10px] text-cyan-300 active:bg-cyan-500/20"
+            >
+              ATTACK
+            </button>
+
+            <button
+              type="button"
+              onPointerDown={() =>
+                holdKey(
+                  "arrowright",
+                )
+              }
+              onPointerUp={() =>
+                releaseKey(
+                  "arrowright",
+                )
+              }
+              onPointerCancel={() =>
+                releaseKey(
+                  "arrowright",
+                )
+              }
+              onPointerLeave={() =>
+                releaseKey(
+                  "arrowright",
+                )
+              }
+              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
+            >
+              →
+            </button>
+          </div>
+        )}
 
         {/* FOOTER */}
+
         <footer className="mt-3 flex items-center justify-between text-[7px] uppercase tracking-[0.2em] text-cyan-500/25 sm:text-[8px]">
           <span>
             ARCADE NODE // BUILD 04
