@@ -3,9 +3,9 @@ import { GameProtocolView } from "@/components/game/GameProtocolView";
 import { PageTransition } from "@/components/ui/PageTransition";
 
 export const metadata: Metadata = {
-  title: "Game Protocol",
+  title: "VΣLOHE SYSTEM — GAME WHITEPAPER",
   description:
-    "Build your Node. Expand the Network. Reach the Aethergrid. — VΣLOHE game layer in active development.",
+    "Build your Nexus. Expand the Network. Reach the Aethergrid — VΣLOHE SYSTEM game layer in active development.",
 };
 
 /**

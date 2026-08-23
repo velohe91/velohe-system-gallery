@@ -36,8 +36,8 @@ export default function HomePage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          Offline-first exhibition node. Recovered artifacts, sealed keys, and
-          system lore — rendered under neon glass.
+          NFT Exhibition Node. Collected artifacts, sealed crypto arts, and
+          system lore — rendered under Web 3.0.
         </motion.p>
 
         <SystemBootSequence />
