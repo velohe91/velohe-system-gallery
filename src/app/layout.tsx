@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Orbitron, Share_Tech_Mono } from "next/font/google";
 import { ImmersiveShell } from "@/components/layout/ImmersiveShell";
+import { Web3Providers } from "@/components/web3/Web3Providers";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import "./globals.css";
 
@@ -39,7 +40,9 @@ export default function RootLayout({
       <body
         className={`${orbitron.variable} ${shareTech.variable} font-mono antialiased`}
       >
-        <ImmersiveShell>{children}</ImmersiveShell>
+        <Web3Providers>
+          <ImmersiveShell>{children}</ImmersiveShell>
+        </Web3Providers>
       </body>
     </html>
   );

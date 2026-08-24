@@ -6,6 +6,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { MarketTicker } from "@/components/web3/MarketTicker";
+import { ConnectNodeButton } from "@/components/web3/ConnectNodeButton";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -14,16 +16,16 @@ export function Navbar() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 border-b border-neon-cyan/10 bg-void/70 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
         <Link
           href="/"
-          className="font-sans text-sm font-bold tracking-[0.25em] text-neon-cyan text-glow-sm sm:text-base"
+          className="shrink-0 font-sans text-sm font-bold tracking-[0.25em] text-neon-cyan text-glow-sm sm:text-base"
         >
           {SITE_NAME}
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
           {NAV_LINKS.map((link) => {
             const active =
               link.href === "/"
@@ -33,7 +35,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative px-3 py-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors ${
+                className={`relative px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors xl:px-3 xl:text-xs ${
                   active
                     ? "text-neon-cyan"
                     : "text-muted hover:text-neon-blue"
@@ -49,35 +51,31 @@ export function Navbar() {
               </Link>
             );
           })}
+        </nav>
+
+        {/* Chrome: prices + wallet + FS */}
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="hidden sm:block">
+            <MarketTicker />
+          </div>
+
+          <ConnectNodeButton />
 
           {isSupported && (
             <button
               type="button"
               onClick={toggle}
-              className="ml-2 rounded border border-neon-blue/30 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neon-blue hover:border-neon-cyan hover:text-neon-cyan"
+              className="hidden rounded border border-neon-blue/30 px-2 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neon-blue hover:border-neon-cyan hover:text-neon-cyan md:inline-flex"
               aria-pressed={isFullscreen}
               title="Toggle immersive fullscreen"
             >
-              {isFullscreen ? "Exit FS" : "Fullscreen"}
+              {isFullscreen ? "Exit FS" : "FS"}
             </button>
           )}
-        </nav>
 
-        {/* Mobile controls */}
-        <div className="flex items-center gap-2 md:hidden">
-          {isSupported && (
-            <button
-              type="button"
-              onClick={toggle}
-              className="rounded border border-neon-blue/30 px-2 py-1 font-mono text-[10px] uppercase text-neon-blue"
-              aria-label="Toggle fullscreen"
-            >
-              FS
-            </button>
-          )}
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center text-neon-cyan"
+            className="flex h-10 w-10 items-center justify-center text-neon-cyan lg:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label="Toggle menu"
@@ -93,9 +91,12 @@ export function Navbar() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-neon-cyan/10 md:hidden"
+            className="overflow-hidden border-t border-neon-cyan/10 lg:hidden"
             aria-label="Mobile"
           >
+            <div className="border-b border-neon-cyan/10 px-4 py-3 sm:hidden">
+              <MarketTicker />
+            </div>
             <ul className="flex flex-col gap-1 px-4 py-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>

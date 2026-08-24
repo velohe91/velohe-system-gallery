@@ -30,11 +30,28 @@ An immersive cyberpunk web app for exhibiting NFT-style artifacts with lore, sys
 # Install dependencies
 npm install
 
+# Copy env and set WalletConnect project ID (required for Connect Node)
+cp .env.example .env.local
+# Edit .env.local → NEXT_PUBLIC_WC_PROJECT_ID=...
+
 # Development server (Turbopack)
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Environment variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_WC_PROJECT_ID` | **Yes** (for wallet connect) | WalletConnect Cloud project ID — [cloud.walletconnect.com](https://cloud.walletconnect.com/) |
+| `TXZ_COINGECKO_ID` | No | CoinGecko asset id if TXZ is not Tezos; default maps **TXZ → Tezos (XTZ)** |
+
+### Web3 Phase 1 (header)
+
+- Live **ETH** / **TXZ** price chips (poll `/api/market/prices` every 45s)
+- **CONNECT NODE** via RainbowKit (wagmi + viem) — Base primary, Ethereum mainnet available
+- Site works fully **without** a connected wallet (no gated routes in this phase)
 
 ```bash
 # Production build
