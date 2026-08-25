@@ -4,7 +4,7 @@
  */
 
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
-import { base, mainnet } from "wagmi/chains";
+import { base, mainnet, polygon } from "wagmi/chains";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   metaMaskWallet,
@@ -13,10 +13,10 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 
 /** Primary chain for “switch network” prompts */
-export const PRIMARY_CHAIN = base;
+export const PRIMARY_CHAIN = mainnet;
 
 /** Deploy / browse targets — easy to extend */
-export const SUPPORTED_CHAINS = [base, mainnet] as const;
+export const SUPPORTED_CHAINS = [mainnet, base, polygon] as const;
 
 export const WC_PROJECT_ID =
   process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "MISSING_WC_PROJECT_ID";
@@ -41,10 +41,11 @@ export function getWagmiConfig() {
 
   return createConfig({
     connectors,
-    chains: [base, mainnet],
+    chains: [mainnet, base, polygon],
     transports: {
-      [base.id]: http(),
       [mainnet.id]: http(),
+      [base.id]: http(),
+      [polygon.id]: http(),
     },
     ssr: true,
     storage: createStorage({

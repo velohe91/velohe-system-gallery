@@ -4,7 +4,7 @@
 
 export const SITE_NAME = "VΣLOHE SYSTEM";
 export const SITE_TAGLINE = "NFT Exhibition System";
-export const SITE_VERSION = "v0.1.0-ARCHIVE";
+export const SITE_VERSION = "v2.0";
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },

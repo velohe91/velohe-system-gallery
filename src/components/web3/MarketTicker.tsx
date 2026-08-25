@@ -14,7 +14,7 @@ function formatUsd(value: number | null, digits = 2): string {
 }
 
 /**
- * Compact cyberpunk price chips — ETH + TXZ.
+ * Compact cyberpunk price chips — BTC, ETH, SOL, TXZ, and POL.
  * Polls /api/market/prices; never blocks layout on error.
  */
 export function MarketTicker() {
@@ -46,21 +46,33 @@ export function MarketTicker() {
     };
   }, []);
 
+  const btcLabel =
+    status === "loading" && !data
+      ? "…"
+      : formatUsd(data?.btcUsd ?? null, 2);
   const ethLabel =
     status === "loading" && !data
       ? "…"
       : formatUsd(data?.ethUsd ?? null, 2);
+  const solLabel =
+    status === "loading" && !data
+      ? "…"
+      : formatUsd(data?.solUsd ?? null, 2);
   const txzLabel =
     status === "loading" && !data
       ? "…"
       : formatUsd(data?.txzUsd ?? null, data?.txzUsd != null && data.txzUsd < 1 ? 4 : 2);
+  const polLabel =
+    status === "loading" && !data
+      ? "…"
+      : formatUsd(data?.polUsd ?? null, data?.polUsd != null && data.polUsd < 1 ? 4 : 2);
 
   return (
     <div
       className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider sm:gap-2 sm:text-[10px]"
       title={
         data
-          ? `Updated ${data.updatedAt} · ETH:${data.sources.eth} · TXZ:${data.sources.txz}`
+          ? `Updated ${data.updatedAt} · BTC:${data.sources.btc} · ETH:${data.sources.eth} · SOL:${data.sources.sol} · TXZ:${data.sources.txz} · POL:${data.sources.pol}`
           : status === "error"
             ? "Price feed offline"
             : "Loading market feed"
@@ -69,9 +81,20 @@ export function MarketTicker() {
     >
       <span
         className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error"
+          status === "error" || data?.btcUsd == null
+            ? "border-neon-blue/20 text-muted"
+            : "border-[#f7931a]/60 bg-[#f7931a]/10 text-[#ffb45a] shadow-[0_0_8px_rgba(247,147,26,0.12)]"
+        }`}
+      >
+        <span className="hidden text-muted sm:inline">BTC // </span>
+        <span className="sm:hidden">BTC </span>
+        {btcLabel}
+      </span>
+      <span
+        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
+          status === "error" || data?.ethUsd == null
             ? "border-rose-400/30 text-rose-300/80"
-            : "border-neon-cyan/25 text-neon-cyan/90"
+            : "border-slate-300/45 bg-slate-200/10 text-slate-100 shadow-[0_0_8px_rgba(226,232,240,0.1)]"
         }`}
       >
         <span className="hidden text-muted sm:inline">ETH // </span>
@@ -80,14 +103,36 @@ export function MarketTicker() {
       </span>
       <span
         className={`rounded border px-1.5 py-0.5 sm:px-2 ${
+          status === "error" || data?.solUsd == null
+            ? "border-neon-blue/20 text-muted"
+            : "border-[#14f1d9]/60 bg-[#14f1d9]/10 text-[#6fffe9] shadow-[0_0_8px_rgba(20,241,217,0.12)]"
+        }`}
+      >
+        <span className="hidden text-muted sm:inline">SOL // </span>
+        <span className="sm:hidden">SOL </span>
+        {solLabel}
+      </span>
+      <span
+        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
           status === "error" || data?.txzUsd == null
             ? "border-neon-blue/20 text-muted"
-            : "border-neon-blue/30 text-neon-blue/90"
+            : "border-[#2f7df6]/60 bg-[#2f7df6]/10 text-[#75a8ff] shadow-[0_0_8px_rgba(47,125,246,0.12)]"
         }`}
       >
         <span className="hidden text-muted sm:inline">TXZ // </span>
         <span className="sm:hidden">TXZ </span>
         {txzLabel}
+      </span>
+      <span
+        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
+          status === "error" || data?.polUsd == null
+            ? "border-neon-blue/20 text-muted"
+            : "border-[#a855f7]/60 bg-[#a855f7]/10 text-[#d8a4ff] shadow-[0_0_8px_rgba(168,85,247,0.12)]"
+        }`}
+      >
+        <span className="hidden text-muted sm:inline">POL // </span>
+        <span className="sm:hidden">POL </span>
+        {polLabel}
       </span>
     </div>
   );

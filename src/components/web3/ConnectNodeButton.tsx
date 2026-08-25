@@ -1,7 +1,6 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { PRIMARY_CHAIN } from "@/lib/web3/config";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 4)}…${address.slice(-2)}`;
@@ -61,20 +60,8 @@ export function ConnectNodeButton() {
           );
         }
 
-        const onPrimary = chain.id === PRIMARY_CHAIN.id;
-
         return (
           <div className="flex items-center gap-1.5">
-            {!onPrimary && (
-              <button
-                type="button"
-                onClick={openChainModal}
-                className="hidden rounded border border-amber-400/40 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-amber-200/90 sm:inline-flex"
-                title={`Switch to ${PRIMARY_CHAIN.name}`}
-              >
-                Switch
-              </button>
-            )}
             <button
               type="button"
               onClick={openChainModal}
