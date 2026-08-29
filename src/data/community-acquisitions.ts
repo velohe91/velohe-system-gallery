@@ -52,4 +52,24 @@ The asset has been successfully integrated into the exhibition node. Ownership r
     year: 2026,
     tags: ["community", "acquisition", "neopop-pandas", "khaleghi"],
   },
+  {
+    id: "ACQ-003",
+    title: "Kaiju in Tokyo",
+    image: "/logs/Kaiju-in-Tokyo.gif",
+    video: "/logs/Kaiju-in-Tokyo.gif",
+    description:
+      "A community acquisition from the Hey!Kaiju collection, now preserved in the VΣLOHE SYSTEM exhibition.",
+    lore: `NFT acquired from the Hey!Kaiju collection (Emotion Grapher).
+
+Kaiju in Tokyo — 1/1, now integrated into the VΣLOHE SYSTEM exhibition node.
+
+The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+    series: "Hey!Kaiju",
+    rarity: "rare",
+    objkt:
+      "https://objkt.com/tokens/KT1E7TR2Gj1KLt19VNh9bYLSrgjgNAR8e8xT/549",
+    status: "Archived",
+    year: 2026,
+    tags: ["community", "acquisition", "kaiju", "tokyo", "hey-kaiju"],
+  },
 ];

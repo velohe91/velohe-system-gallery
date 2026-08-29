@@ -14,7 +14,30 @@ import type { SystemLogEntry } from "@/lib/types";
 
 export const systemLogs: SystemLogEntry[] = [
   // ─── Live (LOG-VΣ##) — sorted newest-first in feed.ts ───
-    {
+  {
+    kind: "system-log",
+    era: "live",
+    id: "LOG-VΣ06",
+    timestamp: "2026.08.26",
+    level: "SIGNAL",
+    title: "LOG-VΣ06 // Kaiju in Tokyo — Asset Acquisition Confirmed",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VΣLOHE SYSTEM ARCHIVE",
+    image: "/logs/Kaiju-in-Tokyo.gif",
+    marketplace:
+      "https://objkt.com/tokens/KT1E7TR2Gj1KLt19VNh9bYLSrgjgNAR8e8xT/549",
+    buyerProfile:
+      "https://x.com/velohe91/status/2092475752973312142",
+    message: `System Log // NFT Acquired from the Hey!Kaiju collection (Emotion Grapher)!
+
+Kaiju in Tokyo — 1/1 — now preserved in the VΣLOHE SYSTEM exhibition node.
+
+Asset designation: Kaiju in Tokyo
+
+The asset has been successfully integrated into the VΣLOHE exhibition system. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+  },
+  {
     kind: "system-log",
     era: "live",
     id: "LOG-VΣ05",
@@ -38,6 +61,7 @@ Asset designation: Matrix Mix
 
 The asset has been successfully integrated into the VΣLOHE exhibition system. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
   },
+
 
   {
     kind: "system-log",
