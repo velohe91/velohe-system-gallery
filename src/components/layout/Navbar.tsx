@@ -6,7 +6,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { useFullscreen } from "@/hooks/useFullscreen";
-import { MarketTicker } from "@/components/web3/MarketTicker";
 import { ConnectNodeButton } from "@/components/web3/ConnectNodeButton";
 
 export function Navbar() {
@@ -53,12 +52,8 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Chrome: prices + wallet + FS */}
+        {/* Chrome: wallet + FS */}
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <div className="hidden sm:block">
-            <MarketTicker />
-          </div>
-
           <ConnectNodeButton />
 
           {isSupported && (
@@ -94,9 +89,6 @@ export function Navbar() {
             className="overflow-hidden border-t border-neon-cyan/10 lg:hidden"
             aria-label="Mobile"
           >
-            <div className="border-b border-neon-cyan/10 px-4 py-3 sm:hidden">
-              <MarketTicker />
-            </div>
             <ul className="flex flex-col gap-1 px-4 py-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
