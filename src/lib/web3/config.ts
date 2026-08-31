@@ -4,7 +4,7 @@
  */
 
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
-import { base, mainnet, polygon } from "wagmi/chains";
+import { base, mainnet, polygon, bsc } from "wagmi/chains";
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 import {
   metaMaskWallet,
@@ -12,11 +12,32 @@ import {
   walletConnectWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 
-/** Primary chain for “switch network” prompts */
-export const PRIMARY_CHAIN = mainnet;
+/** Preferred chain for “Switch network” when unsupported */
+export const PRIMARY_CHAIN = base;
 
-/** Deploy / browse targets — easy to extend */
-export const SUPPORTED_CHAINS = [mainnet, base, polygon] as const;
+/**
+ * Supported EVM networks (display / connect order).
+ * Base → Ethereum → Polygon → BSC
+ */
+export const SUPPORTED_CHAINS = [base, mainnet, polygon, bsc] as const;
+
+/** Short cyberpunk labels for the header network badge */
+export const CHAIN_BADGE_LABELS: Record<number, string> = {
+  [base.id]: "BASE",
+  [mainnet.id]: "ETHEREUM",
+  [polygon.id]: "POLYGON",
+  [bsc.id]: "BSC",
+};
+
+export function getChainBadgeLabel(
+  chainId: number,
+  fallbackName?: string,
+): string {
+  return (
+    CHAIN_BADGE_LABELS[chainId] ??
+    (fallbackName ? fallbackName.toUpperCase() : `CHAIN ${chainId}`)
+  );
+}
 
 export const WC_PROJECT_ID =
   process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? "MISSING_WC_PROJECT_ID";
@@ -25,7 +46,7 @@ export const APP_NAME = "VΣLOHE SYSTEM";
 
 /** Create wagmi config in the client provider (not at import time). */
 export function getWagmiConfig() {
-  // Note: coinbaseWallet omitted — CDP SDK pulls optional @x402 deps that break Next builds.
+  // coinbaseWallet omitted — CDP SDK optional @x402 deps break Next builds.
   const connectors = connectorsForWallets(
     [
       {
@@ -41,11 +62,12 @@ export function getWagmiConfig() {
 
   return createConfig({
     connectors,
-    chains: [mainnet, base, polygon],
+    chains: [base, mainnet, polygon, bsc],
     transports: {
-      [mainnet.id]: http(),
       [base.id]: http(),
+      [mainnet.id]: http(),
       [polygon.id]: http(),
+      [bsc.id]: http(),
     },
     ssr: true,
     storage: createStorage({
