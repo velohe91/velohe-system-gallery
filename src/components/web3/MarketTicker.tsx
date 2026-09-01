@@ -120,7 +120,7 @@ export function MarketTicker() {
         }`}
       >
         <span className="hidden text-muted sm:inline">XTZ // </span>
-        <span className="sm:hidden">TXZ </span>
+        <span className="sm:hidden">XTZ </span>
         {xtzLabel}
       </span>
       <span
