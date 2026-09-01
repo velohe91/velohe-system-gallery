@@ -19,10 +19,10 @@ title: "Signal Rebirth",
 image: "/logs/signal-rebirth.gif",
 video: "/logs/signal-rebirth.gif",
  description:
-"A community acquisition from the After Light Dimension collection collection, now preserved in the VΣLOHE SYSTEM exhibition.",
+"A community acquisition from the DREAMNT collection, now preserved in the VΣLOHE SYSTEM exhibition.",
 lore: `NFT acquired from @its_dreamnt
  collection.
-Glad to have this wonder piece with a narrative structure to the VΣLOHE SYSTEM metaverse. The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+Excited to welcome this wonderful, narrative-driven piece into the VΣLOHE SYSTEM metaverse. The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
  series: "After Light Dimension",
  rarity: "rare",
 objkt:
