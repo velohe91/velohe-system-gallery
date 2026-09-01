@@ -14,6 +14,25 @@ import type { NftItem } from "@/lib/types";
 
 export const communityAcquisitions: NftItem[] = [
   {
+id: "ACQ-004",
+title: "Signal Rebirth",
+image: "/logs/signal-rebirth.gif",
+video: "/logs/signal-rebirth.gif",
+ description:
+"A community acquisition from the After Light Dimension collection collection, now preserved in the VΣLOHE SYSTEM exhibition.",
+lore: `NFT acquired from @its_dreamnt
+ collection.
+Glad to have this wonder piece with a narrative structure to the VΣLOHE SYSTEM metaverse. The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+ series: "After Light Dimension",
+ rarity: "rare",
+objkt:
+ "https://objkt.com/tokens/KT1QLjELiJGcbUkqrRGDVtMPSC1xZggBS4TU/1?ref=tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse",
+ status: "Archived",
+ year: 2026,
+ tags: ["community", "acquisition", "signal", "rebirth", "after-light-dimension"],
+ },
+
+  {
 id: "ACQ-003",
 title: "Kaiju in Tokyo",
 image: "/logs/Kaiju-in-Tokyo.gif",
@@ -23,7 +42,7 @@ video: "/logs/Kaiju-in-Tokyo.gif",
 lore: `NFT acquired from @Kaiju_tez collection.
 The flawless glitch execution on this piece makes it feel completely native to the VΣLOHE SYSTEM metaverse. The asset has been successfully integrated into the exhibition node. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
  series: "Hey!Kaiju",
- rarity: "Mythic",
+ rarity: "mythic",
 objkt:
  "https://objkt.com/tokens/KT1E7TR2Gj1KLt19VNh9bYLSrgjgNAR8e8xT/549?ref=tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse",
  status: "Archived",
