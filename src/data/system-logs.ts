@@ -14,6 +14,30 @@ import type { SystemLogEntry } from "@/lib/types";
 
 export const systemLogs: SystemLogEntry[] = [
   // ─── Live (LOG-VΣ##) — sorted newest-first in feed.ts ───
+
+  {
+    kind: "system-log",
+    era: "live",
+    id: "LOG-VΣ07",
+    timestamp: "2026.08.26",
+    level: "SIGNAL",
+    title: "LOG-VΣ07 // Signal Rebirth — Asset Acquisition Confirmed",
+    status: "COMPLETED",
+    classification: "PUBLIC RECORD",
+    gallery: "VΣLOHE SYSTEM ARCHIVE",
+    image: "/logs/signal-rebirth.gif",
+    marketplace:
+      "https://objkt.com/tokens/KT1QLjELiJGcbUkqrRGDVtMPSC1xZggBS4TU/1?ref=tz1LFQHDFX8VzSA1Vyc6sYQdyNGL1KKmwhse",
+    buyerProfile:
+      "https://x.com/velohe91",
+    message: `System Log // NFT Acquired from the After Light Dimension collection (Emotion Grapher)!
+
+Signal Rebirth — 1/5 — now preserved in the VΣLOHE SYSTEM exhibition node.
+
+Asset designation: Signal Rebirth
+
+The asset has been successfully integrated into the VΣLOHE exhibition system. Ownership registry updated and cryptographically validated. Signal integrity: STABLE.`,
+  },
   {
     kind: "system-log",
     era: "live",
@@ -28,7 +52,7 @@ export const systemLogs: SystemLogEntry[] = [
     marketplace:
       "https://objkt.com/tokens/KT1E7TR2Gj1KLt19VNh9bYLSrgjgNAR8e8xT/549",
     buyerProfile:
-      "https://x.com/velohe91/status/2092475752973312142",
+      "https://x.com/velohe91",
     message: `System Log // NFT Acquired from the Hey!Kaiju collection (Emotion Grapher)!
 
 Kaiju in Tokyo — 1/1 — now preserved in the VΣLOHE SYSTEM exhibition node.
