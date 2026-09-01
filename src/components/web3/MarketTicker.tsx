@@ -14,7 +14,7 @@ function formatUsd(value: number | null, digits = 2): string {
 }
 
 /**
- * Compact cyberpunk price chips — BTC, ETH, SOL, TXZ, and POL.
+ * Compact cyberpunk price chips — BTC, ETH, SOL, XTZ, and POL.
  * Polls /api/market/prices; never blocks layout on error.
  */
 export function MarketTicker() {
@@ -58,10 +58,10 @@ export function MarketTicker() {
     status === "loading" && !data
       ? "…"
       : formatUsd(data?.solUsd ?? null, 2);
-  const txzLabel =
+  const xtzLabel =
     status === "loading" && !data
       ? "…"
-      : formatUsd(data?.txzUsd ?? null, data?.txzUsd != null && data.txzUsd < 1 ? 4 : 2);
+      : formatUsd(data?.xtzUsd ?? null, data?.xtzUsd != null && data.xtzUsd < 1 ? 4 : 2);
   const polLabel =
     status === "loading" && !data
       ? "…"
@@ -72,7 +72,7 @@ export function MarketTicker() {
       className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider sm:gap-2 sm:text-[10px]"
       title={
         data
-          ? `Updated ${data.updatedAt} · BTC:${data.sources.btc} · ETH:${data.sources.eth} · SOL:${data.sources.sol} · TXZ:${data.sources.txz} · POL:${data.sources.pol}`
+          ? `Updated ${data.updatedAt} · BTC:${data.sources.btc} · ETH:${data.sources.eth} · SOL:${data.sources.sol} · XTZ:${data.sources.xtz} · POL:${data.sources.pol}`
           : status === "error"
             ? "Price feed offline"
             : "Loading market feed"
@@ -114,14 +114,14 @@ export function MarketTicker() {
       </span>
       <span
         className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.txzUsd == null
+          status === "error" || data?.xtzUsd == null
             ? "border-neon-blue/20 text-muted"
             : "border-[#2f7df6]/60 bg-[#2f7df6]/10 text-[#75a8ff] shadow-[0_0_8px_rgba(47,125,246,0.12)]"
         }`}
       >
-        <span className="hidden text-muted sm:inline">TXZ // </span>
+        <span className="hidden text-muted sm:inline">XTZ // </span>
         <span className="sm:hidden">TXZ </span>
-        {txzLabel}
+        {xtzLabel}
       </span>
       <span
         className={`rounded border px-1.5 py-0.5 sm:px-2 ${
