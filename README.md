@@ -44,8 +44,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_WC_PROJECT_ID` | **Yes** (for wallet connect) | WalletConnect Cloud project ID — [cloud.walletconnect.com](https://cloud.walletconnect.com/) |
-| `TXZ_COINGECKO_ID` | No | CoinGecko asset id if TXZ is not Tezos; default maps **TXZ → Tezos (XTZ)**|
+|`NEXT_PUBLIC_WC_PROJECT_ID` | **Yes** (for wallet connect) | WalletConnect Cloud project ID — [cloud.walletconnect.com](https://cloud.walletconnect.com/) |
+|`TXZ_COINGECKO_ID` | No | CoinGecko asset id if TXZ is not Tezos; default maps **TXZ → Tezos (XTZ)**|
 
 ### Web3 Phase 1 (header)
 
