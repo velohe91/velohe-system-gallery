@@ -387,6 +387,13 @@ export function GameProtocolView() {
               Read Whitepaper
             </NeonButton>
 
+            <NeonButton
+              href="https://theaethergrid.com"
+              className="min-w-[200px] text-glow-sm"
+            >
+              Enter The Aethergrid
+            </NeonButton>
+
             <NeonButton href="/" variant="outline" className="min-w-[200px]">
               Return to Archive
             </NeonButton>
