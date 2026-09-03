@@ -8,7 +8,7 @@ import { nfts } from "@/data/nfts";
 export const metadata: Metadata = {
   title: "VΣLOHE SYSTEM Archive",
   description:
-    "Official recorded identities and lore — CyborgPunks, Lunarya, Aethergrid Spirits.",
+    "Official recorded identities and lore — CyborgPunks · VΣLOHE SYSTEM · Lunarya.",
 };
 
 /**
@@ -22,7 +22,7 @@ export default function ArchiveGalleryPage() {
         <SectionHeading
           eyebrow="Archive // Catalog"
           title="VΣLOHE SYSTEM Archive"
-          subtitle="Newest fragments first. Official identities — CyborgPunks, Lunarya, and Aethergrid Spirits."
+          subtitle="Newest fragments first. Official identities — CyborgPunks · Lunarya."
         />
         <NftGrid items={nfts} />
       </div>

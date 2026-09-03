@@ -5,7 +5,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 export const metadata: Metadata = {
   title: "Gallery",
   description:
-    "Choose a gallery sector — VΣLOHE SYSTEM Archive or NFT VeLozArt.",
+    "Choose a gallery sector — VΣLOHE SYSTEM Archive, Exhibition Node, or NFT VeLozArt.",
 };
 
 /**

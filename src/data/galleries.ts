@@ -26,7 +26,7 @@ export const galleryHubEntries: GalleryHubEntry[] = [
       "The official recorded identities and lore of VΣLOHE SYSTEM",
     href: "/gallery/archive",
     badge: "PRIMARY ARCHIVE",
-    seriesHint: "CyborgPunks · Lunarya · Aethergrid Spirits",
+    seriesHint: "CyborgPunks · VΣLOHE SYSTEM · Lunarya",
     cta: "Enter Archive",
     accent: "cyan",
     status: "online",
