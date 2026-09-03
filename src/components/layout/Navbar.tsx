@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { ConnectNodeButton } from "@/components/web3/ConnectNodeButton";
+import { MarketTicker } from "../web3/MarketTicker";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -79,7 +80,11 @@ export function Navbar() {
           </button>
         </div>
       </div>
-
+ <div className="border-t border-neon-cyan/10 px-3 py-1.5">
+        <div className="mx-auto flex max-w-7xl justify-end sm:justify-center">
+          <MarketTicker />
+        </div>
+      </div>
       <AnimatePresence>
         {open && (
           <motion.nav

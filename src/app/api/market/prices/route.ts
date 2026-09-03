@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 export type MarketPricesResponse = {
   btcUsd: number | null;
   ethUsd: number | null;
+  bnbUsd: number | null;
   solUsd: number | null;
   txzUsd: number | null;
   polUsd: number | null;
@@ -10,6 +11,7 @@ export type MarketPricesResponse = {
   sources: {
     btc: string;
     eth: string;
+    bnb: string;
     sol: string;
     txz: string;
     pol: string;
@@ -41,14 +43,14 @@ function getPrice(
 
 async function fetchMarketPrices(): Promise<CoinGeckoPrices | null> {
   const txzId = process.env.TXZ_COINGECKO_ID?.trim() || "tezos";
-  const ids = [
-    "bitcoin",
-    "ethereum",
-    "solana",
-    txzId,
-    "polygon-ecosystem-token",
-  ];
-
+const ids = [
+  "bitcoin",
+  "ethereum",
+  "binancecoin",
+  "solana",
+  txzId,
+  "polygon-ecosystem-token",
+];
   try {
     const res = await fetch(
       `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids.join(","))}&vs_currencies=usd`,
@@ -71,9 +73,10 @@ export async function GET() {
 
   const txzId = process.env.TXZ_COINGECKO_ID?.trim() || "tezos";
   const data = await fetchMarketPrices();
-  const btc = getPrice(data, "bitcoin", "coingecko:bitcoin");
-  const eth = getPrice(data, "ethereum", "coingecko:ethereum");
-  const sol = getPrice(data, "solana", "coingecko:solana");
+const btc = getPrice(data, "bitcoin", "coingecko:bitcoin");
+const eth = getPrice(data, "ethereum", "coingecko:ethereum");
+const bnb = getPrice(data, "binancecoin", "coingecko:binancecoin");
+const sol = getPrice(data, "solana", "coingecko:solana");
   const txz = getPrice(
     data,
     txzId,
@@ -86,21 +89,22 @@ export async function GET() {
   );
 
 const body: MarketPricesResponse = {
-    btcUsd: btc.value,
-    ethUsd: eth.value,
-    solUsd: sol.value,
-    polUsd: pol.value,
-    txzUsd: txz.value,
+  btcUsd: btc.value,
+  ethUsd: eth.value,
+  bnbUsd: bnb.value,
+  solUsd: sol.value,
+  polUsd: pol.value,
+  txzUsd: txz.value,
   
     updatedAt: new Date().toISOString(),
     sources: {
-      btc: btc.source,
-      eth: eth.source,
-      sol: sol.source,
-      pol: pol.source,
-      txz: txz.source,
-      
-    },
+  btc: btc.source,
+  eth: eth.source,
+  bnb: bnb.source,
+  sol: sol.source,
+  pol: pol.source,
+  txz: txz.source,
+},
   };
 
 

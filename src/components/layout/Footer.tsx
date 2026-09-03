@@ -1,5 +1,4 @@
 import { SITE_NAME, SITE_VERSION } from "@/lib/constants";
-import { MarketTicker } from "@/components/web3/MarketTicker";
 
 export function Footer() {
   return (
@@ -8,7 +7,6 @@ export function Footer() {
         <p className="font-mono text-xs tracking-widest text-muted sm:justify-self-start">
           {SITE_NAME} · {SITE_VERSION}
         </p>
-        <MarketTicker />
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted/70 sm:justify-self-end">
           NFT Archive Node
         </p>
