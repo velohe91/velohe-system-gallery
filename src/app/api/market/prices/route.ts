@@ -85,21 +85,24 @@ export async function GET() {
     "coingecko:polygon-ecosystem-token",
   );
 
-  const body: MarketPricesResponse = {
+const body: MarketPricesResponse = {
     btcUsd: btc.value,
     ethUsd: eth.value,
     solUsd: sol.value,
-    txzUsd: txz.value,
     polUsd: pol.value,
+    txzUsd: txz.value,
+  
     updatedAt: new Date().toISOString(),
     sources: {
       btc: btc.source,
       eth: eth.source,
       sol: sol.source,
-      txz: txz.source,
       pol: pol.source,
+      txz: txz.source,
+      
     },
   };
+
 
   cache = { at: now, body };
 

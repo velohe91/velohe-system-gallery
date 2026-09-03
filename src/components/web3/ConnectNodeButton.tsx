@@ -1,15 +1,13 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { getChainBadgeLabel, PRIMARY_CHAIN } from "@/lib/web3/config";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 4)}…${address.slice(-2)}`;
 }
 
 /**
- * Cyberpunk CONNECT NODE control — wraps RainbowKit account state.
- * Site remains usable when disconnected.
+ * CONNECT NODE — RainbowKit wrapper. Site remains usable when disconnected.
  */
 export function ConnectNodeButton() {
   return (
@@ -42,7 +40,7 @@ export function ConnectNodeButton() {
             <button
               type="button"
               onClick={openConnectModal}
-              className="rounded border border-neon-cyan/50 bg-neon-cyan/10 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neon-cyan transition-colors hover:bg-neon-cyan/20 hover:border-neon-cyan"
+              className="rounded border border-neon-cyan/50 bg-neon-cyan/10 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neon-cyan transition-colors hover:border-neon-cyan hover:bg-neon-cyan/20"
             >
               Connect Node
             </button>
@@ -55,30 +53,27 @@ export function ConnectNodeButton() {
               type="button"
               onClick={openChainModal}
               className="rounded border border-amber-400/50 bg-amber-500/10 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-amber-200 transition-colors hover:bg-amber-500/20"
-              title={`Switch to ${PRIMARY_CHAIN.name}`}
             >
               Switch Network
             </button>
           );
         }
 
-        const badge = getChainBadgeLabel(chain.id, chain.name);
-
         return (
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={openChainModal}
-              className="hidden rounded border border-neon-blue/30 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-neon-blue sm:inline-flex"
+              className="hidden rounded border border-neon-violet/40 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-neon-violet sm:inline-flex"
               title={chain.name}
             >
-              {badge}
+              {chain.name}
             </button>
             <button
               type="button"
               onClick={openAccountModal}
               className="rounded border border-neon-cyan/40 bg-neon-cyan/5 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wider text-neon-cyan transition-colors hover:border-neon-cyan hover:bg-neon-cyan/10"
-              title={`${account.address} · ${badge} · Disconnect from account modal`}
+              title={`${account.address} · Disconnect from account modal`}
             >
               <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
               {truncateAddress(account.address)}

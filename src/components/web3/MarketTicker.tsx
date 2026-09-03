@@ -1,25 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { MarketPricesResponse } from "@/app/api/market/prices/route";
+import { useEffect, useMemo, useState } from "react";
+import type { MarketPricesResponse } from "@/lib/types";
 
 const POLL_MS = 45_000;
 
-function formatUsd(value: number | null, digits = 2): string {
+type TokenKey = "btc" | "eth" | "bsc" | "sol" | "pol" | "xtz";
+
+type TokenChip = {
+  key: TokenKey;
+  label: string;
+  value: number | null;
+  source: string;
+  className: string;
+  hint?: string;
+};
+
+function formatUsd(value: number | null): string {
   if (value === null || Number.isNaN(value)) return "---";
+  const digits = value < 1 ? 4 : 2;
   return `$${value.toLocaleString("en-US", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   })}`;
 }
 
+function chipTone(
+  status: "loading" | "ok" | "error",
+  value: number | null,
+  okClass: string,
+): string {
+  if (status === "error" || value == null) {
+    return "border-neon-blue/20 text-muted";
+  }
+  return okClass;
+}
+
 /**
- * Compact cyberpunk price chips — BTC, ETH, SOL, TXZ, and POL.
- * Polls /api/market/prices; never blocks layout on error.
+ * Compact market chips. Polls /api/market/prices every 45s.
+ * Mobile: ETH + BTC visible, remaining tokens behind a +N overflow.
  */
 export function MarketTicker() {
   const [data, setData] = useState<MarketPricesResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,94 +70,156 @@ export function MarketTicker() {
     };
   }, []);
 
-  const btcLabel =
-    status === "loading" && !data
-      ? "…"
-      : formatUsd(data?.btcUsd ?? null, 2);
-  const ethLabel =
-    status === "loading" && !data
-      ? "…"
-      : formatUsd(data?.ethUsd ?? null, 2);
-  const solLabel =
-    status === "loading" && !data
-      ? "…"
-      : formatUsd(data?.solUsd ?? null, 2);
-  const txzLabel =
-    status === "loading" && !data
-      ? "…"
-      : formatUsd(data?.txzUsd ?? null, data?.txzUsd != null && data.txzUsd < 1 ? 4 : 2);
-  const polLabel =
-    status === "loading" && !data
-      ? "…"
-      : formatUsd(data?.polUsd ?? null, data?.polUsd != null && data.polUsd < 1 ? 4 : 2);
+  const tokens: TokenChip[] = useMemo(
+    () => [
+      {
+        key: "btc",
+        label: "BTC",
+        value: data?.btcUsd ?? null,
+        source: data?.sources.btc ?? "pending",
+        className: chipTone(
+          status,
+          data?.btcUsd ?? null,
+          "border-[#f7931a]/60 bg-[#f7931a]/10 text-[#ffb45a] shadow-[0_0_8px_rgba(247,147,26,0.12)]",
+        ),
+      },
+      {
+        key: "eth",
+        label: "ETH",
+        value: data?.ethUsd ?? null,
+        source: data?.sources.eth ?? "pending",
+        className: chipTone(
+          status,
+          data?.ethUsd ?? null,
+          "border-slate-300/45 bg-slate-200/10 text-slate-100 shadow-[0_0_8px_rgba(226,232,240,0.1)]",
+        ),
+      },
+      {
+        key: "bsc",
+        label: "BSC",
+        value: data?.bnbUsd ?? null,
+        source: data?.sources.bsc ?? "pending",
+        className: chipTone(
+          status,
+          data?.bnbUsd ?? null,
+          "border-[#f3ba2f]/60 bg-[#f3ba2f]/10 text-[#ffe08a] shadow-[0_0_8px_rgba(243,186,47,0.12)]",
+        ),
+      },
+      {
+        key: "sol",
+        label: "SOL",
+        value: data?.solUsd ?? null,
+        source: data?.sources.sol ?? "pending",
+        className: chipTone(
+          status,
+          data?.solUsd ?? null,
+          "border-[#14f1d9]/60 bg-[#14f1d9]/10 text-[#6fffe9] shadow-[0_0_8px_rgba(20,241,217,0.12)]",
+        ),
+      },
+      {
+        key: "pol",
+        label: "POL",
+        value: data?.polUsd ?? null,
+        source: data?.sources.pol ?? "pending",
+        className: chipTone(
+          status,
+          data?.polUsd ?? null,
+          "border-neon-violet/60 bg-neon-violet/10 text-[#d8a4ff] shadow-[0_0_8px_rgba(168,85,247,0.12)]",
+        ),
+      },
+      {
+        key: "xtz",
+        label: "XTZ",
+        hint: "Tezos",
+        value: data?.xtzUsd ?? data?.txzUsd ?? null,
+        source: data?.sources.xtz ?? data?.sources.txz ?? "pending",
+        className: chipTone(
+          status,
+          data?.xtzUsd ?? data?.txzUsd ?? null,
+          "border-[#2f7df6]/60 bg-[#2f7df6]/10 text-[#75a8ff] shadow-[0_0_8px_rgba(47,125,246,0.12)]",
+        ),
+      },
+    ],
+    [data, status],
+  );
+
+  const mobilePrimary = tokens.filter((t) => t.key === "eth" || t.key === "btc");
+  const overflow = tokens.filter((t) => t.key !== "eth" && t.key !== "btc");
+
+  const title = data
+    ? `Updated ${data.updatedAt} · ${tokens
+        .map((t) => `${t.label}${t.hint ? ` (${t.hint})` : ""}:${t.source}`)
+        .join(" · ")}`
+    : status === "error"
+      ? "Price feed offline"
+      : "Loading market feed";
 
   return (
     <div
-      className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider sm:gap-2 sm:text-[10px]"
-      title={
-        data
-          ? `Updated ${data.updatedAt} · BTC:${data.sources.btc} · ETH:${data.sources.eth} · SOL:${data.sources.sol} · TXZ:${data.sources.txz} · POL:${data.sources.pol}`
-          : status === "error"
-            ? "Price feed offline"
-            : "Loading market feed"
-      }
+      className="relative flex min-w-0 flex-wrap items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider sm:gap-2 sm:text-[10px]"
+      title={title}
       aria-live="polite"
     >
-      <span
-        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.btcUsd == null
-            ? "border-neon-blue/20 text-muted"
-            : "border-[#f7931a]/60 bg-[#f7931a]/10 text-[#ffb45a] shadow-[0_0_8px_rgba(247,147,26,0.12)]"
-        }`}
-      >
-        <span className="hidden text-muted sm:inline">BTC // </span>
-        <span className="sm:hidden">BTC </span>
-        {btcLabel}
-      </span>
-      <span
-        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.ethUsd == null
-            ? "border-rose-400/30 text-rose-300/80"
-            : "border-slate-300/45 bg-slate-200/10 text-slate-100 shadow-[0_0_8px_rgba(226,232,240,0.1)]"
-        }`}
-      >
-        <span className="hidden text-muted sm:inline">ETH // </span>
-        <span className="sm:hidden">ETH </span>
-        {ethLabel}
-      </span>
-      <span
-        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.solUsd == null
-            ? "border-neon-blue/20 text-muted"
-            : "border-[#14f1d9]/60 bg-[#14f1d9]/10 text-[#6fffe9] shadow-[0_0_8px_rgba(20,241,217,0.12)]"
-        }`}
-      >
-        <span className="hidden text-muted sm:inline">SOL // </span>
-        <span className="sm:hidden">SOL </span>
-        {solLabel}
-      </span>
-      <span
-        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.txzUsd == null
-            ? "border-neon-blue/20 text-muted"
-            : "border-[#2f7df6]/60 bg-[#2f7df6]/10 text-[#75a8ff] shadow-[0_0_8px_rgba(47,125,246,0.12)]"
-        }`}
-      >
-        <span className="hidden text-muted sm:inline">TXZ // </span>
-        <span className="sm:hidden">TXZ </span>
-        {txzLabel}
-      </span>
-      <span
-        className={`rounded border px-1.5 py-0.5 sm:px-2 ${
-          status === "error" || data?.polUsd == null
-            ? "border-neon-blue/20 text-muted"
-            : "border-[#a855f7]/60 bg-[#a855f7]/10 text-[#d8a4ff] shadow-[0_0_8px_rgba(168,85,247,0.12)]"
-        }`}
-      >
-        <span className="hidden text-muted sm:inline">POL // </span>
-        <span className="sm:hidden">POL </span>
-        {polLabel}
-      </span>
+      {tokens.map((token) => (
+        <Chip
+          key={token.key}
+          token={token}
+          status={status}
+          className="hidden lg:inline-flex"
+        />
+      ))}
+
+      {mobilePrimary.map((token) => (
+        <Chip
+          key={`m-${token.key}`}
+          token={token}
+          status={status}
+          className="inline-flex lg:hidden"
+        />
+      ))}
+
+      <div className="relative lg:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="rounded border border-neon-cyan/30 bg-void/60 px-1.5 py-0.5 text-neon-cyan/80"
+          aria-expanded={open}
+          aria-label={`Show ${overflow.length} more prices`}
+        >
+          +{overflow.length}
+        </button>
+        {open && (
+          <div className="absolute right-0 top-full z-40 mt-1 flex flex-col gap-1 rounded border border-neon-cyan/20 bg-void/95 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+            {overflow.map((token) => (
+              <Chip key={`o-${token.key}`} token={token} status={status} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+function Chip({
+  token,
+  status,
+  className = "",
+}: {
+  token: TokenChip;
+  status: "loading" | "ok" | "error";
+  className?: string;
+}) {
+  const label = status === "loading" && token.value == null ? "…" : formatUsd(token.value);
+  return (
+    <span
+      className={`rounded border px-1.5 py-0.5 sm:px-2 ${token.className} ${className}`}
+      title={token.hint}
+    >
+      <span className="hidden text-muted sm:inline">
+        {token.label} {"//"}{" "}
+      </span>
+      <span className="sm:hidden">{token.label} </span>
+      {label}
+    </span>
   );
 }
