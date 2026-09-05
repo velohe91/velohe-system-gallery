@@ -388,7 +388,7 @@ export function GameProtocolView() {
             </NeonButton>
 
             <NeonButton
-              href="https://theaethergrid.com"
+              href="https://www.theaethergrid.com/"
               className="min-w-[200px] text-glow-sm"
             >
               Enter The Aethergrid

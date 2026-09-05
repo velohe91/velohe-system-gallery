@@ -48,7 +48,7 @@ The long-term direction of VΣLOHE SYSTEM is a **multi-chain NFT marketplace** f
 
 The platform is designed with support for multiple blockchain ecosystems in mind, including:
 
-- ♦️ **Ethereum — ETH**
+- 💠 **Ethereum — ETH**
 - 🟡 **BNB Chain — BNB**
 - 🟣 **Solana — SOL**
 - 🔷 **Tezos — XTZ**
@@ -208,16 +208,15 @@ Environment-specific values should be configured locally and **must never be com
 
 ---
 
-## 📜 LICENSE
+## Design notes
 
-Private project.
-
-All artwork, characters, lore, digital assets, and original Velohe intellectual property remain the property of their respective creators unless otherwise stated.
+- **Theme:** deep void black (`#03050a`) + neon blue / cyan
+- **Type:** Orbitron (display) + Share Tech Mono (body / logs)
+- **Motion:** Framer Motion with `prefers-reduced-motion` respect
+- **Fullscreen:** Navbar control uses the browser Fullscreen API (limited on some mobile browsers)
 
 ---
 
-### VΣLOHE SYSTEM
+## License
 
-**The archive is open.**  
-**The transmissions continue.**  
-**The ecosystem is evolving.**
+Private exhibition project — customize freely for your own archive.
