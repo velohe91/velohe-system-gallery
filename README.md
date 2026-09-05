@@ -1,4 +1,4 @@
-# 🜏 VΣLOHE SYSTEM
+# VΣLOHE SYSTEM
 
 > **A digital archive, exhibition, and evolving marketplace for the Velohe universe.**
 
@@ -216,7 +216,7 @@ All artwork, characters, lore, digital assets, and original Velohe intellectual 
 
 ---
 
-### 🜏 VΣLOHE SYSTEM
+### VΣLOHE SYSTEM
 
 **The archive is open.**  
 **The transmissions continue.**  
