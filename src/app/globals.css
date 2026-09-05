@@ -52,6 +52,11 @@ body::before {
   );
 }
 
+/* RainbowKit connect modal above vignette + custom chain modals (z-200) */
+[data-rk] {
+  z-index: 300;
+}
+
 /* Custom selection */
 ::selection {
   background: rgba(0, 240, 255, 0.25);

@@ -11,6 +11,8 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.102.2",
+    "@taquito/taquito": "^17.5.2",
+    "@temple-wallet/dapp": "^12.0.0",
     "@vercel/speed-insights": "^2.0.0",
     "@x402/core": "file:stubs/x402-core",
     "@x402/evm": "file:stubs/x402-evm",

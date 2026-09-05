@@ -5,6 +5,7 @@ import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
+import { MultiChainProvider } from "@/components/web3/MultiChainProvider";
 import { getWagmiConfig, PRIMARY_CHAIN } from "@/lib/web3/config";
 
 /**
@@ -40,7 +41,7 @@ export function Web3Providers({ children }: { children: ReactNode }) {
           modalSize="compact"
           coolMode={false}
         >
-          {children}
+          <MultiChainProvider>{children}</MultiChainProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
