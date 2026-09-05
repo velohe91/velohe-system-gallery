@@ -5,29 +5,52 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useMultiChain } from "@/components/web3/MultiChainProvider";
 import { ChainConnectModal } from "@/components/web3/ChainConnectModal";
 import { NodeAccountModal } from "@/components/web3/NodeAccountModal";
+import { NetworkSwitchModal } from "@/components/web3/NetworkSwitchModal";
 import { getChainBadgeLabel, PRIMARY_CHAIN } from "@/lib/web3/config";
 import { truncateAddress } from "@/lib/web3/multi-chain";
 
 /**
  * CONNECT NODE — multi-namespace entry.
  * EVM via RainbowKit; Solana/Tezos via injected helpers.
+ * Custom NetworkSwitchModal replaces RainbowKit openChainModal.
  * Custom NodeAccountModal replaces RainbowKit openAccountModal.
  */
 export function ConnectNodeButton() {
-  const { solana, tezos, hasAnyAltChain } = useMultiChain();
+  const { solana, tezos, hasAnyAltChain, focusedNamespace } = useMultiChain();
   const [chainModalOpen, setChainModalOpen] = useState(false);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [networkModalOpen, setNetworkModalOpen] = useState(false);
 
   return (
     <ConnectButton.Custom>
-      {({ account, chain, openChainModal, openConnectModal, mounted }) => {
+      {({ account, chain, openConnectModal, mounted }) => {
         const ready = mounted;
         const evmConnected = Boolean(ready && account && chain);
         const anyConnected = evmConnected || hasAnyAltChain;
 
-        const displayAddress = evmConnected
-          ? account!.address
-          : solana?.address ?? tezos?.address ?? null;
+        const displayAddress =
+          focusedNamespace === "solana" && solana
+            ? solana.address
+            : focusedNamespace === "tezos" && tezos
+              ? tezos.address
+              : evmConnected
+                ? account!.address
+                : solana?.address ?? tezos?.address ?? null;
+
+        const networkBadgeLabel =
+          focusedNamespace === "solana" && solana
+            ? "SOLANA"
+            : focusedNamespace === "tezos" && tezos
+              ? "TEZOS"
+              : chain && !chain.unsupported
+                ? getChainBadgeLabel(chain.id, chain.name)
+                : hasAnyAltChain && solana
+                  ? "SOLANA"
+                  : hasAnyAltChain && tezos
+                    ? "TEZOS"
+                    : chain
+                      ? getChainBadgeLabel(chain.id, chain.name)
+                      : "NETWORK";
 
         if (!ready) {
           return (
@@ -51,10 +74,10 @@ export function ConnectNodeButton() {
               >
                 Connect Node
               </button>
-            ) : chain?.unsupported ? (
+            ) : chain?.unsupported && evmConnected ? (
               <button
                 type="button"
-                onClick={openChainModal}
+                onClick={() => setNetworkModalOpen(true)}
                 className="rounded border border-amber-400/50 bg-amber-500/10 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-widest text-amber-200 transition-colors hover:bg-amber-500/20"
                 title={`Switch to ${PRIMARY_CHAIN.name}`}
               >
@@ -62,16 +85,14 @@ export function ConnectNodeButton() {
               </button>
             ) : (
               <div className="flex items-center gap-1.5">
-                {evmConnected && chain && (
-                  <button
-                    type="button"
-                    onClick={openChainModal}
-                    className="hidden rounded border border-neon-blue/30 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-neon-blue sm:inline-flex"
-                    title={chain.name}
-                  >
-                    {getChainBadgeLabel(chain.id, chain.name)}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setNetworkModalOpen(true)}
+                  className="hidden rounded border border-neon-blue/30 px-2 py-1 font-mono text-[9px] uppercase tracking-widest text-neon-blue sm:inline-flex"
+                  title="Switch network"
+                >
+                  {networkBadgeLabel}
+                </button>
                 <button
                   type="button"
                   onClick={() => setAccountModalOpen(true)}
@@ -90,6 +111,10 @@ export function ConnectNodeButton() {
               open={chainModalOpen}
               onClose={() => setChainModalOpen(false)}
               onOpenEvm={openConnectModal}
+            />
+            <NetworkSwitchModal
+              open={networkModalOpen}
+              onClose={() => setNetworkModalOpen(false)}
             />
             <NodeAccountModal
               open={accountModalOpen}

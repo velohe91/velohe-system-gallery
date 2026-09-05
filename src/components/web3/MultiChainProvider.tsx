@@ -16,6 +16,9 @@ import {
   type LinkedSession,
 } from "@/lib/web3/multi-chain";
 
+/** Which namespace drives the header network badge / switcher highlight */
+export type FocusedNamespace = "evm" | "solana" | "tezos";
+
 type MultiChainContextValue = {
   solana: LinkedSession | null;
   tezos: LinkedSession | null;
@@ -27,6 +30,9 @@ type MultiChainContextValue = {
   disconnectSolana: () => Promise<void>;
   disconnectTezos: () => Promise<void>;
   hasAnyAltChain: boolean;
+  /** Last-focused namespace for badge + switcher active state */
+  focusedNamespace: FocusedNamespace;
+  setFocusedNamespace: (ns: FocusedNamespace) => void;
 };
 
 const MultiChainContext = createContext<MultiChainContextValue | null>(null);
@@ -38,6 +44,8 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
     null,
   );
   const [error, setError] = useState<string | null>(null);
+  const [focusedNamespace, setFocusedNamespace] =
+    useState<FocusedNamespace>("evm");
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -47,6 +55,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
     try {
       const session = await connectSolanaNode();
       setSolana(session);
+      setFocusedNamespace("solana");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Solana connect failed.");
       throw e;
@@ -61,6 +70,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
     try {
       const session = await connectTezosNode();
       setTezos(session);
+      setFocusedNamespace("tezos");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Tezos connect failed.");
       throw e;
@@ -72,11 +82,13 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
   const disconnectSolana = useCallback(async () => {
     await disconnectSolanaNode();
     setSolana(null);
+    setFocusedNamespace((prev) => (prev === "solana" ? "evm" : prev));
   }, []);
 
   const disconnectTezos = useCallback(async () => {
     await disconnectTezosNode();
     setTezos(null);
+    setFocusedNamespace((prev) => (prev === "tezos" ? "evm" : prev));
   }, []);
 
   const value = useMemo<MultiChainContextValue>(
@@ -91,6 +103,8 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       disconnectSolana,
       disconnectTezos,
       hasAnyAltChain: Boolean(solana || tezos),
+      focusedNamespace,
+      setFocusedNamespace,
     }),
     [
       solana,
@@ -102,6 +116,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       connectTezos,
       disconnectSolana,
       disconnectTezos,
+      focusedNamespace,
     ],
   );
 
