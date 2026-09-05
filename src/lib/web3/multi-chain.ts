@@ -50,6 +50,38 @@ declare global {
 /** Active TempleWallet instance for disconnect */
 let templeWallet: TempleWallet | null = null;
 
+/** Unified copy when the user cancels / rejects any wallet connect prompt */
+export const USER_REJECTED = "User rejected the request.";
+
+export function isUserRejection(err: unknown): boolean {
+  if (!err) return false;
+  const anyErr = err as {
+    code?: number | string;
+    name?: string;
+    message?: string;
+    shortMessage?: string;
+  };
+  const code = anyErr.code;
+  const name = (anyErr.name ?? "").toLowerCase();
+  const msg = `${anyErr.message ?? ""} ${anyErr.shortMessage ?? ""}`.toLowerCase();
+  return (
+    code === 4001 ||
+    code === "4001" ||
+    code === "ACTION_REJECTED" ||
+    name.includes("userrejected") ||
+    name.includes("connectoruserrejected") ||
+    /user rejected|rejected the request|request rejected|denied|cancelled|canceled|user closed|closed the modal|user abort/i.test(
+      msg,
+    )
+  );
+}
+
+export function walletErrorMessage(err: unknown): string {
+  if (isUserRejection(err)) return USER_REJECTED;
+  if (err instanceof Error && err.message.trim()) return err.message;
+  return "Wallet request failed.";
+}
+
 export function truncateAddress(address: string, head = 4, tail = 2): string {
   if (address.length <= head + tail + 1) return address;
   return `${address.slice(0, head)}…${address.slice(-tail)}`;
@@ -239,59 +271,43 @@ export async function connectTezosNode(): Promise<LinkedSession> {
   const available = await detectTempleAvailable(1200);
 
   if (!available) {
-    // Do NOT auto-open the store — extension may be installed but DApps disabled.
-    throw new Error(
-      "Temple no detectado. Desbloquea la extensión y activa Settings → DApps. Recarga la página.",
-    );
+    // Do NOT auto-open the store. Rejects are handled via isUserRejection upstream.
+    throw new Error("Temple not detected. Unlock the extension and retry.");
   }
 
+  const wallet = new TempleWallet("VΣLOHE SYSTEM");
+  await wallet.connect("mainnet");
+  templeWallet = wallet;
+
+  let address = "";
   try {
-    const wallet = new TempleWallet("VΣLOHE SYSTEM");
-    await wallet.connect("mainnet");
-    templeWallet = wallet;
-
-    let address = "";
-    try {
-      // Preferred path via Taquito wallet API
-      const tezos = wallet.toTezos();
-      address = await tezos.wallet.pkh();
-    } catch {
-      // Fallback if toTezos is unavailable in this build
-      const maybePkh = (
-        wallet as unknown as { getPKH?: () => Promise<string> }
-      ).getPKH;
-      if (maybePkh) address = await maybePkh.call(wallet);
-    }
-
-    if (!address && window.tezos?.getPKH) {
-      address = await window.tezos.getPKH();
-    }
-
-    if (!address) {
-      throw new Error("Temple connected but no Tezos address was returned.");
-    }
-
-    const balance = await fetchXtzBalance(address);
-    return {
-      namespace: "tezos",
-      address,
-      walletName: "Temple",
-      balance,
-      symbol: "XTZ",
-    };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    // Likely DApps disabled / permission denied while extension is present
-    if (
-      /permission|dapp|denied|not.?allowed|reject/i.test(msg) ||
-      (await TempleWallet.isAvailable())
-    ) {
-      throw new Error(
-        "Temple detectado pero sin permiso DApp. Desbloquea Temple y activa Settings → DApps, luego reintenta.",
-      );
-    }
-    throw e instanceof Error ? e : new Error(msg);
+    // Preferred path via Taquito wallet API
+    const tezos = wallet.toTezos();
+    address = await tezos.wallet.pkh();
+  } catch {
+    // Fallback if toTezos is unavailable in this build
+    const maybePkh = (
+      wallet as unknown as { getPKH?: () => Promise<string> }
+    ).getPKH;
+    if (maybePkh) address = await maybePkh.call(wallet);
   }
+
+  if (!address && window.tezos?.getPKH) {
+    address = await window.tezos.getPKH();
+  }
+
+  if (!address) {
+    throw new Error("Temple connected but no Tezos address was returned.");
+  }
+
+  const balance = await fetchXtzBalance(address);
+  return {
+    namespace: "tezos",
+    address,
+    walletName: "Temple",
+    balance,
+    symbol: "XTZ",
+  };
 }
 
 export async function disconnectTezosNode(): Promise<void> {

@@ -13,6 +13,7 @@ import {
   connectTezosNode,
   disconnectSolanaNode,
   disconnectTezosNode,
+  walletErrorMessage,
   type LinkedSession,
 } from "@/lib/web3/multi-chain";
 
@@ -25,6 +26,8 @@ type MultiChainContextValue = {
   connecting: "solana" | "tezos" | null;
   error: string | null;
   clearError: () => void;
+  /** Shared banner writer (EVM / Solana / Tezos) */
+  setWalletError: (message: string | null) => void;
   connectSolana: () => Promise<void>;
   connectTezos: () => Promise<void>;
   disconnectSolana: () => Promise<void>;
@@ -48,6 +51,10 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
     useState<FocusedNamespace>("evm");
 
   const clearError = useCallback(() => setError(null), []);
+  const setWalletError = useCallback(
+    (message: string | null) => setError(message),
+    [],
+  );
 
   const connectSolana = useCallback(async () => {
     setError(null);
@@ -57,7 +64,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       setSolana(session);
       setFocusedNamespace("solana");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Solana connect failed.");
+      setError(walletErrorMessage(e));
       throw e;
     } finally {
       setConnecting(null);
@@ -72,7 +79,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       setTezos(session);
       setFocusedNamespace("tezos");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Tezos connect failed.");
+      setError(walletErrorMessage(e));
       throw e;
     } finally {
       setConnecting(null);
@@ -98,6 +105,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       connecting,
       error,
       clearError,
+      setWalletError,
       connectSolana,
       connectTezos,
       disconnectSolana,
@@ -112,6 +120,7 @@ export function MultiChainProvider({ children }: { children: ReactNode }) {
       connecting,
       error,
       clearError,
+      setWalletError,
       connectSolana,
       connectTezos,
       disconnectSolana,
