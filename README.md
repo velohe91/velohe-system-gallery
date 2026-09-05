@@ -1,129 +1,223 @@
-# VΣLOHE SYSTEM — NFT Exhibition System
+# 🜏 VΣLOHE SYSTEM
 
-An immersive cyberpunk web app for exhibiting NFT-style artifacts with lore, system logs, and a holographic gallery UI.
+> **A digital archive, exhibition, and evolving marketplace for the Velohe universe.**
 
-**Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS · Framer Motion
+VΣLOHE SYSTEM is an immersive web platform built around a cyberpunk archival interface.
 
----
+The system combines **digital artifacts, narrative fragments, system transmissions, Web3 functionality, and interactive UI elements** into a single evolving platform.
 
-## Features
-
-- **Landing** — Animated `VΣLOHE SYSTEM` logo, boot sequence (`SYSTEM ONLINE`), **Enter the Archive** CTA
-- **Gallery** — Responsive NFT grid, hover glow, modal with enlarged art + lore
-- **Transmissions** — Chronological system-log feed
-- **About** — Short project overview
-- **Immersive chrome** — Scanlines, particle field, neon theme, **Fullscreen** toggle
-- **Data-driven catalog** — Add NFTs by editing one TypeScript array
+The project is currently focused on the exhibition and archival experience while evolving toward a **multi-chain NFT marketplace** for Velohe digital assets.
 
 ---
 
-## Requirements
+## 🛰️ SYSTEM EXPERIENCE
 
-- **Node.js 18+** (recommended: 20+)
-- npm (comes with Node)
+### 🖼️ Archive
+
+Explore the catalog of Velohe artifacts through an interactive gallery featuring artwork, metadata, rarity classifications, status indicators, and lore.
+
+### 📡 Transmissions
+
+A chronological feed of system transmissions and archival records that expands the narrative surrounding the Velohe universe.
+
+### 🌌 Immersive Interface
+
+The interface combines:
+
+- ✦ Animated transitions
+- ✦ Scanlines
+- ✦ Particle effects
+- ✦ Holographic UI elements
+- ✦ Neon visual systems
+- ✦ Fullscreen presentation
+- ✦ Responsive layouts
+
+The goal is to make browsing the archive feel less like navigating a conventional website and more like accessing a **digital system from another world**.
+
+### 🔗 Web3 Integration
+
+VΣLOHE SYSTEM is being developed with Web3 functionality as a core part of its future.
+
+Wallet connectivity and blockchain integrations are being introduced progressively as the platform evolves toward its marketplace phase.
 
 ---
 
-## Getting started
+## 🏪 MULTI-CHAIN MARKETPLACE
+
+The long-term direction of VΣLOHE SYSTEM is a **multi-chain NFT marketplace** for Velohe digital assets.
+
+The platform is designed with support for multiple blockchain ecosystems in mind, including:
+
+- 💠 **Ethereum — ETH**
+- 🟡 **BNB Chain — BNB**
+- 🟣 **Solana — SOL**
+- 🔷 **Tezos — XTZ**
+- 🟪 **Polygon — POL**
+
+Additional networks and compatible scaling or execution layers may be introduced as the ecosystem develops.
+
+Velohe NFTs are intended to operate through **dedicated smart-contract infrastructure**, allowing the platform to maintain its own on-chain asset ecosystem rather than depending exclusively on third-party NFT marketplaces.
+
+> ⚡ **The archive is the beginning. The marketplace is the next layer.**
+
+---
+
+## 🧩 CONTENT SYSTEM
+
+The exhibition is **data-driven**.
+
+Artifacts and transmissions are maintained separately from the interface, allowing the archive to expand without requiring the entire application to be redesigned.
+
+### 🗃️ Adding an Artifact
+
+New artifacts can include:
+
+- 🆔 Identifier
+- 🏷️ Title
+- 🧬 Series
+- 💎 Rarity
+- 🟢 Status
+- 📅 Year
+- 🔖 Tags
+- 📜 Lore
+- 🖼️ Artwork
+
+Once registered in the catalog, the exhibition interface handles its presentation automatically.
+
+### 📡 Adding a Transmission
+
+New transmissions can be added to the chronological system archive.
+
+A transmission may optionally reference an existing artifact, allowing narrative records and visual artifacts to become connected pieces of the same archive.
+
+---
+
+## ⚙️ TECHNOLOGY
+
+Built with modern web technologies:
+
+- ⚡ **Next.js**
+- 🔷 **TypeScript**
+- 🎨 **Tailwind CSS**
+- 🎞️ **Framer Motion**
+- 🔗 **wagmi**
+- 🧬 **viem**
+- 🌈 **RainbowKit**
+
+The application uses the **Next.js App Router** and is designed for deployment on modern web infrastructure.
+
+---
+
+## 🖥️ DEVELOPMENT
+
+### 📋 Requirements
+
+- 🟢 Node.js 18+
+- 📦 npm
+
+### 🚀 Installation
 
 ```bash
-# Install dependencies
 npm install
+```
 
-# Copy env and set WalletConnect project ID (required for Connect Node)
-cp .env.example .env.local
-# Edit .env.local → NEXT_PUBLIC_WC_PROJECT_ID=...
+Configure the required environment values locally using the project's environment template.
 
-# Development server (Turbopack)
+Then launch the development server:
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+The application will be available locally at:
 
-### Environment variables
+```text
+http://localhost:3000
+```
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-|`NEXT_PUBLIC_WC_PROJECT_ID` | **Yes** (for wallet connect) | WalletConnect Cloud project ID — [cloud.walletconnect.com](https://cloud.walletconnect.com/) |
-|`TXZ_COINGECKO_ID` | No | CoinGecko asset id if TXZ is not Tezos; default maps **TXZ → Tezos (XTZ)**|
-
-### Web3 Phase 1 (header)
-
-- Live **ETH** / **TXZ** price chips (poll `/api/market/prices` every 45s)
-- **CONNECT NODE** via RainbowKit (wagmi + viem) — Base primary, Ethereum mainnet available
-- Site works fully **without** a connected wallet (no gated routes in this phase)
+### 🏗️ Production
 
 ```bash
-# Production build
 npm run build
-
-# Start production server
 npm start
 ```
 
+### 🧹 Linting
+
 ```bash
-# Lint
 npm run lint
 ```
 
 ---
 
-## How to add a new NFT
+## 🎨 DESIGN LANGUAGE
 
-1. Add an image under `public/nfts/` (e.g. `nft-009.svg` or `.png`).
-2. Open `src/data/nfts.ts` and append an object to the `nfts` array:
+VΣLOHE SYSTEM follows a dark cyberpunk archival aesthetic built around:
 
-```ts
-{
-  id: "VEL-009",
-  title: "Your Title",
-  image: "/nfts/nft-009.svg",
-  series: "Your Series",
-  rarity: "rare", // common | rare | epic | legendary | mythic
-  status: "online", // online | sealed | corrupted | archived
-  year: 2082,
-  tags: ["tag-a", "tag-b"],
-  lore: `Multi-line lore text for the modal.`,
-},
-```
+- 🌑 Deep-space black backgrounds
+- 💠 Neon blue and cyan accents
+- 🖥️ Monospaced system typography
+- ✦ Futuristic display typography
+- 🧊 Holographic interface elements
+- 🌌 Ambient motion
+- 📺 Scanline effects
+- ✨ Particle systems
 
-3. Restart or refresh the dev server — the Gallery picks it up automatically.
-
-### How to add a transmission / log
-
-Edit `src/data/transmissions.ts` and insert a new entry at the **top** of the array (newest-first feed). Optionally set `relatedNftId` to an NFT `id`.
+Motion-aware behavior respects user accessibility preferences where supported.
 
 ---
 
-## Project structure
+## 🧠 PROJECT PHILOSOPHY
 
-```
-src/
-  app/                  # Routes: /, /gallery, /transmissions, /about
-  components/
-    layout/             # Navbar, Footer, ImmersiveShell
-    effects/            # Particles, scanlines, hologram frame
-    home/               # Logo, boot sequence, CTA
-    gallery/            # Grid, card, modal
-    transmissions/      # Log feed
-    ui/                 # NeonButton, headings, page transition
-  data/                 # nfts.ts, transmissions.ts  ← edit these
-  lib/                  # types, constants
-  hooks/                # useFullscreen, usePrefersReducedMotion
-public/nfts/            # NFT images
-```
+VΣLOHE SYSTEM is designed to **evolve as an ecosystem**.
 
----
+What begins as an interactive archive can expand into a broader platform for:
 
-## Design notes
+- 🖼️ Digital exhibitions
+- 📡 Narrative transmissions
+- 💎 NFT collections
+- 🔗 Web3 assets
+- 🏪 Multi-chain trading
+- 🧬 Original smart-contract infrastructure
 
-- **Theme:** deep void black (`#03050a`) + neon blue / cyan
-- **Type:** Orbitron (display) + Share Tech Mono (body / logs)
-- **Motion:** Framer Motion with `prefers-reduced-motion` respect
-- **Fullscreen:** Navbar control uses the browser Fullscreen API (limited on some mobile browsers)
+The goal is to build a platform where the **technology, artwork, and lore develop together**.
+
+> **Preserve. Exhibit. Trade. Expand.**
 
 ---
 
-## License
+## 🔐 SECURITY & CONFIGURATION
 
-Private exhibition project — customize freely for your own archive.
+Public documentation intentionally avoids exposing private infrastructure, credentials, deployment configuration, internal services, or operational details.
+
+Environment-specific values should be configured locally and **must never be committed to version control**.
+
+> ⚠️ If you are contributing to the project, keep private configuration and credentials outside the repository.
+
+---
+
+## 📡 SYSTEM STATUS
+
+**VΣLOHE SYSTEM**
+
+`ARCHIVE: ONLINE` 🟢  
+`EXHIBITION: ACTIVE` 🟢  
+`TRANSMISSIONS: RECEIVING` 🟢  
+`WEB3: EVOLVING` 🔵  
+`MARKETPLACE: IN DEVELOPMENT` 🟡
+
+---
+
+## 📜 LICENSE
+
+Private project.
+
+All artwork, characters, lore, digital assets, and original Velohe intellectual property remain the property of their respective creators unless otherwise stated.
+
+---
+
+### 🜏 VΣLOHE SYSTEM
+
+**The archive is open.**  
+**The transmissions continue.**  
+**The ecosystem is evolving.**
