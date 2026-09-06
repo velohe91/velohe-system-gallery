@@ -44,17 +44,6 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     status: "online",
   },
 
-   {
-    id: "velozart",
-    title: "NFT VeLozArt Gallery",
-    description:
-      "A separate collection of AI artworks under the VeLozArt label",
-    href: "/gallery/velozart",
-    badge: "EXTERNAL WING",
-    seriesHint: "VeLozArt · AI collection",
-    cta: "Enter VeLozArt",
-    accent: "cyan",
-    status: "online",
-  },
+  
 
 ];
