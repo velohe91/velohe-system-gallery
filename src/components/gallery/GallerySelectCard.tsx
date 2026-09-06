@@ -22,6 +22,14 @@ const ACCENT = {
     led: "bg-violet-400",
     glow: "group-hover:shadow-[0_0_32px_rgba(167,139,250,0.22)]",
   },
+gray: {
+  border: "border-white/10 hover:border-white/20",
+  badge: "text-white/50 border-white/20",
+  title: "text-white/60",
+  cta: "text-white/40",
+  led: "bg-white/30",
+  glow: "",
+},
 } as const;
 
 /**
@@ -47,7 +55,7 @@ export function GallerySelectCard({
       className="h-full"
     >
       <Link
-        href={entry.href}
+        href={entry.href ?? "#"}
         className={`group relative flex h-full min-h-[280px] flex-col overflow-hidden rounded-xl border bg-panel/90 p-6 sm:p-8 hologram-border box-glow transition-shadow focus-visible:outline-none ${a.border} ${a.glow}`}
       >
         {/* Soft corner scan accent */}

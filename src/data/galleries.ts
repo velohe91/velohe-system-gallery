@@ -3,14 +3,14 @@
  * Each entry routes to a sub-gallery (archive catalog, VeLozArt wing, etc.).
  */
 
-export type GalleryHubAccent = "cyan" | "violet";
+export type GalleryHubAccent = "cyan" | "violet" | "gray";
 export type GalleryHubStatus = "online" | "standby";
 
 export type GalleryHubEntry = {
-  id: "archive" | "exhibition-node" | "velozart";
+  id: "archive" | "exhibition-node" | "velozart" | "node-forge";
   title: string;
   description: string;
-  href: string;
+  href?: string;
   badge: string;
   seriesHint?: string;
   cta: string;
@@ -43,7 +43,17 @@ export const galleryHubEntries: GalleryHubEntry[] = [
     accent: "violet",
     status: "online",
   },
-
+{
+  id: "node-forge",
+  title: "NFT NODE FORGE",
+  description:
+    "Create your own NFT collection and deploy it as a VΣLOHE Node.",
+  badge: "NFT CREATION",
+  seriesHint: "Smart contract generator · coming online",
+  cta: "Forge NFT Node",
+  accent: "gray",
+  status: "standby",
+},
   
 
 ];
