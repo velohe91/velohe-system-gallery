@@ -11,6 +11,7 @@ export const NAV_LINKS = [
   { href: "/gallery", label: "Gallery" },
   { href: "/transmissions", label: "Transmissions" },
   { href: "/about", label: "About" },
+  { href: "/game/theaethergrid", label: "Unknown Sector" },
 ] as const;
 
 export const RARITY_COLORS: Record<string, string> = {
