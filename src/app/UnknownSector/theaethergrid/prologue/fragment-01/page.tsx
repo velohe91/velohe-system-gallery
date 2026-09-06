@@ -151,14 +151,14 @@ export default function PrologueFragment01() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
   <Link
-    href="/game/theaethergrid"
+    href="/UnknownSector/theaethergrid"
     className="inline-flex items-center justify-center gap-2 border border-cyan-500/30 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
   >
     ← RETURN TO ARCHIVE
   </Link>
 
   <Link
-    href="/game/theaethergrid/prologue/fragment-02"
+    href="/UnknownSector/theaethergrid/prologue/fragment-02"
     className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-500/[0.04] px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_18px_rgba(0,255,255,0.12)]"
   >
     DECRYPT NEXT MEMORY →

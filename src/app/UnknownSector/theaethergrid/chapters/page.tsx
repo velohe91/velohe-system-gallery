@@ -35,7 +35,7 @@ export default function ChaptersArchive() {
 
         <div className="space-y-4">
           <Link
-            href="/game/theaethergrid/chapters/chapter-01"
+            href="/UnknownSector/theaethergrid/chapters/chapter-01"
             className="group block border border-cyan-500/30 bg-cyan-950/[0.06] p-5 transition-all duration-300 hover:border-cyan-400/70 hover:bg-cyan-500/[0.04] hover:shadow-[0_0_30px_rgba(0,220,255,0.08)]"
           >
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -106,7 +106,7 @@ export default function ChaptersArchive() {
 
         <div className="mt-10 border-t border-cyan-500/15 pt-5">
           <Link
-            href="/game/theaethergrid"
+            href="/UnknownSector/theaethergrid"
             className="text-[9px] uppercase tracking-[0.2em] text-cyan-500/50 transition hover:text-cyan-300"
           >
             ← RETURN TO ARCHIVE

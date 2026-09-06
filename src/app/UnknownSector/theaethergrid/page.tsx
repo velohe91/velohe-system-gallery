@@ -217,7 +217,7 @@ export default function AethergridSector() {
 
                 {/* Chapters */}
 <Link
-  href="/game/theaethergrid/chapters"
+  href="/UnknownSector/theaethergrid/chapters"
   className="group block border border-cyan-500/30 bg-cyan-950/[0.06] p-5 transition-all duration-300 hover:border-cyan-400/70 hover:bg-cyan-500/[0.05] hover:shadow-[0_0_30px_rgba(0,220,255,0.08)]"
 >
   <div className="flex items-center justify-between">
@@ -275,7 +275,7 @@ export default function AethergridSector() {
                 </span>
 
                 <Link
-                  href="/"
+                  href="/UnknownSector/theaethergrid"
                   className="text-[9px] uppercase tracking-[0.2em] text-cyan-500/60 transition hover:text-cyan-300"
                 >
                   ← RETURN TO ARCHIVE
@@ -342,7 +342,7 @@ export default function AethergridSector() {
 
                         {available ? (
                           <Link
-  href="/game/theaethergrid/prologue/fragment-01"
+  href="/UnknownSector/theaethergrid/prologue/fragment-01"
   className="inline-flex items-center justify-center border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition hover:border-cyan-300 hover:bg-cyan-500/10"
 >
   DECRYPT MEMORY →

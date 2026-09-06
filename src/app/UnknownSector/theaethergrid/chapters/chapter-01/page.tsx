@@ -106,7 +106,7 @@ export default function Chapter1Page() {
           {/* Barra de navegación superior */}
           <div className="mb-6 flex items-center justify-between">
             <Link
-              href="/game/theaethergrid/prologue/fragment-02"
+              href="/UnknownSector/theaethergrid/prologue/fragment-02"
               className="inline-flex items-center gap-2 rounded border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 font-mono text-xs text-cyan-400 shadow-[0_0_10px_rgba(0,255,255,0.1)] transition-all hover:border-cyan-400 hover:bg-cyan-500/10 md:text-sm"
             >
               <span>&larr;</span> PREVIOUS FRAGMENT
@@ -199,7 +199,7 @@ export default function Chapter1Page() {
             </div>
 
             <Link
-              href="/game/theaethergrid/chapters"
+              href="/UnknownSector/theaethergrid/chapters"
               className="inline-flex items-center gap-2 rounded border border-cyan-400 bg-cyan-600/20 px-6 py-3 font-mono text-sm text-white transition-all hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)]"
             >
               ← RETURN TO CHAPTER ARCHIVE

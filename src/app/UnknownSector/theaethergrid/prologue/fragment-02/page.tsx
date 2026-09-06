@@ -149,7 +149,7 @@ export default function PrologueFragment02() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* Previous fragment */}
             <Link
-              href="/game/theaethergrid/prologue/fragment-01"
+              href="/UnknownSector/theaethergrid/prologue/fragment-01"
               className="inline-flex items-center justify-center gap-2 border border-cyan-500/30 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
             >
               ← PREVIOUS MEMORY
@@ -162,7 +162,7 @@ export default function PrologueFragment02() {
 
             {/* Return to archive */}
             <Link
-              href="/game/theaethergrid"
+              href="/UnknownSector/theaethergrid"
               className="inline-flex items-center justify-center gap-2 border border-cyan-500/40 bg-cyan-950/20 px-5 py-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-300 transition-all hover:border-cyan-300 hover:bg-cyan-500/10"
             >
               RETURN TO ARCHIVE →
