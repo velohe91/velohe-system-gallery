@@ -15,8 +15,10 @@ export const aboutLore = {
     /** First frame of video (extracted poster) */
     poster: "/about/velohe-system-poster.jpg",
     paragraphs: [
-      "VΣLOHE SYSTEM is an NFT exhibition system designed to observe, process, and permanently record every mint as a living entry within an expanding digital archive. Each asset is not merely collected — it is registered as a signal, assigned an identity, and preserved with its full lore, operational state, and narrative continuity. Through this process, VΣLOHE transforms individual mints into permanent records of an interconnected universe.",
-    ],
+  "VΣLOHE SYSTEM is an NFT exhibition system designed to observe, process, and permanently record every mint as a living entry within an expanding digital archive. Each asset is not merely collected — it is registered as a signal, assigned an identity, and preserved with its full lore, operational state, and narrative continuity.",
+  "As VΣLOHE evolves, the system is expanding beyond the exhibition layer into an ecosystem where users can create and deploy their own NFT collections through VΣLOHE-generated smart contracts. The goal is to make contract creation accessible without requiring users to write Solidity themselves, while keeping ownership and transaction signing in the hands of the creator.",
+  "Through this evolution, VΣLOHE transforms individual mints into permanent records while providing the infrastructure for creators to establish their own collections within the same interconnected universe.",
+],
   },
   aethergrid: {
     eyebrow: "02 // Lattice",
