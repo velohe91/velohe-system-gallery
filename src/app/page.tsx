@@ -5,7 +5,6 @@ import { AnimatedLogo } from "@/components/home/AnimatedLogo";
 import { SystemBootSequence } from "@/components/home/SystemBootSequence";
 import { EnterArchiveButton } from "@/components/home/EnterArchiveButton";
 import { PlayGameButton } from "@/components/home/PlayGameButton";
-import { AccessUnknownSectorButton } from "@/components/home/AccessUnknownSectorButton";
 import { SITE_TAGLINE } from "@/lib/constants";
 import { motion } from "framer-motion";
 
@@ -41,9 +40,8 @@ export default function HomePage() {
         </motion.p>
 
         <SystemBootSequence />
-<EnterArchiveButton />
-<PlayGameButton />
-<AccessUnknownSectorButton />
+        <EnterArchiveButton />
+        <PlayGameButton />
       </div>
     </section>
   );
