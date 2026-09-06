@@ -17,6 +17,42 @@ export const transmissionArticles: TransmissionArticle[] = [
 {
     kind: "transmission",
     era: "live",
+    id: "TX-VΣ03",
+    date: "2026.09.06_11:45",
+    title: "WEB3: THE NETWORK CONNECTION",
+    tags: ["web 3.0", "network connection", "wallet", "live data"],
+    content: `A new layer has been established within the VΣLOHE SYSTEM architecture.
+
+The Aethergrid is no longer isolated.
+
+External network protocols have been detected, mapped, and integrated into the live interface. Wallet connectivity is now active, allowing external nodes to establish a direct connection with the system.
+
+A second signal has emerged.
+
+Digital asset markets are now being monitored through newly integrated data channels. Selected cryptocurrency values are displayed through live market chips, synchronized with the external network and refreshed every 45 seconds.
+
+The system is no longer simply observing digital assets.
+
+It is now connected to the network that moves them.
+
+Wallet interfaces. Market signals. Live values. External protocols.
+
+All are now converging within the VΣLOHE SYSTEM.
+
+The boundary between archive and network has begun to disappear.
+
+WEB3 INTEGRATION: ACTIVE.
+WALLET CONNECTIVITY: ESTABLISHED.
+MARKET DATA CHANNEL: ONLINE.
+LIVE SYNCHRONIZATION: 45s.
+
+The connection is stable.
+
+Awaiting further signals from the network.`
+  },
+{
+    kind: "transmission",
+    era: "live",
     id: "TX-VΣ02",
     date: "2026.08.09_07:11",
     title: "CHAPTER 1: THE PULSE INITIALIZATION",
