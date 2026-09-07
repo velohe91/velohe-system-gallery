@@ -516,7 +516,6 @@ export default function ArcadePage() {
           dy += clamp(distanceY / 42, -1.25, 1.25) * PLAYER_VERTICAL_SPEED * dt;
         }
 
-        fire();
       }
 
       const bossLeftLimit = BOSS_X - PLAYER_SIZE - 28;
@@ -1138,10 +1137,12 @@ export default function ArcadePage() {
         </header>
 
         <section
-          className="relative overflow-hidden rounded-xl border bg-black"
+          className={`relative rounded-xl border bg-black ${
+            screen === "playing" ? "overflow-hidden" : "overflow-visible"
+          }`}
           style={{
             borderColor: `${sector.accent}38`,
-            touchAction: "none",
+            touchAction: screen === "playing" ? "none" : "auto",
             userSelect: "none",
             WebkitUserSelect: "none",
           }}
@@ -1625,8 +1626,33 @@ export default function ArcadePage() {
                 >
                   TOUCH // DRAG TO NAVIGATE
                   <br />
-                  AUTO-FIRE // ACTIVE
+                  FIRE // BUTTON
                 </div>
+
+                <button
+                  type="button"
+                  aria-label="Fire weapon"
+                  onPointerDown={(event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    fire();
+                  }}
+                  onPointerUp={(event) => {
+                    event.stopPropagation();
+                  }}
+                  onPointerCancel={(event) => {
+                    event.stopPropagation();
+                  }}
+                  className="absolute bottom-4 right-4 z-30 flex h-16 w-16 touch-none items-center justify-center rounded-full border bg-black/25 font-mono text-[9px] uppercase tracking-[0.18em] transition active:scale-95 sm:hidden"
+                  style={{
+                    borderColor: `${sector.accent}70`,
+                    color: `${sector.accent}cc`,
+                    boxShadow: `0 0 18px ${sector.accent}18`,
+                    backdropFilter: "blur(2px)",
+                  }}
+                >
+                  FIRE
+                </button>
               </div>
 
               <div className="border-t border-white/10 bg-black/80 px-3 py-2">
