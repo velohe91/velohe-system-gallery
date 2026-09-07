@@ -143,11 +143,11 @@ const SECTORS: SectorConfig[] = [
 
 const WORLD_WIDTH = 5200;
 const WORLD_HEIGHT = 560;
-const PLAYER_SIZE = 42;
-const PLAYER_SPEED = 2.65;
-const PLAYER_VERTICAL_SPEED = 2.35;
+const PLAYER_SIZE = 50;
+const PLAYER_SPEED = 3.00;
+const PLAYER_VERTICAL_SPEED = 3.00;
 const PLAYER_HP = 5;
-const STARTING_AMMO = 300;
+const STARTING_AMMO = 500;
 const LIFE_PICKUP_SPACING = 920;
 
 const BOSS_X = WORLD_WIDTH - 138;
@@ -316,6 +316,7 @@ export default function ArcadePage() {
   const lastUiUpdateRef = useRef(0);
   const cameraXRef = useRef(0);
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  const joystickKnobRef = useRef<HTMLDivElement | null>(null);
 
   const resetSector = useCallback((index: number) => {
     const nextPlayer = {
@@ -1043,6 +1044,9 @@ export default function ArcadePage() {
     event: PointerEvent<HTMLElement>,
   ) => {
     if (screen !== "playing") return;
+    if ((event.target as HTMLElement).closest('[data-touch-control="true"]')) {
+      return;
+    }
 
     event.currentTarget.setPointerCapture(event.pointerId);
 
@@ -1070,6 +1074,71 @@ export default function ArcadePage() {
     touchRef.current.active = false;
     touchRef.current.x = 0;
     touchRef.current.y = 0;
+  };
+
+  const handleJoystickDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (screen !== "playing") return;
+
+    event.stopPropagation();
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const radius = 30;
+    const rawX = event.clientX - centerX;
+    const rawY = event.clientY - centerY;
+    const distance = Math.hypot(rawX, rawY) || 1;
+    const scale = Math.min(1, radius / distance);
+    const x = rawX * scale;
+    const y = rawY * scale;
+
+    touchRef.current = { active: true, x, y };
+
+    if (joystickKnobRef.current) {
+      joystickKnobRef.current.style.transform =
+        `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+    }
+  };
+
+  const handleJoystickMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!touchRef.current.active) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const radius = 30;
+    const rawX = event.clientX - centerX;
+    const rawY = event.clientY - centerY;
+    const distance = Math.hypot(rawX, rawY) || 1;
+    const scale = Math.min(1, radius / distance);
+    const x = rawX * scale;
+    const y = rawY * scale;
+
+    touchRef.current.x = x;
+    touchRef.current.y = y;
+
+    if (joystickKnobRef.current) {
+      joystickKnobRef.current.style.transform =
+        `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+    }
+  };
+
+  const handleJoystickUp = (event?: PointerEvent<HTMLDivElement>) => {
+    event?.stopPropagation();
+    event?.preventDefault();
+
+    touchRef.current.active = false;
+    touchRef.current.x = 0;
+    touchRef.current.y = 0;
+
+    if (joystickKnobRef.current) {
+      joystickKnobRef.current.style.transform = "translate(-50%, -50%)";
+    }
   };
 
   const resetToStart = () => {
@@ -1611,48 +1680,82 @@ export default function ArcadePage() {
                   BOSS SIGNAL // {boss.revealed ? "VISIBLE" : "DISTANT"}
                 </div>
 
-                <div className="pointer-events-none absolute bottom-3 left-3 rounded border border-white/10 bg-black/70 px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em] text-white/35">
-                  MOVE // WASD + ARROWS
-                  <br />
-                  FIRE // SPACE / X / TOUCH
+                <div className="pointer-events-auto absolute bottom-4 left-4 z-30 sm:hidden">
+                  <div
+                    data-touch-control="true"
+                    className="relative h-[88px] w-[88px] touch-none rounded-full border bg-black/20 opacity-75 backdrop-blur-[2px]"
+                    style={{
+                      borderColor: `${sector.accent}42`,
+                      boxShadow: `inset 0 0 18px ${sector.accent}08`,
+                    }}
+                    role="button"
+                    aria-label="Move Core"
+                    onPointerDown={handleJoystickDown}
+                    onPointerMove={handleJoystickMove}
+                    onPointerUp={handleJoystickUp}
+                    onPointerCancel={handleJoystickUp}
+                  >
+                    <span
+                      className="absolute left-1/2 top-2 h-2 w-px -translate-x-1/2"
+                      style={{ background: `${sector.accent}38` }}
+                    />
+                    <span
+                      className="absolute bottom-2 left-1/2 h-2 w-px -translate-x-1/2"
+                      style={{ background: `${sector.accent}38` }}
+                    />
+                    <span
+                      className="absolute left-2 top-1/2 h-px w-2 -translate-y-1/2"
+                      style={{ background: `${sector.accent}38` }}
+                    />
+                    <span
+                      className="absolute right-2 top-1/2 h-px w-2 -translate-y-1/2"
+                      style={{ background: `${sector.accent}38` }}
+                    />
+                    <div
+                      ref={joystickKnobRef}
+                      className="absolute left-1/2 top-1/2 h-9 w-9 rounded-full border"
+                      style={{
+                        transform: "translate(-50%, -50%)",
+                        borderColor: `${sector.accent}70`,
+                        background: `${sector.accent}10`,
+                        boxShadow: `0 0 14px ${sector.accent}18`,
+                      }}
+                    >
+                      <span
+                        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{ background: sector.accent }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div
-                  className="pointer-events-none absolute bottom-3 right-3 rounded border px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em]"
-                  style={{
-                    borderColor: `${sector.accent}30`,
-                    color: `${sector.accent}aa`,
-                  }}
-                >
-                  TOUCH // DRAG TO NAVIGATE
-                  <br />
-                  FIRE // BUTTON
+                <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 sm:hidden">
+                  <button
+                    type="button"
+                    data-touch-control="true"
+                    aria-label="Fire weapon"
+                    onPointerDown={(event) => {
+                      event.stopPropagation();
+                      event.preventDefault();
+                      fire();
+                    }}
+                    onPointerUp={(event) => {
+                      event.stopPropagation();
+                    }}
+                    onPointerCancel={(event) => {
+                      event.stopPropagation();
+                    }}
+                    className="pointer-events-auto flex h-16 w-16 touch-none items-center justify-center rounded-full border bg-black/20 font-mono text-[9px] uppercase tracking-[0.18em] opacity-75 transition active:scale-95"
+                    style={{
+                      borderColor: `${sector.accent}70`,
+                      color: `${sector.accent}cc`,
+                      boxShadow: `0 0 18px ${sector.accent}14`,
+                      backdropFilter: "blur(2px)",
+                    }}
+                  >
+                    FIRE
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  aria-label="Fire weapon"
-                  onPointerDown={(event) => {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    fire();
-                  }}
-                  onPointerUp={(event) => {
-                    event.stopPropagation();
-                  }}
-                  onPointerCancel={(event) => {
-                    event.stopPropagation();
-                  }}
-                  className="absolute bottom-4 right-4 z-30 flex h-16 w-16 touch-none items-center justify-center rounded-full border bg-black/25 font-mono text-[9px] uppercase tracking-[0.18em] transition active:scale-95 sm:hidden"
-                  style={{
-                    borderColor: `${sector.accent}70`,
-                    color: `${sector.accent}cc`,
-                    boxShadow: `0 0 18px ${sector.accent}18`,
-                    backdropFilter: "blur(2px)",
-                  }}
-                >
-                  FIRE
-                </button>
               </div>
 
               <div className="border-t border-white/10 bg-black/80 px-3 py-2">
@@ -1872,10 +1975,17 @@ export default function ArcadePage() {
                     sectorIndex === SECTORS.length - 1 && (
                       <button
                         type="button"
-                        onClick={resetToStart}
-                        className="rounded border border-white/20 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/65 transition hover:bg-white/5"
+                        onClick={() => {
+                          window.location.href = "https://www.theaethergrid.com/";
+                        }}
+                        className="rounded border px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-white/5"
+                        style={{
+                          borderColor: sector.accent,
+                          color: sector.accent,
+                          boxShadow: `0 0 18px ${sector.accent}22`,
+                        }}
                       >
-                        Return to Node
+                        Enter the Aethergrid
                       </button>
                     )}
 
@@ -1895,23 +2005,55 @@ export default function ArcadePage() {
                 </div>
 
                 {(screen === "complete" || screen === "gameover") && (
-                  <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-2 font-mono text-[9px] uppercase tracking-widest">
-                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
-                      <span className="block text-white/30">Score</span>
-                      <span className="mt-1 block text-white/80">{score}</span>
+                  <div className="mx-auto mt-10 w-full max-w-lg">
+                    {screen === "complete" && sectorIndex === SECTORS.length - 1 && (
+                      <div
+                        className="mb-4 rounded border px-4 py-3 text-center font-mono text-[9px] uppercase tracking-[0.24em]"
+                        style={{
+                          borderColor: `${sector.accent}35`,
+                          background: `${sector.accent}08`,
+                          color: `${sector.accent}cc`,
+                        }}
+                      >
+                        AETHERGRID ACCESS // 5 FREQUENCIES SYNCHRONIZED
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase tracking-widest sm:grid-cols-4">
+                      <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                        <span className="block text-white/30">Final Score</span>
+                        <span
+                          className="mt-1 block text-lg"
+                          style={{ color: sector.accent }}
+                        >
+                          {score.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                        <span className="block text-white/30">NeoBytes</span>
+                        <span className="mt-1 block text-white/80">
+                          {neoBytes.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                        <span className="block text-white/30">Time</span>
+                        <span className="mt-1 block text-white/80">
+                          {formatTime(time)}
+                        </span>
+                      </div>
+                      <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                        <span className="block text-white/30">Sectors</span>
+                        <span className="mt-1 block text-white/80">
+                          {sectorIndex + 1} / {SECTORS.length}
+                        </span>
+                      </div>
                     </div>
-                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
-                      <span className="block text-white/30">NeoBytes</span>
-                      <span className="mt-1 block text-white/80">
-                        {neoBytes}
-                      </span>
-                    </div>
-                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
-                      <span className="block text-white/30">Time</span>
-                      <span className="mt-1 block text-white/80">
-                        {formatTime(time)}
-                      </span>
-                    </div>
+
+                    {screen === "complete" && sectorIndex === SECTORS.length - 1 && (
+                      <p className="mt-4 text-center font-mono text-[9px] uppercase leading-6 tracking-[0.16em] text-white/35">
+                        Total score accumulated across Cyan, Purple, Gold, Void, and Dual-Core.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1931,4 +2073,3 @@ export default function ArcadePage() {
     </main>
   );
 }
-
