@@ -1128,7 +1128,7 @@ export default function ArcadePage() {
           </div>
 
           <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/35">
-            {sector.code} // SECTOR {String(sectorIndex + 1).padStart(2, "0")}
+            {sector.code} {"//"} SECTOR {String(sectorIndex + 1).padStart(2, "0")}
           </div>
         </header>
 
@@ -1569,7 +1569,7 @@ export default function ArcadePage() {
 
                       <div className="absolute -top-8 left-1/2 w-44 -translate-x-1/2 text-center font-mono text-[8px] uppercase tracking-[0.28em]">
                         <span style={{ color: sector.accent }}>
-                          {sector.spirit} // BOSS
+                          {sector.spirit} {"//"} BOSS
                         </span>
                       </div>
 
