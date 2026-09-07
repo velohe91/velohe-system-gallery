@@ -1,414 +1,188 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 
-type GameState =
-  | "start"
-  | "playing"
-  | "complete"
-  | "gameover";
+type Screen = "start" | "spirit" | "playing" | "complete" | "gameover";
+type SectorKey = "cyan" | "purple" | "gold" | "void" | "dual";
 
-type PlayerState = {
-  x: number;
-  y: number;
-  facing: "left" | "right";
-  attacking: boolean;
+type SectorConfig = {
+  key: SectorKey;
+  spirit: string;
+  code: string;
+  accent: string;
+  accentSoft: string;
+  difficulty: string;
+  enemySpawnMs: number;
+  enemyMax: number;
+  enemySpeed: number;
 };
 
-type Platform = {
+type Player = {
   x: number;
   y: number;
-  width: number;
-  height: number;
 };
 
-type Neobyte = {
+type Projectile = {
   id: number;
   x: number;
   y: number;
-  collected: boolean;
+  vx: number;
 };
 
-type Obstacle = {
+type BossProjectile = {
   id: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
+  vx: number;
+  vy: number;
+  size: number;
 };
 
 type Enemy = {
   id: number;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  alive: boolean;
+  hp: number;
+  source: "sector" | "boss";
 };
 
-type CyanSpiritAnimState = {
-  mode: "idle" | "attack";
-  frame: number;
+type Byte = {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
 };
 
-type ProjectileState = {
+type PowerCapsule = {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+};
+
+type LifePickup = {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+};
+
+type Boss = {
+  x: number;
+  y: number;
+  hp: number;
+  maxHp: number;
+  active: boolean;
+  revealed: boolean;
+};
+
+type TouchState = {
   active: boolean;
   x: number;
   y: number;
-  width: number;
-  height: number;
-  direction: "left" | "right";
-  frame: number;
-  exploding: boolean;
 };
 
-/* =========================================================
-WORLD
-========================================================= */
+const SECTORS: SectorConfig[] = [
+  {
+    key: "cyan",
+    spirit: "CYAN SPIRIT",
+    code: "AGS-001",
+    accent: "#20e7ff",
+    accentSoft: "rgba(32,231,255,0.22)",
+    difficulty: "EASY",
+    enemySpawnMs: 1450,
+    enemyMax: 12,
+    enemySpeed: 0.58,
+  },
+  {
+    key: "purple",
+    spirit: "PURPLE SPIRIT",
+    code: "AGS-002",
+    accent: "#b46cff",
+    accentSoft: "rgba(180,108,255,0.22)",
+    difficulty: "MODERATE",
+    enemySpawnMs: 1120,
+    enemyMax: 15,
+    enemySpeed: 0.68,
+  },
+  {
+    key: "gold",
+    spirit: "GOLD SPIRIT",
+    code: "AGS-003",
+    accent: "#ffd75a",
+    accentSoft: "rgba(255,215,90,0.22)",
+    difficulty: "HARD",
+    enemySpawnMs: 860,
+    enemyMax: 18,
+    enemySpeed: 0.78,
+  },
+  {
+    key: "void",
+    spirit: "VOID SPIRIT",
+    code: "AGS-004",
+    accent: "#ff5d9e",
+    accentSoft: "rgba(255,93,158,0.18)",
+    difficulty: "VERY HARD",
+    enemySpawnMs: 650,
+    enemyMax: 22,
+    enemySpeed: 0.9,
+  },
+  {
+    key: "dual",
+    spirit: "DUAL-CORE SPIRIT",
+    code: "AGS-005",
+    accent: "#e9f7ff",
+    accentSoft: "rgba(233,247,255,0.2)",
+    difficulty: "PROFESSIONAL",
+    enemySpawnMs: 480,
+    enemyMax: 26,
+    enemySpeed: 1.02,
+  },
+];
 
-const WORLD_WIDTH = 3200;
+const WORLD_WIDTH = 5200;
 const WORLD_HEIGHT = 560;
-const FLOOR_Y = 470;
+const PLAYER_SIZE = 42;
+const PLAYER_SPEED = 2.65;
+const PLAYER_VERTICAL_SPEED = 2.35;
+const PLAYER_HP = 5;
+const STARTING_AMMO = 300;
+const LIFE_PICKUP_SPACING = 920;
 
-/* =========================================================
-PLAYER HITBOX
-========================================================= */
+const BOSS_X = WORLD_WIDTH - 138;
+const BOSS_SIZE = 112;
 
-const PLAYER_WIDTH = 48;
-const PLAYER_HEIGHT = 72;
+const PROJECTILE_SPEED = 8.8;
+const PROJECTILE_DAMAGE = 1;
+const PROJECTILE_WIDTH = 28;
+const PROJECTILE_HEIGHT = 10;
 
-/* =========================================================
-CYAN SPIRIT BOUNDS
-========================================================= */
+const FIRE_COOLDOWN = 250;
+const ENEMY_DAMAGE_COOLDOWN = 700;
 
-const CYAN_SPIRIT_MIN_Y = 60;
+const VIEWPORT_WIDTH = 1000;
+const UI_TICK_MS = 50;
 
-const CYAN_SPIRIT_MAX_Y =
-  FLOOR_Y - PLAYER_HEIGHT - 8;
+const BOSS_REVEAL_MARGIN = VIEWPORT_WIDTH * 0.92;
+const BOSS_SHOT_COOLDOWN = 1250;
+const BOSS_REVEALED_SHOT_COOLDOWN = 520;
+const BOSS_SPAWN_COOLDOWN = 2600;
+const BOSS_REVEALED_SPAWN_COOLDOWN = 1450;
+const BOSS_PROJECTILE_SPEED = 3.25;
+const BOSS_REVEALED_PROJECTILE_SPEED = 4.35;
+const CAPSULE_MIN_DISTANCE = 560;
+const CAPSULE_MAX_DISTANCE = 980;
+const CAPSULE_DURATION_MS = 11000;
 
-const CYAN_SPIRIT_START_Y = 370;
 
-/* =========================================================
-SPRITES
-========================================================= */
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
+}
 
-const CYAN_SPIRIT_IDLE_FRAMES = [
-  "/game/arcade/sprites/cyan-spirit/idle/frame-01.png",
-  "/game/arcade/sprites/cyan-spirit/idle/frame-02.png",
-  "/game/arcade/sprites/cyan-spirit/idle/frame-03.png",
-];
-
-const CYAN_SPIRIT_ATTACK_FRAMES = [
-  "/game/arcade/sprites/cyan-spirit/attack/frame-01.png",
-  "/game/arcade/sprites/cyan-spirit/attack/frame-02.png",
-  "/game/arcade/sprites/cyan-spirit/attack/frame-03.png",
-  "/game/arcade/sprites/cyan-spirit/attack/frame-04.png",
-];
-
-/* =========================================================
-PROJECTILE SPRITES
-========================================================= */
-
-const CYAN_SPIRIT_PROJECTILE_FRAMES = [
-  "/game/arcade/sprites/cyan-spirit/attack/projectile/frame-01.png",
-  "/game/arcade/sprites/cyan-spirit/attack/projectile/frame-02.png",
-  "/game/arcade/sprites/cyan-spirit/attack/projectile/frame-03.png",
-  "/game/arcade/sprites/cyan-spirit/attack/projectile/frame-04.png",
-  "/game/arcade/sprites/cyan-spirit/attack/projectile/frame-05.png",
-];
-
-/* =========================================================
-VISUAL SIZES
-========================================================= */
-
-const CYAN_SPIRIT_VISUAL_SIZE = 150;
-
-const PROJECTILE_VISUAL_SIZE = 105;
-
-/* =========================================================
-MOVEMENT / ANIMATION
-========================================================= */
-
-const MOVE_SPEED = 5.8;
-
-const IDLE_FRAME_MS = 150;
-
-const ATTACK_FRAME_MS = 70;
-
-const ATTACK_TOTAL_FRAMES =
-  CYAN_SPIRIT_ATTACK_FRAMES.length;
-
-const ATTACK_MS =
-  ATTACK_FRAME_MS *
-  ATTACK_TOTAL_FRAMES;
-
-const INITIAL_HP = 3;
-
-/* =========================================================
-PROJECTILE
-========================================================= */
-
-const PROJECTILE_WIDTH = 30;
-const PROJECTILE_HEIGHT = 30;
-
-const PROJECTILE_SPEED = 11;
-
-const PROJECTILE_FRAME_MS = 75;
-
-const PROJECTILE_EXPLOSION_FRAME_MS = 75;
-
-const PROJECTILE_START_OFFSET_X = 55;
-
-const PROJECTILE_START_OFFSET_Y = 10;
-
-/* =========================================================
-INITIAL PLAYER
-========================================================= */
-
-const INITIAL_PLAYER: PlayerState = {
-  x: 180,
-  y: CYAN_SPIRIT_START_Y,
-  facing: "right",
-  attacking: false,
-};
-
-/* =========================================================
-INITIAL PROJECTILE
-========================================================= */
-
-const INITIAL_PROJECTILE: ProjectileState = {
-  active: false,
-  x: 0,
-  y: 0,
-  width: PROJECTILE_WIDTH,
-  height: PROJECTILE_HEIGHT,
-  direction: "right",
-  frame: 0,
-  exploding: false,
-};
-
-/* =========================================================
-PLATFORMS
-========================================================= */
-
-const PLATFORMS: Platform[] = [
-  {
-    x: 430,
-    y: 390,
-    width: 180,
-    height: 16,
-  },
-  {
-    x: 700,
-    y: 350,
-    width: 180,
-    height: 16,
-  },
-  {
-    x: 980,
-    y: 395,
-    width: 200,
-    height: 16,
-  },
-  {
-    x: 1280,
-    y: 345,
-    width: 200,
-    height: 16,
-  },
-  {
-    x: 1580,
-    y: 390,
-    width: 220,
-    height: 16,
-  },
-  {
-    x: 1900,
-    y: 340,
-    width: 220,
-    height: 16,
-  },
-  {
-    x: 2200,
-    y: 390,
-    width: 220,
-    height: 16,
-  },
-  {
-    x: 2500,
-    y: 350,
-    width: 220,
-    height: 16,
-  },
-];
-
-/* =========================================================
-NEOBYTES
-========================================================= */
-
-const INITIAL_NEOBYTES: Neobyte[] = [
-  {
-    id: 1,
-    x: 350,
-    y: 430,
-    collected: false,
-  },
-  {
-    id: 2,
-    x: 510,
-    y: 350,
-    collected: false,
-  },
-  {
-    id: 3,
-    x: 770,
-    y: 310,
-    collected: false,
-  },
-  {
-    id: 4,
-    x: 1040,
-    y: 355,
-    collected: false,
-  },
-  {
-    id: 5,
-    x: 1340,
-    y: 305,
-    collected: false,
-  },
-  {
-    id: 6,
-    x: 1660,
-    y: 350,
-    collected: false,
-  },
-  {
-    id: 7,
-    x: 1980,
-    y: 300,
-    collected: false,
-  },
-  {
-    id: 8,
-    x: 2270,
-    y: 350,
-    collected: false,
-  },
-  {
-    id: 9,
-    x: 2580,
-    y: 310,
-    collected: false,
-  },
-  {
-    id: 10,
-    x: 2690,
-    y: 310,
-    collected: false,
-  },
-  {
-    id: 11,
-    x: 2920,
-    y: 430,
-    collected: false,
-  },
-];
-
-/* =========================================================
-OBSTACLES
-========================================================= */
-
-const OBSTACLES: Obstacle[] = [
-  {
-    id: 1,
-    x: 650,
-    y: FLOOR_Y - 42,
-    width: 38,
-    height: 42,
-  },
-  {
-    id: 2,
-    x: 1210,
-    y: FLOOR_Y - 48,
-    width: 40,
-    height: 48,
-  },
-  {
-    id: 3,
-    x: 1815,
-    y: FLOOR_Y - 45,
-    width: 40,
-    height: 45,
-  },
-  {
-    id: 4,
-    x: 2435,
-    y: FLOOR_Y - 50,
-    width: 42,
-    height: 50,
-  },
-];
-
-/* =========================================================
-ENEMIES
-========================================================= */
-
-const ENEMY_WIDTH = 42;
-const ENEMY_HEIGHT = 58;
-
-const INITIAL_ENEMIES: Enemy[] = [
-  {
-    id: 1,
-    x: 560,
-    y: FLOOR_Y - ENEMY_HEIGHT,
-    width: ENEMY_WIDTH,
-    height: ENEMY_HEIGHT,
-    alive: true,
-  },
-  {
-    id: 2,
-    x: 1120,
-    y: FLOOR_Y - ENEMY_HEIGHT,
-    width: ENEMY_WIDTH,
-    height: ENEMY_HEIGHT,
-    alive: true,
-  },
-  {
-    id: 3,
-    x: 1740,
-    y: FLOOR_Y - ENEMY_HEIGHT,
-    width: ENEMY_WIDTH,
-    height: ENEMY_HEIGHT,
-    alive: true,
-  },
-  {
-    id: 4,
-    x: 2320,
-    y: FLOOR_Y - ENEMY_HEIGHT,
-    width: ENEMY_WIDTH,
-    height: ENEMY_HEIGHT,
-    alive: true,
-  },
-];
-
-/* =========================================================
-HELPERS
-========================================================= */
-
-function intersects(
-  a: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  },
-  b: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  },
+function rectsOverlap(
+  a: { x: number; y: number; width: number; height: number },
+  b: { x: number; y: number; width: number; height: number },
 ) {
   return (
     a.x < b.x + b.width &&
@@ -418,2693 +192,1709 @@ function intersects(
   );
 }
 
-function formatTime(totalSeconds: number) {
-  const minutes = Math.floor(
-    totalSeconds / 60,
-  );
-
-  const seconds =
-    totalSeconds % 60;
-
-  return `${minutes
-    .toString()
-    .padStart(2, "0")}:${seconds
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${remainder
     .toString()
     .padStart(2, "0")}`;
 }
 
-function playersEqual(
-  a: PlayerState,
-  b: PlayerState,
-) {
-  return (
-    a.x === b.x &&
-    a.y === b.y &&
-    a.facing === b.facing &&
-    a.attacking === b.attacking
-  );
+function makeEnemies(sectorIndex: number): Enemy[] {
+  const count = 14 + sectorIndex * 4;
+
+  return Array.from({ length: count }, (_, index) => ({
+    id: sectorIndex * 100 + index,
+    x: 420 + index * 205 + (index % 2) * 35,
+    y: 100 + ((index * 83 + sectorIndex * 47) % 330),
+    hp: 1 + Math.floor(sectorIndex / 2),
+    source: "sector" as const,
+  })).filter((enemy) => enemy.x < BOSS_X - 220);
 }
 
-function resolveObstacleOverlap(
-  box: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  },
-  obstacle: Obstacle,
-) {
-  const overlapLeft =
-    box.x +
-    box.width -
-    obstacle.x;
+function makeBytes(sectorIndex: number): Byte[] {
+  const count = 15;
 
-  const overlapRight =
-    obstacle.x +
-    obstacle.width -
-    box.x;
+  return Array.from({ length: count }, (_, index) => ({
+    id: sectorIndex * 1000 + index,
+    x: 260 + index * 190 + (index % 3) * 32,
+    y: 105 + ((index * 71 + sectorIndex * 61) % 320),
+    collected: false,
+  })).filter((byte) => byte.x < BOSS_X - 190);
+}
 
-  const overlapTop =
-    box.y +
-    box.height -
-    obstacle.y;
-
-  const overlapBottom =
-    obstacle.y +
-    obstacle.height -
-    box.y;
-
-  const minX = Math.min(
-    overlapLeft,
-    overlapRight,
-  );
-
-  const minY = Math.min(
-    overlapTop,
-    overlapBottom,
-  );
-
-  if (minX < minY) {
-    if (
-      overlapLeft <
-      overlapRight
-    ) {
-      return {
-        x:
-          obstacle.x -
-          box.width,
-        y: box.y,
-      };
-    }
-
-    return {
-      x:
-        obstacle.x +
-        obstacle.width,
-      y: box.y,
-    };
-  }
-
-  if (
-    overlapTop <
-    overlapBottom
-  ) {
-    return {
-      x: box.x,
-      y:
-        obstacle.y -
-        box.height,
-    };
-  }
+function makeBoss(sectorIndex: number): Boss {
+  const maxHp = 8 + sectorIndex * 3;
 
   return {
-    x: box.x,
-    y:
-      obstacle.y +
-      obstacle.height,
+    x: BOSS_X,
+    y: WORLD_HEIGHT / 2 - BOSS_SIZE / 2,
+    hp: maxHp,
+    maxHp,
+    active: true,
+    revealed: false,
   };
 }
 
-/* =========================================================
-PAGE
-========================================================= */
+function makeCapsules(sectorIndex: number): PowerCapsule[] {
+  const count = 6;
+  const firstX = 760 + sectorIndex * 90;
+
+  return Array.from({ length: count }, (_, index) => ({
+    id: sectorIndex * 100 + index,
+    x: firstX + index * 760 + ((index * 113) % 180),
+    y: 95 + ((index * 137 + sectorIndex * 53) % 330),
+    collected: false,
+  })).filter((capsule) => capsule.x < BOSS_X - 420);
+}
+
+function makeLifePickups(sectorIndex: number): LifePickup[] {
+  const count = Math.floor((BOSS_X - 700) / LIFE_PICKUP_SPACING);
+
+  return Array.from({ length: count }, (_, index) => ({
+    id: sectorIndex * 1000 + index,
+    x: 760 + index * LIFE_PICKUP_SPACING + ((index * 173 + sectorIndex * 91) % 220),
+    y: 90 + ((index * 149 + sectorIndex * 67) % 350),
+    collected: false,
+  })).filter((pickup) => pickup.x < BOSS_X - 300);
+}
 
 export default function ArcadePage() {
-  const [
-    gameState,
-    setGameState,
-  ] =
-    useState<GameState>(
-      "start",
-    );
+  const [screen, setScreen] = useState<Screen>("start");
+  const [sectorIndex, setSectorIndex] = useState(0);
 
-  const [
-    player,
-    setPlayer,
-  ] =
-    useState<PlayerState>(
-      INITIAL_PLAYER,
-    );
+  const sector = SECTORS[sectorIndex];
 
-  const [score, setScore] =
-    useState(0);
+  const [player, setPlayer] = useState<Player>({
+    x: 120,
+    y: WORLD_HEIGHT / 2 - PLAYER_SIZE / 2,
+  });
 
-  const [
-    neobytes,
-    setNeobytes,
-  ] =
-    useState(0);
+  const [projectiles, setProjectiles] = useState<Projectile[]>([]);
+  const [bossProjectiles, setBossProjectiles] = useState<BossProjectile[]>([]);
+  const [enemies, setEnemies] = useState<Enemy[]>([]);
+  const [bytes, setBytes] = useState<Byte[]>([]);
+  const [capsules, setCapsules] = useState<PowerCapsule[]>([]);
+  const [lifePickups, setLifePickups] = useState<LifePickup[]>([]);
+  const [boss, setBoss] = useState<Boss>(() => makeBoss(0));
+  const [shotUpgrade, setShotUpgrade] = useState<"single" | "double">("single");
+  const [ammo, setAmmo] = useState(STARTING_AMMO);
+  const [upgradeUntil, setUpgradeUntil] = useState(0);
 
-  const [combo, setCombo] =
-    useState(0);
+  const [hp, setHp] = useState(PLAYER_HP);
+  const [score, setScore] = useState(0);
+  const [neoBytes, setNeoBytes] = useState(0);
+  const [time, setTime] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [cameraX, setCameraX] = useState(0);
 
-  const [
-    maxCombo,
-    setMaxCombo,
-  ] =
-    useState(0);
+  const playerRef = useRef(player);
+  const projectilesRef = useRef<Projectile[]>([]);
+  const bossProjectilesRef = useRef<BossProjectile[]>([]);
+  const enemiesRef = useRef<Enemy[]>([]);
+  const bytesRef = useRef<Byte[]>([]);
+  const capsulesRef = useRef<PowerCapsule[]>([]);
+  const lifePickupsRef = useRef<LifePickup[]>([]);
+  const bossRef = useRef(boss);
 
-  const [
-    elapsedTime,
-    setElapsedTime,
-  ] =
-    useState(0);
+  const keysRef = useRef<Set<string>>(new Set());
+  const touchRef = useRef<TouchState>({
+    active: false,
+    x: 0,
+    y: 0,
+  });
 
-  const [
-    cameraX,
-    setCameraX,
-  ] =
-    useState(0);
+  const lastFireRef = useRef(0);
+  const lastBossShotRef = useRef(0);
+  const lastBossSpawnRef = useRef(0);
+  const lastEnemySpawnRef = useRef(0);
+  const lastDamageRef = useRef(0);
+  const startTimeRef = useRef(0);
+  const projectileIdRef = useRef(0);
+  const animationRef = useRef<number | null>(null);
+  const lastFrameRef = useRef(0);
+  const lastUiUpdateRef = useRef(0);
+  const cameraXRef = useRef(0);
 
-  const [hp, setHp] =
-    useState(INITIAL_HP);
-
-  const [
-    enemies,
-    setEnemies,
-  ] =
-    useState<Enemy[]>(
-      INITIAL_ENEMIES,
-    );
-
-  const [
-    neobytesState,
-    setNeobytesState,
-  ] =
-    useState<Neobyte[]>(
-      INITIAL_NEOBYTES,
-    );
-
-  const [
-    animState,
-    setAnimState,
-  ] =
-    useState<CyanSpiritAnimState>({
-      mode: "idle",
-      frame: 0,
-    });
-
-  const [
-    projectile,
-    setProjectile,
-  ] =
-    useState<ProjectileState>(
-      INITIAL_PROJECTILE,
-    );
-
-  /* =======================================================
-  REFS
-  ======================================================= */
-
-  const keysRef =
-    useRef<Set<string>>(
-      new Set(),
-    );
-
-  const playerRef =
-    useRef<PlayerState>(
-      INITIAL_PLAYER,
-    );
-
-  const viewportRef =
-    useRef<HTMLDivElement>(
-      null,
-    );
-
-  const gameStateRef =
-    useRef<GameState>(
-      "start",
-    );
-
-  const enemiesRef =
-    useRef<Enemy[]>(
-      INITIAL_ENEMIES,
-    );
-
-  const neobytesRef =
-    useRef<Neobyte[]>(
-      INITIAL_NEOBYTES.map(
-        (b) => ({
-          ...b,
-        }),
-      ),
-    );
-
-  const hpRef =
-    useRef(INITIAL_HP);
-
-  const comboRef =
-    useRef(0);
-
-  const attackTimeoutRef =
-    useRef<number | null>(
-      null,
-    );
-
-  const damageCooldownRef =
-    useRef(0);
-
-  const timerRef =
-    useRef<number | null>(
-      null,
-    );
-
-  const cameraXRef =
-    useRef(0);
-
-  /* =======================================================
-  PROJECTILE REF
-  ======================================================= */
-
-  const projectileRef =
-    useRef<ProjectileState>(
-      INITIAL_PROJECTILE,
-    );
-
-  const lastProjectileFrameTimeRef =
-    useRef(0);
-
-  /* =======================================================
-  ANIMATION REFS
-  ======================================================= */
-
-  const animFrameRef =
-    useRef(0);
-
-  const animDirRef =
-    useRef<1 | -1>(1);
-
-  const lastAnimTimeRef =
-    useRef(0);
-
-  const attackFrameRef =
-    useRef(0);
-
-  const lastAttackFrameTimeRef =
-    useRef(0);
-
-  /* =======================================================
-  RESET ANIMATION
-  ======================================================= */
-
-  const resetCyanSpiritAnim =
-    () => {
-      animFrameRef.current =
-        0;
-
-      animDirRef.current =
-        1;
-
-      attackFrameRef.current =
-        0;
-
-      lastAnimTimeRef.current =
-        0;
-
-      lastAttackFrameTimeRef.current =
-        0;
-
-      setAnimState({
-        mode: "idle",
-        frame: 0,
-      });
+  const resetSector = useCallback((index: number) => {
+    const nextPlayer = {
+      x: 120,
+      y: WORLD_HEIGHT / 2 - PLAYER_SIZE / 2,
     };
 
-  /* =======================================================
-  RESET PROJECTILE
-  ======================================================= */
+    const nextEnemies = makeEnemies(index);
+    const nextBytes = makeBytes(index);
+    const nextCapsules = makeCapsules(index);
+    const nextLifePickups = makeLifePickups(index);
+    const nextBoss = makeBoss(index);
 
-  const resetProjectile =
-    () => {
-      const reset =
-        {
-          ...INITIAL_PROJECTILE,
-        };
+    playerRef.current = nextPlayer;
+    projectilesRef.current = [];
+    bossProjectilesRef.current = [];
+    enemiesRef.current = nextEnemies;
+    bytesRef.current = nextBytes;
+    capsulesRef.current = nextCapsules;
+    lifePickupsRef.current = nextLifePickups;
+    bossRef.current = nextBoss;
 
-      projectileRef.current =
-        reset;
+    setPlayer(nextPlayer);
+    setProjectiles([]);
+    setBossProjectiles([]);
+    setEnemies(nextEnemies);
+    setBytes(nextBytes);
+    setCapsules(nextCapsules);
+    setLifePickups(nextLifePickups);
+    setBoss(nextBoss);
+    setShotUpgrade("single");
+    setUpgradeUntil(0);
+    setAmmo(STARTING_AMMO);
+    setHp(PLAYER_HP);
+    setCombo(0);
+    setCameraX(0);
 
-      lastProjectileFrameTimeRef.current =
-        0;
-
-      setProjectile(
-        reset,
-      );
-    };
-
-  /* =======================================================
-  SPAWN PROJECTILE
-  ======================================================= */
-
-  const spawnProjectile =
-    () => {
-      if (
-        gameStateRef.current !==
-        "playing"
-      ) {
-        return;
-      }
-
-      /*
-       * Only one projectile may exist
-       * at a time.
-       */
-      if (
-        projectileRef.current.active
-      ) {
-        return;
-      }
-
-      const current =
-        playerRef.current;
-
-      const direction =
-        current.facing;
-
-      const spawnX =
-        direction ===
-        "right"
-          ? current.x +
-            PROJECTILE_START_OFFSET_X
-          : current.x -
-            PROJECTILE_START_OFFSET_X -
-            PROJECTILE_WIDTH;
-
-      const spawnY =
-        current.y +
-        PROJECTILE_START_OFFSET_Y;
-
-      const nextProjectile: ProjectileState =
-        {
-          active: true,
-          x: spawnX,
-          y: spawnY,
-          width:
-            PROJECTILE_WIDTH,
-          height:
-            PROJECTILE_HEIGHT,
-          direction,
-          frame: 0,
-          exploding: false,
-        };
-
-      projectileRef.current =
-        nextProjectile;
-
-      lastProjectileFrameTimeRef.current =
-        performance.now();
-
-      setProjectile(
-        nextProjectile,
-      );
-    };
-
-  /* =======================================================
-  START ATTACK
-  ======================================================= */
-
-  const startAttack =
-    () => {
-      if (
-        gameStateRef.current !==
-        "playing"
-      ) {
-        return;
-      }
-
-      const current =
-        playerRef.current;
-
-      if (
-        current.attacking
-      ) {
-        return;
-      }
-
-      attackFrameRef.current =
-        0;
-
-      lastAttackFrameTimeRef.current =
-        performance.now();
-
-      const attackingPlayer =
-        {
-          ...current,
-          attacking: true,
-        };
-
-      playerRef.current =
-        attackingPlayer;
-
-      setPlayer(
-        attackingPlayer,
-      );
-
-      setAnimState({
-        mode: "attack",
-        frame: 0,
-      });
-
-      if (
-        attackTimeoutRef.current
-      ) {
-        window.clearTimeout(
-          attackTimeoutRef.current,
-        );
-      }
-
-      attackTimeoutRef.current =
-        window.setTimeout(
-          () => {
-            const nextPlayer =
-              {
-                ...playerRef.current,
-                attacking: false,
-              };
-
-            playerRef.current =
-              nextPlayer;
-
-            setPlayer(
-              nextPlayer,
-            );
-
-            attackFrameRef.current =
-              0;
-
-            setAnimState({
-              mode: "idle",
-              frame: 0,
-            });
-
-            animFrameRef.current =
-              0;
-
-            animDirRef.current =
-              1;
-
-            lastAnimTimeRef.current =
-              performance.now();
-
-            attackTimeoutRef.current =
-              null;
-
-            /*
-             * The projectile is created
-             * AFTER the attack animation.
-             *
-             * Cyan Spirit remains visible
-             * and immediately returns to idle.
-             */
-            spawnProjectile();
-          },
-          ATTACK_MS + 20,
-        );
-    };
-
-  /* =======================================================
-  GAME STATE REF
-  ======================================================= */
-
-  useEffect(() => {
-    gameStateRef.current =
-      gameState;
-  }, [gameState]);
-
-  /* =======================================================
-  PRELOAD SPRITES
-  ======================================================= */
-
-  useEffect(() => {
-    [
-      ...CYAN_SPIRIT_IDLE_FRAMES,
-      ...CYAN_SPIRIT_ATTACK_FRAMES,
-      ...CYAN_SPIRIT_PROJECTILE_FRAMES,
-    ].forEach((src) => {
-      const image =
-        new Image();
-
-      image.src = src;
-    });
+    startTimeRef.current = performance.now();
+    lastFireRef.current = 0;
+    lastBossShotRef.current = performance.now() - BOSS_SHOT_COOLDOWN;
+    lastBossSpawnRef.current = performance.now() - BOSS_SPAWN_COOLDOWN;
+    lastEnemySpawnRef.current =
+      performance.now() - SECTORS[index].enemySpawnMs;
+    lastDamageRef.current = 0;
   }, []);
 
-  /* =======================================================
-  START GAME
-  ======================================================= */
-
-  const startGame =
-    () => {
-      const resetPlayer =
-        {
-          ...INITIAL_PLAYER,
-        };
-
-      const resetEnemies =
-        INITIAL_ENEMIES.map(
-          (enemy) => ({
-            ...enemy,
-            alive: true,
-          }),
-        );
-
-      const resetBytes =
-        INITIAL_NEOBYTES.map(
-          (byte) => ({
-            ...byte,
-            collected: false,
-          }),
-        );
-
-      playerRef.current =
-        resetPlayer;
-
-      enemiesRef.current =
-        resetEnemies;
-
-      neobytesRef.current =
-        resetBytes;
-
-      hpRef.current =
-        INITIAL_HP;
-
-      comboRef.current =
-        0;
-
-      cameraXRef.current =
-        0;
-
-      damageCooldownRef.current =
-        0;
-
-      keysRef.current.clear();
-
-      if (
-        attackTimeoutRef.current
-      ) {
-        window.clearTimeout(
-          attackTimeoutRef.current,
-        );
-
-        attackTimeoutRef.current =
-          null;
-      }
-
-      resetCyanSpiritAnim();
-
-      resetProjectile();
-
-      setPlayer(
-        resetPlayer,
-      );
-
-      setEnemies(
-        resetEnemies,
-      );
-
-      setNeobytesState(
-        resetBytes,
-      );
-
-      setHp(
-        INITIAL_HP,
-      );
-
-      setScore(0);
-      setNeobytes(0);
-      setCombo(0);
-      setMaxCombo(0);
-      setElapsedTime(0);
-      setCameraX(0);
-
-      gameStateRef.current =
-        "playing";
-
-      setGameState(
-        "playing",
-      );
-    };
-
-  /* =======================================================
-  RETURN TO INITIAL NODE
-  ======================================================= */
-
-  const returnToInitialNode =
-    () => {
-      const resetPlayer =
-        {
-          ...INITIAL_PLAYER,
-        };
-
-      const resetEnemies =
-        INITIAL_ENEMIES.map(
-          (enemy) => ({
-            ...enemy,
-            alive: true,
-          }),
-        );
-
-      const resetBytes =
-        INITIAL_NEOBYTES.map(
-          (byte) => ({
-            ...byte,
-            collected: false,
-          }),
-        );
-
-      playerRef.current =
-        resetPlayer;
-
-      enemiesRef.current =
-        resetEnemies;
-
-      neobytesRef.current =
-        resetBytes;
-
-      hpRef.current =
-        INITIAL_HP;
-
-      comboRef.current =
-        0;
-
-      cameraXRef.current =
-        0;
-
-      damageCooldownRef.current =
-        0;
-
-      keysRef.current.clear();
-
-      if (
-        attackTimeoutRef.current
-      ) {
-        window.clearTimeout(
-          attackTimeoutRef.current,
-        );
-
-        attackTimeoutRef.current =
-          null;
-      }
-
-      if (
-        timerRef.current
-      ) {
-        window.clearInterval(
-          timerRef.current,
-        );
-
-        timerRef.current =
-          null;
-      }
-
-      resetCyanSpiritAnim();
-
-      resetProjectile();
-
-      setPlayer(
-        resetPlayer,
-      );
-
-      setEnemies(
-        resetEnemies,
-      );
-
-      setNeobytesState(
-        resetBytes,
-      );
-
-      setHp(
-        INITIAL_HP,
-      );
-
-      setScore(0);
-      setNeobytes(0);
-      setCombo(0);
-      setMaxCombo(0);
-      setElapsedTime(0);
-      setCameraX(0);
-
-      gameStateRef.current =
-        "start";
-
-      setGameState(
-        "start",
-      );
-    };
-
-  /* =======================================================
-  TIMER
-  ======================================================= */
-
-  useEffect(() => {
-    if (
-      gameState !==
-      "playing"
-    ) {
-      if (
-        timerRef.current
-      ) {
-        window.clearInterval(
-          timerRef.current,
-        );
-
-        timerRef.current =
-          null;
-      }
-
-      return;
-    }
-
-    timerRef.current =
-      window.setInterval(
-        () => {
-          setElapsedTime(
-            (previous) =>
-              previous + 1,
-          );
-        },
-        1000,
-      );
-
-    return () => {
-      if (
-        timerRef.current
-      ) {
-        window.clearInterval(
-          timerRef.current,
-        );
-
-        timerRef.current =
-          null;
-      }
-    };
-  }, [gameState]);
-
-  /* =======================================================
-  KEYBOARD
-  ======================================================= */
-
-  useEffect(() => {
-    const handleKeyDown =
-      (
-        event: KeyboardEvent,
-      ) => {
-        const key =
-          event.key.toLowerCase();
-
-        if (
-          [
-            "arrowleft",
-            "arrowright",
-            "arrowup",
-            "arrowdown",
-            " ",
-            "a",
-            "d",
-            "w",
-            "s",
-            "x",
-            "j",
-          ].includes(key)
-        ) {
-          event.preventDefault();
-        }
-
-        keysRef.current.add(
-          key,
-        );
-
-        if (
-          gameStateRef.current !==
-          "playing"
-        ) {
-          return;
-        }
-
-        if (
-          key === " " ||
-          key === "x" ||
-          key === "j"
-        ) {
-          startAttack();
-        }
-      };
-
-    const handleKeyUp =
-      (
-        event: KeyboardEvent,
-      ) => {
-        keysRef.current.delete(
-          event.key.toLowerCase(),
-        );
-      };
-
-    window.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
-
-    window.addEventListener(
-      "keyup",
-      handleKeyUp,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
-
-      window.removeEventListener(
-        "keyup",
-        handleKeyUp,
-      );
-    };
-  }, []);
-
-  /* =======================================================
-  MAIN GAME LOOP
-  ======================================================= */
-
-  useEffect(() => {
-    let animationFrame = 0;
-
-    const updateGame =
-      () => {
-        if (
-          gameStateRef.current !==
-          "playing"
-        ) {
-          animationFrame =
-            window.requestAnimationFrame(
-              updateGame,
-            );
-
-          return;
-        }
-
-        const keys =
-          keysRef.current;
-
-        const current =
-          playerRef.current;
-
-        let nextX =
-          current.x;
-
-        let nextY =
-          current.y;
-
-        let nextFacing =
-          current.facing;
-
-        const movingLeft =
-          keys.has(
-            "arrowleft",
-          ) ||
-          keys.has("a");
-
-        const movingRight =
-          keys.has(
-            "arrowright",
-          ) ||
-          keys.has("d");
-
-        const movingUp =
-          keys.has(
-            "arrowup",
-          ) ||
-          keys.has("w");
-
-        const movingDown =
-          keys.has(
-            "arrowdown",
-          ) ||
-          keys.has("s");
-
-        let dx = 0;
-        let dy = 0;
-
-        if (movingLeft)
-          dx -= 1;
-
-        if (movingRight)
-          dx += 1;
-
-        if (movingUp)
-          dy -= 1;
-
-        if (movingDown)
-          dy += 1;
-
-        if (
-          dx !== 0 ||
-          dy !== 0
-        ) {
-          const length =
-            Math.hypot(
-              dx,
-              dy,
-            );
-
-          dx =
-            (dx / length) *
-            MOVE_SPEED;
-
-          dy =
-            (dy / length) *
-            MOVE_SPEED;
-
-          nextX += dx;
-          nextY += dy;
-
-          if (dx < 0) {
-            nextFacing =
-              "left";
-          } else if (
-            dx > 0
-          ) {
-            nextFacing =
-              "right";
-          }
-        }
-
-        /* ===================================================
-        WORLD BOUNDS
-        =================================================== */
-
-        nextX =
-          Math.max(
-            20,
-            Math.min(
-              WORLD_WIDTH -
-                PLAYER_WIDTH -
-                20,
-              nextX,
-            ),
-          );
-
-        nextY =
-          Math.max(
-            CYAN_SPIRIT_MIN_Y,
-            Math.min(
-              CYAN_SPIRIT_MAX_Y,
-              nextY,
-            ),
-          );
-
-        /* ===================================================
-        OBSTACLE COLLISION
-        =================================================== */
-
-        let playerBox = {
-          x: nextX,
-          y: nextY,
-          width: PLAYER_WIDTH,
-          height: PLAYER_HEIGHT,
-        };
-
-        for (
-          const obstacle of
-            OBSTACLES
-        ) {
-          if (
-            intersects(
-              playerBox,
-              obstacle,
-            )
-          ) {
-            const resolved =
-              resolveObstacleOverlap(
-                playerBox,
-                obstacle,
-              );
-
-            nextX =
-              resolved.x;
-
-            nextY =
-              resolved.y;
-
-            nextX =
-              Math.max(
-                20,
-                Math.min(
-                  WORLD_WIDTH -
-                    PLAYER_WIDTH -
-                    20,
-                  nextX,
-                ),
-              );
-
-            nextY =
-              Math.max(
-                CYAN_SPIRIT_MIN_Y,
-                Math.min(
-                  CYAN_SPIRIT_MAX_Y,
-                  nextY,
-                ),
-              );
-
-            playerBox = {
-              x: nextX,
-              y: nextY,
-              width:
-                PLAYER_WIDTH,
-              height:
-                PLAYER_HEIGHT,
-            };
-          }
-        }
-
-        /* ===================================================
-        COMBAT
-        =================================================== */
-
-        const attackRange =
-          {
-            x:
-              nextFacing ===
-              "right"
-                ? nextX +
-                  PLAYER_WIDTH
-                : nextX - 48,
-
-            y:
-              nextY + 16,
-
-            width: 48,
-            height: 34,
-          };
-
-        if (
-          current.attacking
-        ) {
-          let defeatedEnemyId:
-            | number
-            | null = null;
-
-          enemiesRef.current =
-            enemiesRef.current.map(
-              (enemy) => {
-                if (
-                  !enemy.alive ||
-                  defeatedEnemyId !==
-                    null
-                ) {
-                  return enemy;
-                }
-
-                const enemyBox =
-                  {
-                    x: enemy.x,
-                    y: enemy.y,
-                    width:
-                      enemy.width,
-                    height:
-                      enemy.height,
-                  };
-
-                if (
-                  intersects(
-                    attackRange,
-                    enemyBox,
-                  )
-                ) {
-                  defeatedEnemyId =
-                    enemy.id;
-
-                  return {
-                    ...enemy,
-                    alive: false,
-                  };
-                }
-
-                return enemy;
-              },
-            );
-
-          if (
-            defeatedEnemyId !==
-            null
-          ) {
-            const nextCombo =
-              comboRef.current +
-              1;
-
-            comboRef.current =
-              nextCombo;
-
-            setCombo(
-              nextCombo,
-            );
-
-            setMaxCombo(
-              (previous) =>
-                Math.max(
-                  previous,
-                  nextCombo,
-                ),
-            );
-
-            setScore(
-              (previous) =>
-                previous +
-                250 *
-                  Math.max(
-                    1,
-                    nextCombo,
-                  ),
-            );
-
-            setEnemies([
-              ...enemiesRef.current,
-            ]);
-          }
-        }
-
-        /* ===================================================
-        PROJECTILE SYSTEM
-        =================================================== */
-
-        if (
-          projectileRef.current
-            .active
-        ) {
-          const currentProjectile =
-            projectileRef.current;
-
-          let nextProjectile =
-            {
-              ...currentProjectile,
-            };
-
-          /* =================================================
-          PROJECTILE EXPLOSION
-          ================================================= */
-
-          if (
-            currentProjectile.exploding
-          ) {
-            const now =
-              performance.now();
-
-            if (
-              now -
-                lastProjectileFrameTimeRef.current >=
-              PROJECTILE_EXPLOSION_FRAME_MS
-            ) {
-              lastProjectileFrameTimeRef.current =
-                now;
-
-              const nextFrame =
-                Math.min(
-                  currentProjectile.frame +
-                    1,
-                  CYAN_SPIRIT_PROJECTILE_FRAMES.length -
-                    1,
-                );
-
-              nextProjectile = {
-                ...currentProjectile,
-                frame:
-                  nextFrame,
-              };
-
-              /*
-               * Frame 05 is the final
-               * disintegration frame.
-               */
-              if (
-                nextFrame ===
-                CYAN_SPIRIT_PROJECTILE_FRAMES.length -
-                  1
-              ) {
-                nextProjectile = {
-                  ...nextProjectile,
-                  active: false,
-                };
-              }
-
-              projectileRef.current =
-                nextProjectile;
-
-              setProjectile(
-                nextProjectile,
-              );
-            }
-          } else {
-            /* ===============================================
-            PROJECTILE MOVEMENT
-            =============================================== */
-
-            if (
-              currentProjectile
-                .direction ===
-              "right"
-            ) {
-              nextProjectile.x +=
-                PROJECTILE_SPEED;
-            } else {
-              nextProjectile.x -=
-                PROJECTILE_SPEED;
-            }
-
-            let projectileHit =
-              false;
-
-            /* ===============================================
-            WORLD LIMIT
-            =============================================== */
-
-            if (
-              nextProjectile.x <=
-                0 ||
-              nextProjectile.x +
-                nextProjectile.width >=
-                WORLD_WIDTH
-            ) {
-              projectileHit =
-                true;
-            }
-
-            const projectileBox =
-              {
-                x:
-                  nextProjectile.x,
-                y:
-                  nextProjectile.y,
-                width:
-                  nextProjectile.width,
-                height:
-                  nextProjectile.height,
-              };
-
-            /* ===============================================
-            OBSTACLE COLLISION
-            =============================================== */
-
-            if (
-              !projectileHit
-            ) {
-              for (
-                const obstacle of
-                  OBSTACLES
-              ) {
-                if (
-                  intersects(
-                    projectileBox,
-                    obstacle,
-                  )
-                ) {
-                  projectileHit =
-                    true;
-
-                  break;
-                }
-              }
-            }
-
-            /* ===============================================
-            ENEMY COLLISION
-            =============================================== */
-
-            if (
-              !projectileHit
-            ) {
-              let projectileEnemyId:
-                | number
-                | null = null;
-
-              enemiesRef.current =
-                enemiesRef.current.map(
-                  (enemy) => {
-                    if (
-                      !enemy.alive ||
-                      projectileEnemyId !==
-                        null
-                    ) {
-                      return enemy;
-                    }
-
-                    const enemyBox =
-                      {
-                        x: enemy.x,
-                        y: enemy.y,
-                        width:
-                          enemy.width,
-                        height:
-                          enemy.height,
-                      };
-
-                    if (
-                      intersects(
-                        projectileBox,
-                        enemyBox,
-                      )
-                    ) {
-                      projectileEnemyId =
-                        enemy.id;
-
-                      return {
-                        ...enemy,
-                        alive: false,
-                      };
-                    }
-
-                    return enemy;
-                  },
-                );
-
-              if (
-                projectileEnemyId !==
-                null
-              ) {
-                projectileHit =
-                  true;
-
-                const nextCombo =
-                  comboRef.current +
-                  1;
-
-                comboRef.current =
-                  nextCombo;
-
-                setCombo(
-                  nextCombo,
-                );
-
-                setMaxCombo(
-                  (previous) =>
-                    Math.max(
-                      previous,
-                      nextCombo,
-                    ),
-                );
-
-                setScore(
-                  (previous) =>
-                    previous +
-                    250 *
-                      Math.max(
-                        1,
-                        nextCombo,
-                      ),
-                );
-
-                setEnemies([
-                  ...enemiesRef.current,
-                ]);
-              }
-            }
-
-            /* ===============================================
-            PROJECTILE HIT
-            =============================================== */
-
-            if (
-              projectileHit
-            ) {
-              /*
-               * Start the disintegration
-               * from frame 03.
-               *
-               * 03 → 04 → 05
-               */
-              nextProjectile = {
-                ...nextProjectile,
-                frame: 2,
-                exploding: true,
-              };
-
-              lastProjectileFrameTimeRef.current =
-                performance.now();
-            } else {
-              /* =============================================
-              NORMAL PROJECTILE ANIMATION
-              ============================================= */
-
-              const now =
-                performance.now();
-
-              if (
-                now -
-                  lastProjectileFrameTimeRef.current >=
-                PROJECTILE_FRAME_MS
-              ) {
-                lastProjectileFrameTimeRef.current =
-                  now;
-
-                /*
-                 * While travelling:
-                 *
-                 * 01 → 02 → 03 → 04 → 01...
-                 *
-                 * Frame 05 is reserved for
-                 * final disintegration.
-                 */
-                const nextFrame =
-                  (currentProjectile.frame +
-                    1) %
-                  4;
-
-                nextProjectile = {
-                  ...nextProjectile,
-                  frame:
-                    nextFrame,
-                };
-              }
-            }
-
-            projectileRef.current =
-              nextProjectile;
-
-            setProjectile(
-              nextProjectile,
-            );
-          }
-        }
-
-        /* ===================================================
-        ENEMY CONTACT DAMAGE
-        =================================================== */
-
-        if (
-          damageCooldownRef.current >
-          0
-        ) {
-          damageCooldownRef.current -=
-            1;
-        }
-
-        if (
-          damageCooldownRef.current <=
-          0
-        ) {
-          const touchingEnemy =
-            enemiesRef.current.some(
-              (enemy) => {
-                if (
-                  !enemy.alive
-                ) {
-                  return false;
-                }
-
-                return intersects(
-                  playerBox,
-                  {
-                    x: enemy.x,
-                    y: enemy.y,
-                    width:
-                      enemy.width,
-                    height:
-                      enemy.height,
-                  },
-                );
-              },
-            );
-
-          if (
-            touchingEnemy
-          ) {
-            const nextHp =
-              Math.max(
-                0,
-                hpRef.current -
-                  1,
-              );
-
-            hpRef.current =
-              nextHp;
-
-            setHp(nextHp);
-
-            comboRef.current =
-              0;
-
-            setCombo(0);
-
-            damageCooldownRef.current =
-              60;
-
-            nextX =
-              nextFacing ===
-              "right"
-                ? nextX - 18
-                : nextX + 18;
-
-            nextX =
-              Math.max(
-                20,
-                Math.min(
-                  WORLD_WIDTH -
-                    PLAYER_WIDTH -
-                    20,
-                  nextX,
-                ),
-              );
-
-            playerBox = {
-              x: nextX,
-              y: nextY,
-              width:
-                PLAYER_WIDTH,
-              height:
-                PLAYER_HEIGHT,
-            };
-
-            if (
-              nextHp <= 0
-            ) {
-              gameStateRef.current =
-                "gameover";
-
-              setGameState(
-                "gameover",
-              );
-
-              keysRef.current.clear();
-
-              resetCyanSpiritAnim();
-
-              resetProjectile();
-            }
-          }
-        }
-
-        /* ===================================================
-        COLLECT NEOBYTES
-        =================================================== */
-
-        {
-          let collectedSomething =
-            false;
-
-          const updated =
-            neobytesRef.current.map(
-              (byte) => {
-                if (
-                  byte.collected
-                ) {
-                  return byte;
-                }
-
-                const byteBox =
-                  {
-                    x:
-                      byte.x -
-                      10,
-
-                    y:
-                      byte.y -
-                      10,
-
-                    width: 20,
-                    height: 20,
-                  };
-
-                if (
-                  intersects(
-                    playerBox,
-                    byteBox,
-                  )
-                ) {
-                  collectedSomething =
-                    true;
-
-                  return {
-                    ...byte,
-                    collected: true,
-                  };
-                }
-
-                return byte;
-              },
-            );
-
-          if (
-            collectedSomething
-          ) {
-            neobytesRef.current =
-              updated;
-
-            setNeobytesState(
-              updated,
-            );
-
-            const nextCombo =
-              comboRef.current +
-              1;
-
-            comboRef.current =
-              nextCombo;
-
-            setNeobytes(
-              (previous) =>
-                previous + 1,
-            );
-
-            setCombo(
-              nextCombo,
-            );
-
-            setMaxCombo(
-              (previous) =>
-                Math.max(
-                  previous,
-                  nextCombo,
-                ),
-            );
-
-            setScore(
-              (previous) =>
-                previous +
-                100 *
-                  Math.max(
-                    1,
-                    nextCombo,
-                  ),
-            );
-          }
-        }
-
-        /* ===================================================
-        CYAN SPIRIT ANIMATION
-        =================================================== */
-
-        {
-          const now =
-            performance.now();
-
-          if (
-            current.attacking
-          ) {
-            if (
-              lastAttackFrameTimeRef.current ===
-              0
-            ) {
-              lastAttackFrameTimeRef.current =
-                now;
-            }
-
-            if (
-              now -
-                lastAttackFrameTimeRef.current >=
-              ATTACK_FRAME_MS
-            ) {
-              lastAttackFrameTimeRef.current =
-                now;
-
-              const nextAttackFrame =
-                Math.min(
-                  attackFrameRef.current +
-                    1,
-                  ATTACK_TOTAL_FRAMES -
-                    1,
-                );
-
-              attackFrameRef.current =
-                nextAttackFrame;
-
-              setAnimState({
-                mode: "attack",
-                frame:
-                  nextAttackFrame,
-              });
-            }
-          } else {
-            if (
-              lastAnimTimeRef.current ===
-              0
-            ) {
-              lastAnimTimeRef.current =
-                now;
-            }
-
-            if (
-              now -
-                lastAnimTimeRef.current >=
-              IDLE_FRAME_MS
-            ) {
-              lastAnimTimeRef.current =
-                now;
-
-              let nextFrame =
-                animFrameRef.current +
-                animDirRef.current;
-
-              const last =
-                CYAN_SPIRIT_IDLE_FRAMES.length -
-                1;
-
-              if (
-                nextFrame >=
-                last
-              ) {
-                nextFrame =
-                  last;
-
-                animDirRef.current =
-                  -1;
-              } else if (
-                nextFrame <=
-                0
-              ) {
-                nextFrame = 0;
-
-                animDirRef.current =
-                  1;
-              }
-
-              if (
-                nextFrame !==
-                animFrameRef.current
-              ) {
-                animFrameRef.current =
-                  nextFrame;
-
-                setAnimState({
-                  mode: "idle",
-                  frame:
-                    nextFrame,
-                });
-              }
-            }
-          }
-        }
-
-        /* ===================================================
-        CAMERA
-        =================================================== */
-
-        const viewportWidth =
-          viewportRef.current
-            ?.clientWidth ??
-          1000;
-
-        const desiredCamera =
-          nextX -
-          viewportWidth *
-            0.42;
-
-        const maxCamera =
-          Math.max(
-            0,
-            WORLD_WIDTH -
-              viewportWidth,
-          );
-
-        const boundedCamera =
-          Math.max(
-            0,
-            Math.min(
-              desiredCamera,
-              maxCamera,
-            ),
-          );
-
-        if (
-          boundedCamera !==
-          cameraXRef.current
-        ) {
-          cameraXRef.current =
-            boundedCamera;
-
-          setCameraX(
-            boundedCamera,
-          );
-        }
-
-        /* ===================================================
-        PLAYER UPDATE
-        =================================================== */
-
-        const nextPlayer =
-          {
-            x: nextX,
-            y: nextY,
-            facing:
-              nextFacing,
-            attacking:
-              current.attacking,
-          };
-
-        playerRef.current =
-          nextPlayer;
-
-        if (
-          !playersEqual(
-            current,
-            nextPlayer,
-          )
-        ) {
-          setPlayer(
-            nextPlayer,
-          );
-        }
-
-        /* ===================================================
-        FINISH
-        =================================================== */
-
-        const finishLine =
-          WORLD_WIDTH - 150;
-
-        if (
-          nextX >=
-            finishLine &&
-          gameStateRef.current ===
-            "playing"
-        ) {
-          gameStateRef.current =
-            "complete";
-
-          setGameState(
-            "complete",
-          );
-
-          keysRef.current.clear();
-
-          resetCyanSpiritAnim();
-
-          resetProjectile();
-        }
-
-        animationFrame =
-          window.requestAnimationFrame(
-            updateGame,
-          );
-      };
-
-    animationFrame =
-      window.requestAnimationFrame(
-        updateGame,
-      );
-
-    return () => {
-      window.cancelAnimationFrame(
-        animationFrame,
-      );
-    };
-  }, []);
-
-  /* =========================================================
-  PASSIVE SCORE
-  ========================================================= */
-
-  useEffect(() => {
-    if (
-      gameState !==
-      "playing"
-    ) {
-      return;
-    }
-
-    const interval =
-      window.setInterval(
-        () => {
-          const keys =
-            keysRef.current;
-
-          if (
-            keys.has(
-              "arrowleft",
-            ) ||
-            keys.has(
-              "arrowright",
-            ) ||
-            keys.has(
-              "arrowup",
-            ) ||
-            keys.has(
-              "arrowdown",
-            ) ||
-            keys.has("a") ||
-            keys.has("d") ||
-            keys.has("w") ||
-            keys.has("s")
-          ) {
-            setScore(
-              (previous) =>
-                previous + 1,
-            );
-          }
-        },
-        1000,
-      );
-
-    return () =>
-      window.clearInterval(
-        interval,
-      );
-  }, [gameState]);
-
-  /* =========================================================
-  MOBILE CONTROLS
-  ========================================================= */
-
-  const holdKey = (
-    key: string,
-  ) => {
-    if (
-      gameStateRef.current !==
-      "playing"
-    ) {
-      return;
-    }
-
-    keysRef.current.add(
-      key,
-    );
-  };
-
-  const releaseKey = (
-    key: string,
-  ) => {
-    keysRef.current.delete(
-      key,
-    );
-  };
-
-  const triggerAttack =
-    () => {
-      startAttack();
-    };
-
-  const progress = Math.min(
-    100,
-    Math.round(
-      (player.x /
-        (WORLD_WIDTH -
-          PLAYER_WIDTH)) *
-        100,
-    ),
+  const beginSector = useCallback(
+    (index: number) => {
+      setSectorIndex(index);
+      resetSector(index);
+      setScreen("playing");
+    },
+    [resetSector],
   );
 
-  /* =========================================================
-  ACTIVE SPRITE
-  ========================================================= */
+  const initializeSpirit = useCallback(() => {
+    beginSector(sectorIndex);
+  }, [beginSector, sectorIndex]);
 
-  const activeSprite =
-    animState.mode ===
-    "attack"
-      ? CYAN_SPIRIT_ATTACK_FRAMES[
-          animState.frame %
-            CYAN_SPIRIT_ATTACK_FRAMES.length
-        ]
-      : CYAN_SPIRIT_IDLE_FRAMES[
-          animState.frame %
-            CYAN_SPIRIT_IDLE_FRAMES.length
+  const startGame = useCallback(() => {
+    setSectorIndex(0);
+    setScore(0);
+    setNeoBytes(0);
+    setTime(0);
+    beginSector(0);
+  }, [beginSector]);
+
+  const advanceSector = useCallback(() => {
+    if (sectorIndex >= SECTORS.length - 1) return;
+
+    const nextIndex = sectorIndex + 1;
+    setSectorIndex(nextIndex);
+    setScreen("spirit");
+  }, [sectorIndex]);
+
+  const fire = useCallback(() => {
+    if (screen !== "playing") return;
+
+    const now = performance.now();
+
+    if (now - lastFireRef.current < FIRE_COOLDOWN) return;
+
+    lastFireRef.current = now;
+
+    const current = playerRef.current;
+    const shotsRequired = shotUpgrade === "double" ? 2 : 1;
+
+    if (ammo < shotsRequired) return;
+
+    setAmmo((value) => Math.max(0, value - shotsRequired));
+
+    const baseX = current.x + PLAYER_SIZE - 2;
+    const centerY = current.y + PLAYER_SIZE / 2 - PROJECTILE_HEIGHT / 2;
+
+    const shots: Projectile[] =
+      shotUpgrade === "double"
+        ? [
+            {
+              id: projectileIdRef.current++,
+              x: baseX,
+              y: centerY - 9,
+              vx: PROJECTILE_SPEED,
+            },
+            {
+              id: projectileIdRef.current++,
+              x: baseX,
+              y: centerY + 9,
+              vx: PROJECTILE_SPEED,
+            },
+          ]
+        : [
+            {
+              id: projectileIdRef.current++,
+              x: baseX,
+              y: centerY,
+              vx: PROJECTILE_SPEED,
+            },
+          ];
+
+    projectilesRef.current = [...projectilesRef.current, ...shots];
+  }, [ammo, screen, shotUpgrade]);
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+
+      if (
+        [
+          "arrowup",
+          "arrowdown",
+          "arrowleft",
+          "arrowright",
+          "w",
+          "a",
+          "s",
+          "d",
+          " ",
+          "x",
+          "j",
+        ].includes(key)
+      ) {
+        event.preventDefault();
+      }
+
+      keysRef.current.add(key);
+
+      if (key === " " || key === "x" || key === "j") {
+        fire();
+      }
+    };
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      keysRef.current.delete(event.key.toLowerCase());
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, [fire]);
+
+  useEffect(() => {
+    if (screen !== "playing") return;
+
+    let cancelled = false;
+
+    const loop = (now: number) => {
+      if (cancelled) return;
+
+      const previous = lastFrameRef.current || now;
+      const dt = clamp((now - previous) / 16.67, 0, 2);
+      lastFrameRef.current = now;
+
+      const keys = keysRef.current;
+      const current = playerRef.current;
+
+      let dx = 0;
+      let dy = 0;
+
+      if (keys.has("arrowleft") || keys.has("a")) dx -= PLAYER_SPEED * dt;
+      if (keys.has("arrowright") || keys.has("d")) dx += PLAYER_SPEED * dt;
+      if (keys.has("arrowup") || keys.has("w")) dy -= PLAYER_VERTICAL_SPEED * dt;
+      if (keys.has("arrowdown") || keys.has("s")) dy += PLAYER_VERTICAL_SPEED * dt;
+
+      if (touchRef.current.active) {
+        const touch = touchRef.current;
+        const distanceX = touch.x;
+        const distanceY = touch.y;
+        const deadZone = 14;
+
+        if (Math.abs(distanceX) > deadZone) {
+          dx += clamp(distanceX / 42, -1.25, 1.25) * PLAYER_SPEED * dt;
+        }
+
+        if (Math.abs(distanceY) > deadZone) {
+          dy += clamp(distanceY / 42, -1.25, 1.25) * PLAYER_VERTICAL_SPEED * dt;
+        }
+
+        fire();
+      }
+
+      const bossLeftLimit = BOSS_X - PLAYER_SIZE - 28;
+
+      const nextPlayer = {
+        x: clamp(current.x + dx, 28, bossLeftLimit),
+        y: clamp(
+          current.y + dy,
+          34,
+          WORLD_HEIGHT - PLAYER_SIZE - 34,
+        ),
+      };
+
+      playerRef.current = nextPlayer;
+
+      // The boss exists from the beginning, but the Core cannot damage it
+      // until its body has actually entered the visible viewport.
+      const targetCamera = clamp(
+        nextPlayer.x - VIEWPORT_WIDTH * 0.34,
+        0,
+        WORLD_WIDTH - VIEWPORT_WIDTH,
+      );
+
+      const smoothCamera =
+        cameraXRef.current +
+        (targetCamera - cameraXRef.current) * 0.12;
+
+      cameraXRef.current = smoothCamera;
+
+      const bossCurrent = bossRef.current;
+      const bossOnScreen =
+        bossCurrent.active &&
+        bossCurrent.x < smoothCamera + VIEWPORT_WIDTH &&
+        bossCurrent.x + BOSS_SIZE > smoothCamera;
+
+      if (bossOnScreen && !bossCurrent.revealed) {
+        bossCurrent.revealed = true;
+      }
+
+      let nextEnemies = enemiesRef.current.map((enemy) => {
+        const verticalDirection = enemy.y < nextPlayer.y ? 1 : -1;
+        const horizontalDirection = enemy.x < nextPlayer.x ? 1 : -1;
+
+        return {
+          ...enemy,
+          x:
+            enemy.x +
+            horizontalDirection * sector.enemySpeed * dt,
+          y: clamp(
+            enemy.y +
+              verticalDirection * sector.enemySpeed * 0.65 * dt,
+            54,
+            WORLD_HEIGHT - 100,
+          ),
+        };
+      });
+
+      // Boss keeps sending threats through the whole traversal.
+      // Once visible, both the cadence and projectile speed increase.
+      const bossShotCooldown = bossCurrent.revealed
+        ? BOSS_REVEALED_SHOT_COOLDOWN
+        : BOSS_SHOT_COOLDOWN;
+
+      let nextBossProjectiles = bossProjectilesRef.current
+        .map((projectile) => ({
+          ...projectile,
+          x: projectile.x + projectile.vx * dt,
+          y: projectile.y + projectile.vy * dt,
+        }))
+        .filter(
+          (projectile) =>
+            projectile.x > -120 &&
+            projectile.x < BOSS_X + 180 &&
+            projectile.y > -80 &&
+            projectile.y < WORLD_HEIGHT + 80,
+        );
+
+      if (
+        bossCurrent.active &&
+        now - lastBossShotRef.current >= bossShotCooldown
+      ) {
+        lastBossShotRef.current = now;
+
+        const targetY =
+          nextPlayer.y + PLAYER_SIZE / 2 + (Math.random() - 0.5) * 90;
+
+        const speed = bossCurrent.revealed
+          ? BOSS_REVEALED_PROJECTILE_SPEED
+          : BOSS_PROJECTILE_SPEED;
+
+        const dyToTarget =
+          (targetY - (bossCurrent.y + BOSS_SIZE / 2)) * 0.015;
+
+        nextBossProjectiles = [
+          ...nextBossProjectiles,
+          {
+            id: projectileIdRef.current++,
+            x: bossCurrent.x - 10,
+            y: bossCurrent.y + BOSS_SIZE / 2 - 5,
+            vx: -speed,
+            vy: clamp(dyToTarget, -1.5, 1.5),
+            size: bossCurrent.revealed ? 12 : 9,
+          },
         ];
 
-  /* =========================================================
-  ACTIVE PROJECTILE SPRITE
-  ========================================================= */
+        if (bossCurrent.revealed) {
+          nextBossProjectiles = [
+            ...nextBossProjectiles,
+            {
+              id: projectileIdRef.current++,
+              x: bossCurrent.x - 10,
+              y: bossCurrent.y + BOSS_SIZE / 2 - 5,
+              vx: -speed * 0.94,
+              vy: -1.15,
+              size: 8,
+            },
+            {
+              id: projectileIdRef.current++,
+              x: bossCurrent.x - 10,
+              y: bossCurrent.y + BOSS_SIZE / 2 - 5,
+              vx: -speed * 0.94,
+              vy: 1.15,
+              size: 8,
+            },
+          ];
+        }
+      }
 
-  const activeProjectileSprite =
-    CYAN_SPIRIT_PROJECTILE_FRAMES[
-      Math.min(
-        projectile.frame,
-        CYAN_SPIRIT_PROJECTILE_FRAMES.length -
-          1,
-      )
-    ];
+      // Sector difficulty controls how often hostile nodes appear.
+      // The pressure increases gradually from Cyan to Dual-Core.
+      if (
+        now - lastEnemySpawnRef.current >= sector.enemySpawnMs &&
+        nextEnemies.length < sector.enemyMax
+      ) {
+        lastEnemySpawnRef.current = now;
 
-  /* =========================================================
-  RENDER
-  ========================================================= */
+        const spawnDistance =
+          540 + Math.random() * 360;
+
+        const spawnX = Math.min(
+          nextPlayer.x + spawnDistance,
+          BOSS_X - 300,
+        );
+
+        const spawnY = clamp(
+          nextPlayer.y + (Math.random() - 0.5) * 280,
+          60,
+          WORLD_HEIGHT - 120,
+        );
+
+        nextEnemies = [
+          ...nextEnemies,
+          {
+            id:
+              sectorIndex * 100000 +
+              Math.floor(now) +
+              nextEnemies.length,
+            x: spawnX,
+            y: spawnY,
+            hp: 1 + Math.floor(sectorIndex / 2),
+            source: "sector",
+          },
+        ];
+      }
+
+      const bossSpawnCooldown = bossCurrent.revealed
+        ? BOSS_REVEALED_SPAWN_COOLDOWN
+        : BOSS_SPAWN_COOLDOWN;
+
+      if (
+        bossCurrent.active &&
+        now - lastBossSpawnRef.current >= bossSpawnCooldown &&
+        nextEnemies.length < 18
+      ) {
+        lastBossSpawnRef.current = now;
+
+        const spawnId = sectorIndex * 10000 + Math.floor(now);
+        const spawnY = clamp(
+          nextPlayer.y + (Math.random() - 0.5) * 220,
+          70,
+          WORLD_HEIGHT - 115,
+        );
+
+        nextEnemies = [
+          ...nextEnemies,
+          {
+            id: spawnId,
+            x: bossCurrent.x - 36,
+            y: spawnY,
+            hp: 1 + Math.floor(sectorIndex / 2),
+            source: "boss",
+          },
+        ];
+      }
+
+      let nextProjectiles = projectilesRef.current
+        .map((projectile) => ({
+          ...projectile,
+          x: projectile.x + projectile.vx * dt,
+        }))
+        .filter((projectile) => projectile.x < BOSS_X + 120);
+
+      let nextBytes = bytesRef.current;
+      let nextCapsules = capsulesRef.current;
+      let nextLifePickups = lifePickupsRef.current;
+      let nextScore = 0;
+      let collectedNow = 0;
+      let lifeCollected = false;
+      let capsuleCollected = false;
+
+      nextBytes = nextBytes.map((byte) => {
+        if (
+          !byte.collected &&
+          rectsOverlap(
+            {
+              x: nextPlayer.x,
+              y: nextPlayer.y,
+              width: PLAYER_SIZE,
+              height: PLAYER_SIZE,
+            },
+            {
+              x: byte.x - 12,
+              y: byte.y - 12,
+              width: 24,
+              height: 24,
+            },
+          )
+        ) {
+          collectedNow += 1;
+          nextScore += 25;
+          return { ...byte, collected: true };
+        }
+
+        return byte;
+      });
+
+      nextCapsules = nextCapsules.map((capsule) => {
+        if (
+          !capsule.collected &&
+          rectsOverlap(
+            {
+              x: nextPlayer.x,
+              y: nextPlayer.y,
+              width: PLAYER_SIZE,
+              height: PLAYER_SIZE,
+            },
+            {
+              x: capsule.x - 15,
+              y: capsule.y - 15,
+              width: 30,
+              height: 30,
+            },
+          )
+        ) {
+          capsuleCollected = true;
+          return { ...capsule, collected: true };
+        }
+
+        return capsule;
+      });
+
+      nextLifePickups = nextLifePickups.map((pickup) => {
+        if (
+          !pickup.collected &&
+          rectsOverlap(
+            {
+              x: nextPlayer.x,
+              y: nextPlayer.y,
+              width: PLAYER_SIZE,
+              height: PLAYER_SIZE,
+            },
+            {
+              x: pickup.x - 15,
+              y: pickup.y - 15,
+              width: 30,
+              height: 30,
+            },
+          )
+        ) {
+          lifeCollected = true;
+          return { ...pickup, collected: true };
+        }
+
+        return pickup;
+      });
+
+      if (lifeCollected) {
+        setHp((value) => Math.min(PLAYER_HP, value + 1));
+        nextScore += 75;
+      }
+
+      if (capsuleCollected) {
+        setShotUpgrade("double");
+        setUpgradeUntil(now + CAPSULE_DURATION_MS);
+        nextScore += 150;
+      } else if (shotUpgrade === "double" && now >= upgradeUntil) {
+        setShotUpgrade("single");
+        setUpgradeUntil(0);
+      }
+
+      const enemyHits = new Set<number>();
+      const consumedProjectiles = new Set<number>();
+
+      nextProjectiles.forEach((projectile) => {
+        nextEnemies.forEach((enemy) => {
+          if (
+            enemyHits.has(enemy.id) ||
+            consumedProjectiles.has(projectile.id)
+          ) {
+            return;
+          }
+
+          if (
+            rectsOverlap(
+              {
+                x: projectile.x,
+                y: projectile.y,
+                width: PROJECTILE_WIDTH,
+                height: PROJECTILE_HEIGHT,
+              },
+              {
+                x: enemy.x,
+                y: enemy.y,
+                width: 38,
+                height: 38,
+              },
+            )
+          ) {
+            consumedProjectiles.add(projectile.id);
+            enemyHits.add(enemy.id);
+          }
+        });
+      });
+
+      nextEnemies = nextEnemies
+        .map((enemy) =>
+          enemyHits.has(enemy.id)
+            ? { ...enemy, hp: enemy.hp - PROJECTILE_DAMAGE }
+            : enemy,
+        )
+        .filter((enemy) => enemy.hp > 0);
+
+      nextProjectiles = nextProjectiles.filter(
+        (projectile) => !consumedProjectiles.has(projectile.id),
+      );
+
+      // Boss damage is deliberately gated by visibility.
+      // Shots fired while the boss is still off-screen are harmless to it.
+      if (bossCurrent.revealed && bossCurrent.active) {
+        nextProjectiles.forEach((projectile) => {
+          if (consumedProjectiles.has(projectile.id)) return;
+
+          if (
+            rectsOverlap(
+              {
+                x: projectile.x,
+                y: projectile.y,
+                width: PROJECTILE_WIDTH,
+                height: PROJECTILE_HEIGHT,
+              },
+              {
+                x: bossCurrent.x,
+                y: bossCurrent.y,
+                width: BOSS_SIZE,
+                height: BOSS_SIZE,
+              },
+            )
+          ) {
+            consumedProjectiles.add(projectile.id);
+            bossCurrent.hp -= PROJECTILE_DAMAGE;
+          }
+        });
+      }
+
+      nextProjectiles = nextProjectiles.filter(
+        (projectile) => !consumedProjectiles.has(projectile.id),
+      );
+
+      // Enemy/boss projectile collision with the Core.
+      const bossProjectilesToRemove = new Set<number>();
+
+      nextBossProjectiles.forEach((projectile) => {
+        const projectileSize = projectile.size;
+
+        if (
+          rectsOverlap(
+            {
+              x: nextPlayer.x,
+              y: nextPlayer.y,
+              width: PLAYER_SIZE,
+              height: PLAYER_SIZE,
+            },
+            {
+              x: projectile.x - projectileSize / 2,
+              y: projectile.y - projectileSize / 2,
+              width: projectileSize,
+              height: projectileSize,
+            },
+          )
+        ) {
+          bossProjectilesToRemove.add(projectile.id);
+
+          if (now - lastDamageRef.current > ENEMY_DAMAGE_COOLDOWN) {
+            lastDamageRef.current = now;
+            setHp((value) => Math.max(0, value - 1));
+            setCombo(0);
+          }
+        }
+      });
+
+      nextBossProjectiles = nextBossProjectiles.filter(
+        (projectile) => !bossProjectilesToRemove.has(projectile.id),
+      );
+
+      const playerBox = {
+        x: nextPlayer.x,
+        y: nextPlayer.y,
+        width: PLAYER_SIZE,
+        height: PLAYER_SIZE,
+      };
+
+      const touchedEnemy = nextEnemies.some((enemy) =>
+        rectsOverlap(playerBox, {
+          x: enemy.x,
+          y: enemy.y,
+          width: 38,
+          height: 38,
+        }),
+      );
+
+      if (
+        touchedEnemy &&
+        now - lastDamageRef.current > ENEMY_DAMAGE_COOLDOWN
+      ) {
+        lastDamageRef.current = now;
+        setHp((value) => Math.max(0, value - 1));
+        setCombo(0);
+      }
+
+      if (collectedNow > 0) {
+        setNeoBytes((value) => value + collectedNow);
+      }
+
+      const destroyedEnemies = enemyHits.size;
+      if (destroyedEnemies > 0) {
+        nextScore += destroyedEnemies * 100;
+        setCombo((value) => value + destroyedEnemies);
+      }
+
+      if (nextScore > 0) {
+        setScore((value) => value + nextScore);
+      }
+
+      bossRef.current = bossCurrent;
+      playerRef.current = nextPlayer;
+      projectilesRef.current = nextProjectiles;
+      bossProjectilesRef.current = nextBossProjectiles;
+      enemiesRef.current = nextEnemies;
+      bytesRef.current = nextBytes;
+      capsulesRef.current = nextCapsules;
+      lifePickupsRef.current = nextLifePickups;
+
+      if (bossCurrent.hp <= 0 && bossCurrent.active) {
+        bossCurrent.active = false;
+        bossCurrent.hp = 0;
+        setBoss({ ...bossCurrent });
+        setScreen("complete");
+      }
+
+      if (now - lastUiUpdateRef.current >= UI_TICK_MS) {
+        lastUiUpdateRef.current = now;
+
+        setPlayer(nextPlayer);
+        setProjectiles(nextProjectiles);
+        setBossProjectiles(nextBossProjectiles);
+        setEnemies(nextEnemies);
+        setBytes(nextBytes);
+        setCapsules(nextCapsules);
+        setLifePickups(nextLifePickups);
+        setBoss({ ...bossCurrent });
+        setCameraX(smoothCamera);
+        setTime(
+          Math.floor(
+            (now - startTimeRef.current) / 1000,
+          ),
+        );
+      }
+
+      animationRef.current = requestAnimationFrame(loop);
+    };
+
+    lastFrameRef.current = performance.now();
+    lastUiUpdateRef.current = 0;
+    animationRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      cancelled = true;
+
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+      }
+
+      animationRef.current = null;
+    };
+  }, [fire, screen, sectorIndex, shotUpgrade, upgradeUntil]);
+  useEffect(() => {
+    if (hp <= 0 && screen === "playing") {
+      setScreen("gameover");
+    }
+  }, [hp, screen]);
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current !== null) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  const handlePointerDown = (
+    event: PointerEvent<HTMLElement>,
+  ) => {
+    if (screen !== "playing") return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    touchRef.current = {
+      active: true,
+      x: 0,
+      y: 0,
+    };
+  };
+
+  const handlePointerMove = (
+    event: PointerEvent<HTMLElement>,
+  ) => {
+    if (!touchRef.current.active) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    touchRef.current.x = event.clientX - centerX;
+    touchRef.current.y = event.clientY - centerY;
+  };
+
+  const handlePointerUp = () => {
+    touchRef.current.active = false;
+    touchRef.current.x = 0;
+    touchRef.current.y = 0;
+  };
+
+  const resetToStart = () => {
+    setScreen("start");
+    setSectorIndex(0);
+    setScore(0);
+    setNeoBytes(0);
+    setTime(0);
+    setCombo(0);
+    setHp(PLAYER_HP);
+    setShotUpgrade("single");
+    setUpgradeUntil(0);
+    setAmmo(STARTING_AMMO);
+  };
+
+  const progress = clamp(
+    ((player.x - 120) / (BOSS_X - 120)) * 100,
+    0,
+    100,
+  );
+
+  const remainingBossHp = Math.max(
+    0,
+    boss.hp,
+  );
+
+  const visualParticles = useMemo(
+    () =>
+      Array.from({ length: 18 }, (_, index) => ({
+        left: `${(index * 17) % 100}%`,
+        top: `${20 + ((index * 31) % 65)}%`,
+        delay: `${(index % 7) * 0.7}s`,
+        duration: `${4 + (index % 4)}s`,
+      })),
+    [],
+  );
 
   return (
-    <main className="min-h-screen bg-[#050914] px-3 py-4 text-cyan-100 sm:px-6 sm:py-6">
-      <div className="mx-auto w-full max-w-[1200px]">
-
-        {/* HEADER */}
-
-        <header className="mb-3 flex items-center justify-between border-b border-cyan-500/20 pb-3">
+    <main
+      className="min-h-screen bg-[#030508] px-3 py-6 text-white sm:px-6"
+      style={
+        {
+          "--sector-accent": sector.accent,
+          "--sector-soft": sector.accentSoft,
+        } as CSSProperties
+      }
+    >
+      <div className="mx-auto w-full max-w-[1180px]">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.35em] text-cyan-400/70 sm:text-xs">
-              VΣLOHE SYSTEM
-            </div>
-
-            <div className="mt-1 text-sm font-bold uppercase tracking-[0.25em] text-cyan-200">
-              ARCADE NODE
-            </div>
+            <p
+              className="font-mono text-[9px] uppercase tracking-[0.35em]"
+              style={{ color: sector.accent }}
+            >
+              VΣLOHE SYSTEM // AETHERGRID
+            </p>
+            <h1 className="mt-1 text-sm font-semibold uppercase tracking-[0.18em] text-white/90">
+              Spirit Navigation Protocol
+            </h1>
           </div>
 
-          <div className="text-right text-[8px] uppercase tracking-[0.2em] text-cyan-500/40 sm:text-[9px]">
-            <div>
-              BUILD // 07
-            </div>
-
-            <div className="mt-1">
-              AEG-001
-            </div>
+          <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/35">
+            {sector.code} // SECTOR {String(sectorIndex + 1).padStart(2, "0")}
           </div>
         </header>
 
-        {/* START SCREEN */}
-
-        {gameState ===
-          "start" && (
-          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-cyan-500/20 bg-[#07101f]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,220,255,0.08),transparent_55%)]" />
-
-            <div className="relative z-10 text-center">
-
-              <div className="text-[9px] uppercase tracking-[0.5em] text-cyan-500/50">
-                ARCHIVE NODE // AEG-001
-              </div>
-
-              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-cyan-300 sm:text-5xl">
-                CYAN SPIRIT
-              </h1>
-
-              <p className="mt-3 text-[9px] uppercase tracking-[0.3em] text-cyan-500/50">
-                AETHERGRID ARCADE PROTOCOL
-              </p>
-
-              <p className="mt-2 text-[8px] uppercase tracking-[0.25em] text-cyan-500/40">
-                FLOATING UNIT // AEG-001
-              </p>
-
-              <button
-                type="button"
-                onClick={
-                  startGame
-                }
-                className="mt-8 border border-cyan-400/50 bg-cyan-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-200 transition hover:bg-cyan-400/20"
-              >
-                INITIALIZE
-              </button>
-
-            </div>
-          </section>
-        )}
-
-        {/* GAME */}
-
-        {gameState ===
-          "playing" && (
-          <section
-            ref={
-              viewportRef
-            }
-            className="relative h-[560px] overflow-hidden border border-cyan-500/20 bg-[#060b16]"
-          >
-
-            <div
-              className="absolute left-0 top-0 h-full"
-              style={{
-                width: `${WORLD_WIDTH}px`,
-                transform: `translateX(-${cameraX}px)`,
-              }}
-            >
-
-              {/* SKY */}
-
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(0,200,255,0.10),transparent_45%)]" />
-
-              {/* GRID */}
-
-              <div
-                className="absolute inset-0 opacity-20"
+        <section
+          className="relative overflow-hidden rounded-xl border bg-black"
+          style={{
+            borderColor: `${sector.accent}38`,
+            touchAction: "none",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+        >
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            {visualParticles.map((particle, index) => (
+              <span
+                key={index}
+                className="absolute h-[2px] w-[2px] rounded-full opacity-40 motion-safe:animate-pulse"
                 style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(0,220,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,220,255,0.08) 1px, transparent 1px)",
-                  backgroundSize:
-                    "40px 40px",
+                  left: particle.left,
+                  top: particle.top,
+                  background: sector.accent,
+                  boxShadow: `0 0 10px ${sector.accent}`,
+                  animationDelay: particle.delay,
+                  animationDuration: particle.duration,
                 }}
               />
+            ))}
+          </div>
 
-              {/* FLOOR */}
-
-              <div
-                className="absolute left-0 border-t border-cyan-400/30 bg-[#091322]"
-                style={{
-                  top: `${FLOOR_Y}px`,
-                  width: `${WORLD_WIDTH}px`,
-                  height: `${WORLD_HEIGHT - FLOOR_Y}px`,
-                }}
-              />
-
-              {/* PLATFORMS */}
-
-              {PLATFORMS.map(
-                (
-                  platform,
-                ) => (
-                  <div
-                    key={
-                      platform.x
-                    }
-                    className="absolute border border-cyan-400/30 bg-cyan-500/10 shadow-[0_0_15px_rgba(0,220,255,0.08)]"
+          {screen === "playing" && (
+            <>
+              <div className="relative z-20 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 bg-black/70 px-3 py-2 backdrop-blur-sm">
+                <div className="flex flex-wrap gap-3 font-mono text-[9px] uppercase tracking-widest">
+                  <span style={{ color: sector.accent }}>
+                    HP {hp}/{PLAYER_HP}
+                  </span>
+                  <span className="text-white/50">
+                    SCORE {score.toString().padStart(5, "0")}
+                  </span>
+                  <span className="text-white/50">
+                    NEOBYTES {neoBytes}
+                  </span>
+                  <span
                     style={{
-                      left: `${platform.x}px`,
-                      top: `${platform.y}px`,
-                      width: `${platform.width}px`,
-                      height: `${platform.height}px`,
-                    }}
-                  />
-                ),
-              )}
-
-              {/* OBSTACLES */}
-
-              {OBSTACLES.map(
-                (
-                  obstacle,
-                ) => (
-                  <div
-                    key={
-                      obstacle.id
-                    }
-                    className="absolute border border-purple-400/30 bg-purple-500/10"
-                    style={{
-                      left: `${obstacle.x}px`,
-                      top: `${obstacle.y}px`,
-                      width: `${obstacle.width}px`,
-                      height: `${obstacle.height}px`,
-                    }}
-                  />
-                ),
-              )}
-
-              {/* NEOBYTES */}
-
-              {neobytesState
-                .filter(
-                  (
-                    byte,
-                  ) =>
-                    !byte.collected,
-                )
-                .map(
-                  (
-                    byte,
-                  ) => (
-                    <div
-                      key={
-                        byte.id
-                      }
-                      className="absolute flex h-5 w-5 items-center justify-center rounded-full border border-cyan-200 bg-cyan-400/20 text-[7px] text-cyan-100 shadow-[0_0_14px_rgba(0,255,255,0.7)]"
-                      style={{
-                        left: `${byte.x - 10}px`,
-                        top: `${byte.y - 10}px`,
-                      }}
-                    >
-                      ◆
-                    </div>
-                  ),
-                )}
-
-              {/* ENEMIES */}
-
-              {enemies
-                .filter(
-                  (
-                    enemy,
-                  ) =>
-                    enemy.alive,
-                )
-                .map(
-                  (
-                    enemy,
-                  ) => (
-                    <div
-                      key={
-                        enemy.id
-                      }
-                      className="absolute border border-fuchsia-500/40 bg-fuchsia-500/10 shadow-[0_0_14px_rgba(255,0,200,0.15)]"
-                      style={{
-                        left: `${enemy.x}px`,
-                        top: `${enemy.y}px`,
-                        width: `${enemy.width}px`,
-                        height: `${enemy.height}px`,
-                      }}
-                    >
-                      <div className="absolute left-1/2 top-1/3 h-2 w-2 -translate-x-1/2 rounded-full bg-fuchsia-400 shadow-[0_0_8px_rgba(255,0,200,0.8)]" />
-                    </div>
-                  ),
-                )}
-
-              {/* =================================================
-              PROJECTILE
-              ================================================= */}
-
-              {projectile.active && (
-                <div
-                  className="pointer-events-none absolute"
-                  style={{
-                    left: `${projectile.x}px`,
-                    top: `${projectile.y}px`,
-                    width: `${projectile.width}px`,
-                    height: `${projectile.height}px`,
-                  }}
-                >
-                  <div
-                    className="absolute left-1/2 top-1/2"
-                    style={{
-                      width: `${PROJECTILE_VISUAL_SIZE}px`,
-                      height: `${PROJECTILE_VISUAL_SIZE}px`,
-                      transform:
-                        projectile.direction ===
-                        "left"
-                          ? "translate(-50%, -50%) scaleX(-1)"
-                          : "translate(-50%, -50%)",
-                      transformOrigin:
-                        "center center",
+                      color:
+                        ammo <= 25
+                          ? "#ff5d9e"
+                          : `${sector.accent}aa`,
                     }}
                   >
-                    <img
-                      src={
-                        activeProjectileSprite
-                      }
-                      alt="Cyan Spirit Projectile"
-                      draggable={
-                        false
-                      }
-                      className="pointer-events-none select-none"
-                      style={{
-                        width:
-                          "100%",
-                        height:
-                          "100%",
-                        objectFit:
-                          "contain",
-                        objectPosition:
-                          "center center",
-                        imageRendering:
-                          "pixelated",
-                      }}
-                    />
-                  </div>
+                    AMMO {ammo}
+                  </span>
+                  <span className="text-white/50">
+                    COMBO {combo}
+                  </span>
+                  {shotUpgrade === "double" && (
+                    <span style={{ color: sector.accent }}>
+                      DOUBLE FIRE
+                    </span>
+                  )}
                 </div>
-              )}
 
-              {/* CYAN SPIRIT */}
+                <span className="font-mono text-[9px] uppercase tracking-widest text-white/35">
+                  {formatTime(time)}
+                </span>
+              </div>
 
               <div
-                className="absolute"
+                className="relative h-[560px] overflow-hidden"
                 style={{
-                  left: `${player.x}px`,
-                  top: `${player.y}px`,
-                  width: `${PLAYER_WIDTH}px`,
-                  height: `${PLAYER_HEIGHT}px`,
+                  background:
+                    `radial-gradient(circle at 55% 50%, ${sector.accentSoft}, transparent 30%), radial-gradient(circle at 20% 75%, ${sector.accent}08, transparent 32%), #020305`,
                 }}
               >
-
                 <div
-                  className="absolute left-1/2 top-1/2 overflow-visible"
+                  className="absolute inset-y-0"
                   style={{
-                    width: `${CYAN_SPIRIT_VISUAL_SIZE}px`,
-                    height: `${CYAN_SPIRIT_VISUAL_SIZE}px`,
-                    transform:
-                      player.facing ===
-                      "left"
-                        ? "translate(-50%, -50%) scaleX(-1)"
-                        : "translate(-50%, -50%) scaleX(1)",
-                    transformOrigin:
-                      "center center",
+                    width: `${WORLD_WIDTH}px`,
+                    transform: `translateX(${-cameraX}px)`,
                   }}
                 >
+                  <div className="absolute inset-x-0 bottom-0 h-[110px] border-t border-white/5 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.025)_50%,transparent_100%)]" />
 
-                  <img
-                    src={
-                      activeSprite
-                    }
-                    alt="Cyan Spirit"
-                    draggable={
-                      false
-                    }
-                    className="pointer-events-none select-none"
+                  <div
+                    className="absolute left-[70px] top-[52px] font-mono text-[8px] uppercase tracking-[0.3em]"
+                    style={{ color: `${sector.accent}70` }}
+                  >
+                    NETWORK ENTRY
+                  </div>
+
+                  {Array.from({ length: 16 }, (_, index) => {
+                    const x = 180 + index * 190;
+                    return (
+                      <div
+                        key={index}
+                        className="absolute top-[110px] h-[1px] w-[120px]"
+                        style={{
+                          left: x,
+                          background: `${sector.accent}14`,
+                        }}
+                      />
+                    );
+                  })}
+
+                  {bytes.map(
+                    (byte) =>
+                      !byte.collected && (
+                        <div
+                          key={byte.id}
+                          className="absolute h-5 w-5 rotate-45 rounded-[4px] border motion-safe:animate-pulse"
+                          style={{
+                            left: byte.x,
+                            top: byte.y,
+                            borderColor: sector.accent,
+                            background: sector.accentSoft,
+                            boxShadow: `0 0 16px ${sector.accentSoft}`,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-[5px] rounded-sm"
+                            style={{ background: sector.accent }}
+                          />
+                        </div>
+                      ),
+                  )}
+
+                  {capsules.map(
+                    (capsule) =>
+                      !capsule.collected && (
+                        <div
+                          key={capsule.id}
+                          className="absolute"
+                          style={{
+                            left: capsule.x,
+                            top: capsule.y,
+                            width: 30,
+                            height: 30,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-0 rotate-45 rounded-[6px] border"
+                            style={{
+                              borderColor: sector.accent,
+                              background: sector.accentSoft,
+                              boxShadow: `0 0 20px ${sector.accentSoft}`,
+                            }}
+                          />
+                          <div
+                            className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                            style={{
+                              background: sector.accent,
+                              boxShadow: `0 0 14px ${sector.accent}`,
+                            }}
+                          />
+                          <div
+                            className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.18em]"
+                            style={{ color: `${sector.accent}80` }}
+                          >
+                            FIRE UPGRADE
+                          </div>
+                        </div>
+                      ),
+                  )}
+
+                  {lifePickups.map(
+                    (pickup) =>
+                      !pickup.collected && (
+                        <div
+                          key={pickup.id}
+                          className="absolute motion-safe:animate-pulse"
+                          style={{
+                            left: pickup.x,
+                            top: pickup.y,
+                            width: 30,
+                            height: 30,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-0 rounded-full border"
+                            style={{
+                              borderColor: `${sector.accent}90`,
+                              background: sector.accentSoft,
+                              boxShadow: `0 0 18px ${sector.accentSoft}`,
+                            }}
+                          />
+                          <div
+                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[15px] font-bold"
+                            style={{
+                              color: sector.accent,
+                              textShadow: `0 0 10px ${sector.accent}`,
+                            }}
+                          >
+                            +
+                          </div>
+                          <div
+                            className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.16em]"
+                            style={{ color: `${sector.accent}75` }}
+                          >
+                            LIFE
+                          </div>
+                        </div>
+                      ),
+                  )}
+
+                  {enemies.map((enemy) => (
+                    <div
+                      key={enemy.id}
+                      className="absolute"
+                      style={{
+                        left: enemy.x,
+                        top: enemy.y,
+                        width: 38,
+                        height: 38,
+                      }}
+                    >
+                      <div
+                        className="h-full w-full rotate-45 rounded-[7px] border"
+                        style={{
+                          borderColor: `${sector.accent}80`,
+                          background: "rgba(5,7,10,0.92)",
+                          boxShadow: `0 0 18px ${sector.accentSoft}`,
+                        }}
+                      />
+                      <div
+                        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{
+                          background: sector.accent,
+                          boxShadow: `0 0 10px ${sector.accent}`,
+                        }}
+                      />
+                    </div>
+                  ))}
+
+                  {projectiles.map((projectile) => (
+                    <div
+                      key={projectile.id}
+                      className="absolute rounded-full"
+                      style={{
+                        left: projectile.x,
+                        top: projectile.y,
+                        width: PROJECTILE_WIDTH,
+                        height: PROJECTILE_HEIGHT,
+                        background: sector.accent,
+                        boxShadow: `0 0 12px ${sector.accent}, 0 0 26px ${sector.accentSoft}`,
+                      }}
+                    />
+                  ))}
+
+                  {bossProjectiles.map((projectile) => (
+                    <div
+                      key={projectile.id}
+                      className="absolute rounded-full"
+                      style={{
+                        left: projectile.x - projectile.size / 2,
+                        top: projectile.y - projectile.size / 2,
+                        width: projectile.size,
+                        height: projectile.size,
+                        background: "#f4f0ff",
+                        boxShadow: `0 0 10px ${sector.accent}, 0 0 22px ${sector.accentSoft}`,
+                      }}
+                    />
+                  ))}
+
+                  <div
+                    className="absolute"
                     style={{
-                      width:
-                        "100%",
-                      height:
-                        "100%",
-                      objectFit:
-                        "contain",
-                      objectPosition:
-                        "center center",
-                      imageRendering:
-                        "pixelated",
+                      left: player.x,
+                      top: player.y,
+                      width: PLAYER_SIZE,
+                      height: PLAYER_SIZE,
+                    }}
+                  >
+                    <div
+                      className="absolute inset-[7px] rotate-45 rounded-[8px] border"
+                      style={{
+                        borderColor: sector.accent,
+                        background: "#030508",
+                        boxShadow: `0 0 18px ${sector.accentSoft}`,
+                      }}
+                    />
+                    {sector.key === "cyan" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{
+                          background: sector.accent,
+                          boxShadow: `0 0 14px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "purple" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: sector.accentSoft,
+                          boxShadow: `0 0 14px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "gold" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: sector.accentSoft,
+                          clipPath:
+                            "polygon(50% 0%, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%)",
+                          boxShadow: `0 0 14px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "void" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: "#020305",
+                          boxShadow: `0 0 16px ${sector.accentSoft}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "dual" && (
+                      <>
+                        <div
+                          className="absolute left-[38%] top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            background: SECTORS[0].accent,
+                            boxShadow: `0 0 14px ${SECTORS[0].accent}`,
+                          }}
+                        />
+                        <div
+                          className="absolute left-[62%] top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            background: SECTORS[1].accent,
+                            boxShadow: `0 0 14px ${SECTORS[1].accent}`,
+                          }}
+                        />
+                      </>
+                    )}
+                    <div
+                      className="absolute left-1/2 top-[-9px] h-2 w-2 -translate-x-1/2 rounded-full"
+                      style={{ background: sector.accent }}
+                    />
+                    <div
+                      className="absolute bottom-[-10px] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full opacity-60"
+                      style={{ background: sector.accent }}
+                    />
+                  </div>
+
+                  {boss.active && (
+                    <div
+                      className="absolute"
+                      style={{
+                        left: boss.x,
+                        top: boss.y,
+                        width: BOSS_SIZE,
+                        height: BOSS_SIZE,
+                      }}
+                    >
+                      <div
+                        className="absolute inset-0 rounded-full border motion-safe:animate-pulse"
+                        style={{
+                          borderColor: sector.accent,
+                          background: `radial-gradient(circle, ${sector.accentSoft} 0%, rgba(0,0,0,0.92) 62%)`,
+                          boxShadow: `0 0 28px ${sector.accentSoft}`,
+                        }}
+                      />
+                      <div
+                        className="absolute inset-[22px] rotate-45 border"
+                        style={{
+                          borderColor: `${sector.accent}aa`,
+                          background: "#020305",
+                        }}
+                      />
+                      {sector.key === "dual" ? (
+                        <>
+                          <div
+                            className="absolute left-[38%] top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                            style={{
+                              background: SECTORS[0].accent,
+                              boxShadow: `0 0 20px ${SECTORS[0].accent}`,
+                            }}
+                          />
+                          <div
+                            className="absolute left-[62%] top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                            style={{
+                              background: SECTORS[1].accent,
+                              boxShadow: `0 0 20px ${SECTORS[1].accent}`,
+                            }}
+                          />
+                        </>
+                      ) : sector.key === "purple" ? (
+                        <div
+                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rotate-45 border"
+                          style={{
+                            borderColor: sector.accent,
+                            background: sector.accentSoft,
+                            boxShadow: `0 0 20px ${sector.accent}`,
+                          }}
+                        />
+                      ) : sector.key === "gold" ? (
+                        <div
+                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 border"
+                          style={{
+                            borderColor: sector.accent,
+                            background: sector.accentSoft,
+                            clipPath:
+                              "polygon(50% 0%, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%)",
+                            boxShadow: `0 0 20px ${sector.accent}`,
+                          }}
+                        />
+                      ) : sector.key === "void" ? (
+                        <div
+                          className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                          style={{
+                            borderColor: sector.accent,
+                            background: "#020305",
+                            boxShadow: `0 0 22px ${sector.accentSoft}`,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            background: sector.accent,
+                            boxShadow: `0 0 24px ${sector.accent}`,
+                          }}
+                        />
+                      )}
+
+                      <div className="absolute -top-8 left-1/2 w-44 -translate-x-1/2 text-center font-mono text-[8px] uppercase tracking-[0.28em]">
+                        <span style={{ color: sector.accent }}>
+                          {sector.spirit} // BOSS
+                        </span>
+                      </div>
+
+                      <div className="absolute -bottom-6 left-1/2 h-1.5 w-40 -translate-x-1/2 overflow-hidden rounded-full border border-white/10 bg-white/5">
+                        <div
+                          className="h-full transition-[width] duration-100"
+                          style={{
+                            width: `${(remainingBossHp / boss.maxHp) * 100}%`,
+                            background: sector.accent,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    className="absolute top-0 h-full border-l border-dashed"
+                    style={{
+                      left: BOSS_X - 30,
+                      borderColor: `${sector.accent}35`,
                     }}
                   />
-
                 </div>
 
-                {/* FLOATING ENERGY */}
-
-                <div className="pointer-events-none absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/5 blur-xl" />
-
-              </div>
-
-              {/* FINISH NODE */}
-
-              <div className="absolute right-20 top-[220px] text-center">
-
-                <div className="text-[8px] uppercase tracking-[0.3em] text-purple-400/50">
-                  ARCHIVE NODE
+                <div
+                  className="pointer-events-none absolute top-3 right-3 rounded border bg-black/70 px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em]"
+                  style={{
+                    borderColor: `${sector.accent}25`,
+                    color: boss.revealed ? sector.accent : `${sector.accent}65`,
+                  }}
+                >
+                  BOSS SIGNAL // {boss.revealed ? "VISIBLE" : "DISTANT"}
                 </div>
 
-                <div className="mx-auto mt-2 h-20 w-px bg-purple-400/30 shadow-[0_0_10px_rgba(180,80,255,0.3)]" />
-
-              </div>
-
-            </div>
-
-            {/* CAMERA HUD */}
-
-            <div className="absolute left-3 top-3 z-50 text-[7px] uppercase tracking-[0.2em] text-cyan-500/35 sm:left-4 sm:top-4 sm:text-[8px]">
-
-              <div>
-                POSITION //{" "}
-                {Math.round(
-                  player.x,
-                )
-                  .toString()
-                  .padStart(
-                    4,
-                    "0",
-                  )}
-              </div>
-
-              <div className="mt-1">
-                NODE // AEG-001
-              </div>
-
-            </div>
-
-            {/* GAME HUD */}
-
-            <div className="absolute right-3 top-3 z-50 text-right text-[7px] uppercase tracking-[0.15em] text-cyan-500/40 sm:right-4 sm:top-4 sm:text-[8px]">
-
-              <div>
-                HP // {hp}/
-                {INITIAL_HP}
-              </div>
-
-              <div className="mt-1">
-                SCORE //{" "}
-                {score}
-              </div>
-
-              <div className="mt-1">
-                NEOBYTES //{" "}
-                {neobytes}
-              </div>
-
-              <div className="mt-1">
-                COMBO // x
-                {combo}
-              </div>
-
-              <div className="mt-1">
-                TIME //{" "}
-                {formatTime(
-                  elapsedTime,
-                )}
-              </div>
-
-            </div>
-
-            {/* DESKTOP CONTROLS */}
-
-            <div className="absolute bottom-3 left-3 z-50 hidden text-[7px] uppercase tracking-[0.18em] text-cyan-500/40 sm:bottom-4 sm:left-4 sm:block sm:text-[8px]">
-
-              <div>
-                MOVE // WASD + ARROWS
-              </div>
-
-              <div className="mt-1">
-                ATTACK // SPACE
-              </div>
-
-            </div>
-
-            {/* PROGRESS */}
-
-            <div className="absolute bottom-3 right-3 z-50 text-right text-[7px] uppercase tracking-[0.18em] text-cyan-500/30 sm:bottom-4 sm:right-4 sm:text-[8px]">
-
-              <div>
-                ARCHIVE PROGRESS
-              </div>
-
-              <div className="mt-1 text-cyan-400/50">
-                {progress}%
-              </div>
-
-            </div>
-
-          </section>
-        )}
-
-        {/* COMPLETE */}
-
-        {gameState ===
-          "complete" && (
-          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-cyan-500/20 bg-[#07101f]">
-
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,255,0.12),transparent_55%)]" />
-
-            <div className="relative z-10 text-center">
-
-              <div className="text-[9px] uppercase tracking-[0.4em] text-cyan-400/60">
-                ARCHIVE NODE // COMPLETE
-              </div>
-
-              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-cyan-300 sm:text-5xl">
-                MISSION COMPLETE
-              </h1>
-
-              <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-cyan-500/50">
-                CYAN SPIRIT HAS REACHED THE NEXT NODE
-              </p>
-
-              <div className="mt-8 grid grid-cols-2 gap-3 text-left text-[9px] uppercase tracking-[0.15em]">
-
-                <div className="border border-cyan-500/20 px-5 py-3">
-                  <div className="text-cyan-500/40">
-                    SCORE
-                  </div>
-
-                  <div className="mt-1 text-cyan-200">
-                    {score}
-                  </div>
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded border border-white/10 bg-black/70 px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em] text-white/35">
+                  MOVE // WASD + ARROWS
+                  <br />
+                  FIRE // SPACE / X / TOUCH
                 </div>
 
-                <div className="border border-cyan-500/20 px-5 py-3">
-                  <div className="text-cyan-500/40">
-                    TIME
-                  </div>
+                <div
+                  className="pointer-events-none absolute bottom-3 right-3 rounded border px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em]"
+                  style={{
+                    borderColor: `${sector.accent}30`,
+                    color: `${sector.accent}aa`,
+                  }}
+                >
+                  TOUCH // DRAG TO NAVIGATE
+                  <br />
+                  AUTO-FIRE // ACTIVE
+                </div>
+              </div>
 
-                  <div className="mt-1 text-cyan-200">
-                    {formatTime(
-                      elapsedTime,
+              <div className="border-t border-white/10 bg-black/80 px-3 py-2">
+                <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.22em] text-white/35">
+                  <span>SECTOR PROGRESS</span>
+                  <span style={{ color: sector.accent }}>
+                    {Math.round(progress)}%
+                  </span>
+                </div>
+
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
+                  <div
+                    className="h-full transition-[width] duration-100"
+                    style={{
+                      width: `${progress}%`,
+                      background: sector.accent,
+                    }}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {screen !== "playing" && (
+            <div
+              className="relative z-10 flex min-h-[620px] items-center justify-center px-5 py-16 text-center"
+              style={{
+                background: `radial-gradient(circle at center, ${sector.accentSoft}, transparent 38%), #020305`,
+              }}
+            >
+              <div className="w-full max-w-2xl">
+                <p
+                  className="font-mono text-[9px] uppercase tracking-[0.4em]"
+                  style={{ color: `${sector.accent}99` }}
+                >
+                  AETHERGRID // SPIRIT FREQUENCY
+                </p>
+
+                <div className="mx-auto mt-10 h-28 w-28">
+                  <div
+                    className="relative h-full w-full rounded-full border motion-safe:animate-pulse"
+                    style={{
+                      borderColor: sector.accent,
+                      boxShadow: `0 0 45px ${sector.accentSoft}`,
+                    }}
+                  >
+                    <div
+                      className="absolute inset-7 rotate-45 rounded-[12px] border"
+                      style={{
+                        borderColor: `${sector.accent}aa`,
+                        background: "#020305",
+                      }}
+                    />
+                    {sector.key === "cyan" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        style={{
+                          background: sector.accent,
+                          boxShadow: `0 0 26px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "purple" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rotate-45 border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: sector.accentSoft,
+                          boxShadow: `0 0 26px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "gold" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: sector.accentSoft,
+                          clipPath:
+                            "polygon(50% 0%, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%)",
+                          boxShadow: `0 0 26px ${sector.accent}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "void" && (
+                      <div
+                        className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                        style={{
+                          borderColor: sector.accent,
+                          background: "#020305",
+                          boxShadow: `0 0 28px ${sector.accentSoft}`,
+                        }}
+                      />
+                    )}
+
+                    {sector.key === "dual" && (
+                      <>
+                        <div
+                          className="absolute left-[38%] top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            background: SECTORS[0].accent,
+                            boxShadow: `0 0 24px ${SECTORS[0].accent}`,
+                          }}
+                        />
+                        <div
+                          className="absolute left-[62%] top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          style={{
+                            background: SECTORS[1].accent,
+                            boxShadow: `0 0 24px ${SECTORS[1].accent}`,
+                          }}
+                        />
+                      </>
                     )}
                   </div>
                 </div>
 
+                <p
+                  className="mt-12 font-mono text-[10px] uppercase tracking-[0.28em]"
+                  style={{ color: `${sector.accent}aa` }}
+                >
+                  {sector.code}
+                </p>
+
+                <div
+                  className="mx-auto mt-4 inline-flex items-center gap-2 rounded border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.22em]"
+                  style={{
+                    borderColor: `${sector.accent}35`,
+                    color: sector.accent,
+                    background: `${sector.accent}08`,
+                  }}
+                >
+                  <span className="text-white/35">DIFFICULTY //</span>
+                  <span>{sector.difficulty}</span>
+                </div>
+
+                <h2
+                  className="mt-4 text-4xl font-semibold tracking-[0.08em] sm:text-6xl"
+                  style={{
+                    color: sector.accent,
+                    textShadow: `0 0 26px ${sector.accentSoft}`,
+                  }}
+                >
+                  {screen === "complete"
+                    ? "SECTOR COMPLETE"
+                    : screen === "gameover"
+                      ? "SPIRIT OFFLINE"
+                      : sector.spirit}
+                </h2>
+
+                <p className="mx-auto mt-5 max-w-xl font-mono text-xs uppercase leading-7 tracking-[0.14em] text-white/45">
+                  {screen === "start" &&
+                    "Enter the Network. Navigate the Aethergrid. Recover NeoBytes. Reach the Spirit signal."}
+
+                  {screen === "spirit" &&
+                    `A new frequency has been detected. ${sector.spirit} // initialize the next Network layer.`}
+
+                  {screen === "complete" &&
+                    (sectorIndex < SECTORS.length - 1
+                      ? `The ${sector.spirit} has been recovered. The next frequency is waiting beyond the current layer.`
+                      : "The final frequency has been reached. Dual-Core synchronization remains beyond this node.")}
+
+                  {screen === "gameover" &&
+                    "The Spirit lost connection with the Network. Reinitialize the current protocol and try again."}
+                </p>
+
+                <div className="mt-10 flex flex-wrap justify-center gap-3">
+                  {screen === "start" && (
+                    <button
+                      type="button"
+                      onClick={startGame}
+                      className="rounded border px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-white/5"
+                      style={{
+                        borderColor: sector.accent,
+                        color: sector.accent,
+                      }}
+                    >
+                      Initialize Cyan
+                    </button>
+                  )}
+
+                  {screen === "spirit" && (
+                    <button
+                      type="button"
+                      onClick={initializeSpirit}
+                      className="rounded border px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-white/5"
+                      style={{
+                        borderColor: sector.accent,
+                        color: sector.accent,
+                      }}
+                    >
+                      Initialize {sector.spirit}
+                    </button>
+                  )}
+
+                  {screen === "complete" &&
+                    sectorIndex < SECTORS.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={advanceSector}
+                        className="rounded border px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-white/5"
+                        style={{
+                          borderColor: SECTORS[sectorIndex + 1].accent,
+                          color: SECTORS[sectorIndex + 1].accent,
+                        }}
+                      >
+                        Advance to {SECTORS[sectorIndex + 1].spirit.replace(
+                          " SPIRIT",
+                          "",
+                        )}
+                      </button>
+                    )}
+
+                  {screen === "complete" &&
+                    sectorIndex === SECTORS.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={resetToStart}
+                        className="rounded border border-white/20 px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-white/65 transition hover:bg-white/5"
+                      >
+                        Return to Node
+                      </button>
+                    )}
+
+                  {screen === "gameover" && (
+                    <button
+                      type="button"
+                      onClick={() => beginSector(sectorIndex)}
+                      className="rounded border px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] transition hover:bg-white/5"
+                      style={{
+                        borderColor: sector.accent,
+                        color: sector.accent,
+                      }}
+                    >
+                      Reinitialize Spirit
+                    </button>
+                  )}
+                </div>
+
+                {(screen === "complete" || screen === "gameover") && (
+                  <div className="mx-auto mt-10 grid max-w-md grid-cols-3 gap-2 font-mono text-[9px] uppercase tracking-widest">
+                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                      <span className="block text-white/30">Score</span>
+                      <span className="mt-1 block text-white/80">{score}</span>
+                    </div>
+                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                      <span className="block text-white/30">NeoBytes</span>
+                      <span className="mt-1 block text-white/80">
+                        {neoBytes}
+                      </span>
+                    </div>
+                    <div className="rounded border border-white/10 bg-white/[0.02] p-3">
+                      <span className="block text-white/30">Time</span>
+                      <span className="mt-1 block text-white/80">
+                        {formatTime(time)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={
-                  returnToInitialNode
-                }
-                className="mt-8 border border-cyan-400/50 bg-cyan-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-200 transition hover:bg-cyan-400/20"
-              >
-                RETURN TO NODE
-              </button>
-
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
-        {/* GAME OVER */}
-
-        {gameState ===
-          "gameover" && (
-          <section className="relative flex min-h-[560px] flex-col items-center justify-center overflow-hidden border border-fuchsia-500/20 bg-[#100712]">
-
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,0,180,0.10),transparent_55%)]" />
-
-            <div className="relative z-10 text-center">
-
-              <div className="text-[9px] uppercase tracking-[0.4em] text-fuchsia-400/50">
-                SYSTEM INTERRUPTION
-              </div>
-
-              <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.15em] text-fuchsia-300 sm:text-5xl">
-                CYAN SPIRIT OFFLINE
-              </h1>
-
-              <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-fuchsia-500/40">
-                ARCHIVE CONNECTION LOST
-              </p>
-
-              <button
-                type="button"
-                onClick={
-                  startGame
-                }
-                className="mt-8 border border-fuchsia-400/40 bg-fuchsia-500/10 px-8 py-3 text-[10px] font-bold uppercase tracking-[0.3em] text-fuchsia-200 transition hover:bg-fuchsia-400/20"
-              >
-                REINITIALIZE
-              </button>
-
-            </div>
-          </section>
-        )}
-
-        {/* MOBILE CONTROLS */}
-
-        {gameState ===
-          "playing" && (
-          <div className="mt-3 grid grid-cols-3 gap-2 sm:hidden">
-
-            <div />
-
-            <button
-              type="button"
-              onPointerDown={() =>
-                holdKey(
-                  "arrowup",
-                )
-              }
-              onPointerUp={() =>
-                releaseKey(
-                  "arrowup",
-                )
-              }
-              onPointerCancel={() =>
-                releaseKey(
-                  "arrowup",
-                )
-              }
-              onPointerLeave={() =>
-                releaseKey(
-                  "arrowup",
-                )
-              }
-              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-            >
-              ↑
-            </button>
-
-            <div />
-
-            <button
-              type="button"
-              onPointerDown={() =>
-                holdKey(
-                  "arrowleft",
-                )
-              }
-              onPointerUp={() =>
-                releaseKey(
-                  "arrowleft",
-                )
-              }
-              onPointerCancel={() =>
-                releaseKey(
-                  "arrowleft",
-                )
-              }
-              onPointerLeave={() =>
-                releaseKey(
-                  "arrowleft",
-                )
-              }
-              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-            >
-              ←
-            </button>
-
-            <button
-              type="button"
-              onClick={
-                triggerAttack
-              }
-              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-[10px] text-cyan-300 active:bg-cyan-500/20"
-            >
-              ATTACK
-            </button>
-
-            <button
-              type="button"
-              onPointerDown={() =>
-                holdKey(
-                  "arrowright",
-                )
-              }
-              onPointerUp={() =>
-                releaseKey(
-                  "arrowright",
-                )
-              }
-              onPointerCancel={() =>
-                releaseKey(
-                  "arrowright",
-                )
-              }
-              onPointerLeave={() =>
-                releaseKey(
-                  "arrowright",
-                )
-              }
-              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-            >
-              →
-            </button>
-
-            <div />
-
-            <button
-              type="button"
-              onPointerDown={() =>
-                holdKey(
-                  "arrowdown",
-                )
-              }
-              onPointerUp={() =>
-                releaseKey(
-                  "arrowdown",
-                )
-              }
-              onPointerCancel={() =>
-                releaseKey(
-                  "arrowdown",
-                )
-              }
-              onPointerLeave={() =>
-                releaseKey(
-                  "arrowdown",
-                )
-              }
-              className="border border-cyan-500/30 bg-cyan-950/20 py-3 text-cyan-300 active:bg-cyan-500/20"
-            >
-              ↓
-            </button>
-
-            <div />
-
-          </div>
-        )}
-
-        {/* FOOTER */}
-
-        <footer className="mt-3 flex items-center justify-between text-[7px] uppercase tracking-[0.2em] text-cyan-500/25 sm:text-[8px]">
-
+        <footer className="mt-4 flex flex-wrap items-center justify-between gap-2 font-mono text-[8px] uppercase tracking-[0.22em] text-white/25">
+          <span>AETHERGRID // {sector.code}</span>
           <span>
-            ARCADE NODE // BUILD 07
+            {screen === "playing"
+              ? "CONNECTION // ACTIVE"
+              : "CONNECTION // STANDBY"}
           </span>
-
-          <span>
-            INPUT // ACTIVE
-          </span>
-
         </footer>
-
       </div>
     </main>
   );
