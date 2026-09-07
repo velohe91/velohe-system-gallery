@@ -315,6 +315,7 @@ export default function ArcadePage() {
   const lastFrameRef = useRef(0);
   const lastUiUpdateRef = useRef(0);
   const cameraXRef = useRef(0);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
 
   const resetSector = useCallback((index: number) => {
     const nextPlayer = {
@@ -531,12 +532,16 @@ export default function ArcadePage() {
 
       playerRef.current = nextPlayer;
 
-      // The boss exists from the beginning, but the Core cannot damage it
-      // until its body has actually entered the visible viewport.
+      // Follow the Core using the actual rendered viewport width.
+      // This keeps camera movement correct on mobile as well as desktop.
+      const viewportWidth = Math.min(
+        VIEWPORT_WIDTH,
+        viewportRef.current?.clientWidth || VIEWPORT_WIDTH,
+      );
       const targetCamera = clamp(
-        nextPlayer.x - VIEWPORT_WIDTH * 0.34,
+        nextPlayer.x - viewportWidth * 0.34,
         0,
-        WORLD_WIDTH - VIEWPORT_WIDTH,
+        WORLD_WIDTH - viewportWidth,
       );
 
       const smoothCamera =
@@ -548,7 +553,7 @@ export default function ArcadePage() {
       const bossCurrent = bossRef.current;
       const bossOnScreen =
         bossCurrent.active &&
-        bossCurrent.x < smoothCamera + VIEWPORT_WIDTH &&
+        bossCurrent.x < smoothCamera + viewportWidth &&
         bossCurrent.x + BOSS_SIZE > smoothCamera;
 
       if (bossOnScreen && !bossCurrent.revealed) {
@@ -1201,6 +1206,7 @@ export default function ArcadePage() {
               </div>
 
               <div
+                ref={viewportRef}
                 className="relative h-[560px] overflow-hidden"
                 style={{
                   background:
@@ -1899,3 +1905,4 @@ export default function ArcadePage() {
     </main>
   );
 }
+
