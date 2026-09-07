@@ -144,8 +144,9 @@ const SECTORS: SectorConfig[] = [
 const WORLD_WIDTH = 5200;
 const WORLD_HEIGHT = 560;
 const PLAYER_SIZE = 50;
-const PLAYER_SPEED = 3.00;
-const PLAYER_VERTICAL_SPEED = 3.00;
+const PLAYER_SPEED = 5.00;
+const PLAYER_VERTICAL_SPEED = 5.00;
+const MOBILE_JOYSTICK_SPEED = 5.00;
 const PLAYER_HP = 5;
 const STARTING_AMMO = 500;
 const LIFE_PICKUP_SPACING = 920;
@@ -163,6 +164,7 @@ const ENEMY_DAMAGE_COOLDOWN = 700;
 
 const VIEWPORT_WIDTH = 1000;
 const UI_TICK_MS = 50;
+const GAME_SCALE = 0.75;
 
 const BOSS_REVEAL_MARGIN = VIEWPORT_WIDTH * 0.92;
 const BOSS_SHOT_COOLDOWN = 1250;
@@ -510,11 +512,11 @@ export default function ArcadePage() {
         const deadZone = 14;
 
         if (Math.abs(distanceX) > deadZone) {
-          dx += clamp(distanceX / 42, -1.25, 1.25) * PLAYER_SPEED * dt;
+          dx += clamp(distanceX / 30, -1, 1) * MOBILE_JOYSTICK_SPEED * dt;
         }
 
         if (Math.abs(distanceY) > deadZone) {
-          dy += clamp(distanceY / 42, -1.25, 1.25) * PLAYER_VERTICAL_SPEED * dt;
+          dy += clamp(distanceY / 30, -1, 1) * MOBILE_JOYSTICK_SPEED * dt;
         }
 
       }
@@ -1177,7 +1179,20 @@ export default function ArcadePage() {
   );
 
   return (
-    <main
+    <>
+      <style jsx>{`
+        @keyframes enemy-core-blink {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.08;
+          }
+        }
+      `}</style>
+
+      <main
       className="min-h-screen bg-[#030508] px-3 py-6 text-white sm:px-6"
       style={
         {
@@ -1186,7 +1201,16 @@ export default function ArcadePage() {
         } as CSSProperties
       }
     >
-      <div className="mx-auto w-full max-w-[1180px]">
+      <div
+        className="mx-auto w-full overflow-visible"
+        style={{
+          transform: `scale(${GAME_SCALE})`,
+          transformOrigin: "top center",
+          width: `${100 / GAME_SCALE}%`,
+          marginLeft: `${(100 - 100 / GAME_SCALE) / 2}%`,
+        }}
+      >
+        <div className="mx-auto w-full max-w-[1180px]">
         <header className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
             <p
@@ -1240,7 +1264,7 @@ export default function ArcadePage() {
           {screen === "playing" && (
             <>
               <div className="relative z-20 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 bg-black/70 px-3 py-2 backdrop-blur-sm">
-                <div className="flex flex-wrap gap-3 font-mono text-[9px] uppercase tracking-widest">
+                <div className="flex flex-wrap gap-3 font-mono text-[18px] uppercase tracking-widest">
                   <span style={{ color: sector.accent }}>
                     HP {hp}/{PLAYER_HP}
                   </span>
@@ -1270,7 +1294,7 @@ export default function ArcadePage() {
                   )}
                 </div>
 
-                <span className="font-mono text-[9px] uppercase tracking-widest text-white/35">
+                <span className="font-mono text-[18px] uppercase tracking-widest text-white/35">
                   {formatTime(time)}
                 </span>
               </div>
@@ -1433,10 +1457,10 @@ export default function ArcadePage() {
                         }}
                       />
                       <div
-                        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                        className="enemy-core-blink absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
                         style={{
-                          background: sector.accent,
-                          boxShadow: `0 0 10px ${sector.accent}`,
+                          background: "#ff1744",
+                          boxShadow: "0 0 8px #ff1744, 0 0 16px #ff1744",
                         }}
                       />
                     </div>
@@ -1606,39 +1630,39 @@ export default function ArcadePage() {
                         </>
                       ) : sector.key === "purple" ? (
                         <div
-                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rotate-45 border"
+                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rotate-45 border motion-safe:animate-pulse"
                           style={{
-                            borderColor: sector.accent,
+                            borderColor: "#FF304F",
                             background: sector.accentSoft,
-                            boxShadow: `0 0 20px ${sector.accent}`,
+                            boxShadow: `0 0 20px #FF304F`,
                           }}
                         />
                       ) : sector.key === "gold" ? (
                         <div
-                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 border"
+                          className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 border motion-safe:animate-pulse"
                           style={{
-                            borderColor: sector.accent,
-                            background: sector.accentSoft,
+                            borderColor: "#FF304F",
+                            background: "#FF304F",
                             clipPath:
                               "polygon(50% 0%, 94% 25%, 94% 75%, 50% 100%, 6% 75%, 6% 25%)",
-                            boxShadow: `0 0 20px ${sector.accent}`,
+                            boxShadow: `0 0 20px #FF304F`,
                           }}
                         />
                       ) : sector.key === "void" ? (
                         <div
-                          className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border"
+                          className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border motion-safe:animate-pulse"
                           style={{
-                            borderColor: sector.accent,
-                            background: "#020305",
-                            boxShadow: `0 0 22px ${sector.accentSoft}`,
+                            borderColor: "#FF304F",
+                            background: "#FF304F",
+                            boxShadow: `0 0 22px #FF304F`,
                           }}
                         />
                       ) : (
                         <div
-                          className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                          className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full motion-safe:animate-pulse"
                           style={{
-                            background: sector.accent,
-                            boxShadow: `0 0 24px ${sector.accent}`,
+                            background: "#FF304F",
+                            boxShadow: `0 0 24px #FF304F`,
                           }}
                         />
                       )}
@@ -1671,10 +1695,12 @@ export default function ArcadePage() {
                 </div>
 
                 <div
-                  className="pointer-events-none absolute top-3 right-3 rounded border bg-black/70 px-3 py-2 font-mono text-[8px] uppercase tracking-[0.18em]"
+                  className={`pointer-events-none absolute top-3 right-3 rounded border bg-black/70 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] ${
+  boss.revealed ? "motion-safe:animate-pulse" : ""
+}`}
                   style={{
                     borderColor: `${sector.accent}25`,
-                    color: boss.revealed ? sector.accent : `${sector.accent}65`,
+                    color: boss.revealed ? "#FF304F" : `${sector.accent}65`,
                   }}
                 >
                   BOSS SIGNAL // {boss.revealed ? "VISIBLE" : "DISTANT"}
@@ -1729,7 +1755,7 @@ export default function ArcadePage() {
                   </div>
                 </div>
 
-                <div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2 sm:hidden">
+                <div className="pointer-events-none absolute bottom-4 right-4 z-30 sm:hidden">
                   <button
                     type="button"
                     data-touch-control="true"
@@ -2019,7 +2045,7 @@ export default function ArcadePage() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-2 font-mono text-[9px] uppercase tracking-widest sm:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2 font-mono text-[18px] uppercase tracking-widest sm:grid-cols-4">
                       <div className="rounded border border-white/10 bg-white/[0.02] p-3">
                         <span className="block text-white/30">Final Score</span>
                         <span
@@ -2069,7 +2095,9 @@ export default function ArcadePage() {
               : "CONNECTION // STANDBY"}
           </span>
         </footer>
+        </div>
       </div>
     </main>
+      </>
   );
 }
