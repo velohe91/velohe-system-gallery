@@ -9,10 +9,10 @@ import { NftModal } from "@/components/gallery/NftModal";
 export function NftGrid({ items }: { items: NftItem[] }) {
   const [selected, setSelected] = useState<NftItem | null>(null);
 
-  // Newest first: VEL-015 … VEL-001, then genesis CPC005 … CPC001 at the bottom.
+  // Oldest / genesis first: CPC001…005 → CBPS001…005 → LRS01…05 at the bottom.
   const ordered = useMemo(
     () =>
-      [...items].sort((a, b) => nftIdNumber(b.id) - nftIdNumber(a.id)),
+      [...items].sort((a, b) => nftIdNumber(a.id) - nftIdNumber(b.id)),
     [items],
   );
 
@@ -26,7 +26,7 @@ export function NftGrid({ items }: { items: NftItem[] }) {
 
   return (
     <>
-      {/* Responsive grid: 1 → 2 (sm) → 3 (md) → 5 (lg+) · newest first */}
+      {/* Responsive grid: 1 → 2 (sm) → 3 (md) → 5 (lg+) · genesis first */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-5">
         {ordered.map((nft, i) => (
           <NftCard key={nft.id} nft={nft} index={i} onOpen={open} />

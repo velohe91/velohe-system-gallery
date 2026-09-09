@@ -2,10 +2,10 @@
  * NFT catalog for the VΣLOHE archive.
  *
  * Source (chronological, oldest → newest):
- *   VEL-CPC001…005 → VEL-CBPS001…005 → VEL-LRS01…05 → VEL-AGS01…05
+ *   VEL-CPC001…005 → VEL-CBPS001…005 → VEL-LRS01…05
  *
- * Display (newest first):
- *   VEL-AGS05…01 → VEL-LRS05…01 → VEL-CBPS005…001 → VEL-CPC005…001
+ * Display (oldest / genesis first):
+ *   VEL-CPC001…005 → VEL-CBPS001…005 → VEL-LRS01…05
  *
  * HOW TO UPDATE ASSETS:
  * 1. Place stills in  /public/nfts/images/
@@ -26,8 +26,8 @@ const SERIES_BASE: Record<string, number> = {
 };
 
 /**
- * Sort key for gallery order (higher = closer to top / newer).
- * Ensures AGS (newest series) sorts above LRS → CBPS → CPC (oldest).
+ * Sort key for gallery order (lower = closer to top / older).
+ * CPC (genesis) → CBPS → LRS when sorted ascending.
  */
 export function nftIdNumber(id: string): number {
   const m = id.match(/VEL-(CPC|CBPS|LRS|AGS)(\d+)/i);
@@ -42,7 +42,7 @@ export function nftIdNumber(id: string): number {
 
 /**
  * Source catalog — chronological oldest → newest.
- * Export `nfts` reverses via nftIdNumber for newest-first display.
+ * Export `nfts` sorts ascending via nftIdNumber (genesis CPC at top).
  */
 const nftCatalog: NftItem[] = [
   // ─── Genesis // Compressed baseline (CyborgPunks Club) ───
@@ -90,7 +90,7 @@ The Nocturne Vision ability, enhanced through night-vision optics, configures th
     image: "/nfts/videos/VEL-CPC003.gif",
     video: "/nfts/videos/VEL-CPC003.gif",
     description:
-      "CyborgPunk 003 is a derived identity node configured for active scanning and signal interrogation within the CyborgPunks Club subsystem.",
+      "Is a derived identity node configured for active scanning and signal interrogation within the CyborgPunks Club subsystem.",
     lore: `Built upon the baseline human identity schema, this node emphasizes real-time analysis and structured detection across system layers.
 
 FUNCTION:
@@ -109,7 +109,7 @@ The Scanning Vision ability, enabled by a dedicated scanning artefact, configure
     image: "/nfts/videos/VEL-CPC004.gif",
     video: "/nfts/videos/VEL-CPC004.gif",
     description:
-      "CyborgPunk 004 is a derived identity node configured for logical processing and code-oriented interaction within the CyborgPunks Club subsystem.",
+      "Is a derived identity node configured for logical processing and code-oriented interaction within the CyborgPunks Club subsystem.",
     lore: `Built upon the baseline human identity schema, this node emphasizes structured problem solving and symbolic interpretation across system layers.
 
 FUNCTION:
@@ -128,7 +128,7 @@ The Programmer ability, enabled through a dedicated cyberspace visual interface,
     image: "/nfts/videos/VEL-CPC005.gif",
     video: "/nfts/videos/VEL-CPC005.gif",
     description:
-      "CyborgPunk 005 is a derived identity node configured for unauthorized access simulation and boundary probing within the CyborgPunks Club subsystem.",
+      "Is a derived identity node configured for unauthorized access simulation and boundary probing within the CyborgPunks Club subsystem.",
     lore: `While retaining a human-origin identity schema, this node represents an aggressive interaction profile, optimized for testing system integrity and access thresholds.
 
 FUNCTION:
@@ -318,12 +318,12 @@ STRIPE operates as a high-mobility interface runner. Its role is to traverse sys
 ];
 
 /**
- * Public catalog for the Gallery — newest first:
- * LRS05…01 → LRS04…001 → LRS03…001
- * Append newer pieces at the END of `nftCatalog` so they surface at the top.
+ * Public catalog for the Gallery — oldest / genesis first:
+ * CPC001…005 → CBPS001…005 → LRS01…05
+ * Append newer pieces at the END of `nftCatalog` so they surface at the bottom.
  */
 export const nfts: NftItem[] = [...nftCatalog].sort(
-  (a, b) => nftIdNumber(b.id) - nftIdNumber(a.id),
+  (a, b) => nftIdNumber(a.id) - nftIdNumber(b.id),
 );
 
 /** Lookup helper for transmissions and deep links */
